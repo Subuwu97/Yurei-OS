@@ -1,0 +1,6 @@
+# Added to CachyOS's desktop ISO package list. yurei-* come from the local
+# repository that build.sh creates from pkg/.
+yurei-settings
+yurei-gaming
+# used by yurei-calamares-patch on the live ISO
+python-yaml

@@ -1,0 +1,4 @@
+#!/bin/sh
+# Called by Steam's "Switch to Desktop". Closing Steam ends the gamescope
+# session, which drops back to the login screen where the desktop can be picked.
+steam -shutdown

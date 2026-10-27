@@ -1,0 +1,12 @@
+NAME="Yūrei"
+PRETTY_NAME="Yūrei Linux"
+ID=arch
+BUILD_ID=rolling
+VARIANT="Gaming"
+VARIANT_ID=gaming
+ANSI_COLOR="38;2;155;140;255"
+HOME_URL="https://github.com/subuwu97/Y-rei-Linux"
+DOCUMENTATION_URL="https://github.com/subuwu97/Y-rei-Linux#readme"
+SUPPORT_URL="https://github.com/subuwu97/Y-rei-Linux/discussions"
+BUG_REPORT_URL="https://github.com/subuwu97/Y-rei-Linux/issues"
+LOGO=yurei

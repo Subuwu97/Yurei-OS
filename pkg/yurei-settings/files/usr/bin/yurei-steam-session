@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Steam "Game Mode": Steam's console UI full-screen inside gamescope, like a
+# Steam Deck. Pick "Switch to Desktop" in Steam's power menu to log out and
+# return to the login screen.
+set -euo pipefail
+
+export STEAM_MULTIPLE_XWAYLANDS=1
+export STEAM_GAMESCOPE_VRR_SUPPORTED=1
+export STEAM_GAMESCOPE_HDR_SUPPORTED=1
+export SRT_URLOPEN_PREFER_STEAM=1
+# lets the Steam UI cap frame rates and control the TDP slider where supported
+export STEAM_GAMESCOPE_FANCY_SCALING_SUPPORT=1
+
+gamescope_args=(--steam --fullscreen --adaptive-sync --hdr-enabled)
+user_conf="${XDG_CONFIG_HOME:-$HOME/.config}/yurei/gamescope.conf"
+if [[ -r $user_conf ]]; then
+    # extra gamescope options, e.g. "-W 2560 -H 1440" or "--mangoapp"
+    while IFS= read -r line; do
+        [[ -z $line || $line == \#* ]] && continue
+        read -ra parts <<< "$line"
+        gamescope_args+=("${parts[@]}")
+    done < "$user_conf"
+fi
+
+exec gamescope "${gamescope_args[@]}" -- steam -gamepadui -steamos3

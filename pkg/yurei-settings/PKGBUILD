@@ -1,0 +1,46 @@
+# Maintainer: Yūrei Linux project
+# Built from the files/ directory next to this PKGBUILD:
+#   cd pkg/yurei-settings && makepkg
+
+pkgbase=yurei
+pkgname=(yurei-settings yurei-gaming)
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Yūrei Linux system settings and tools"
+arch=(any)
+url="https://github.com/subuwu97/Y-rei-Linux"
+license=(GPL-3.0-or-later)
+
+package_yurei-settings() {
+    pkgdesc="Yūrei Linux branding, gaming tuning, Steam Game Mode session and the yurei CLI"
+    depends=(bash pciutils sudo)
+    optdepends=(
+        'chwd: automatic GPU driver setup (yurei drivers)'
+        'flatpak: Flatpak app bundles'
+        'gamescope: Steam Game Mode session'
+        'paru: AUR support in yurei install/update'
+        'power-profiles-daemon: power profile in yurei status'
+        'steam: Steam Game Mode session'
+        'vulkan-tools: Vulkan check in yurei doctor'
+    )
+    # both ship /usr/bin/steamos-session-select
+    conflicts=(gamescope-session-steam gamescope-session-steam-git)
+    install=yurei-settings.install
+
+    cp -a "$startdir/files/." "$pkgdir/"
+    chmod 0755 "$pkgdir"/usr/bin/*
+}
+
+package_yurei-gaming() {
+    pkgdesc="Yūrei's default gaming stack: Steam, Proton, Wine, Lutris, Heroic, GameMode, MangoHud, gamescope"
+    depends=(
+        yurei-settings
+        cachyos-gaming-meta
+        cachyos-gaming-applications
+        flatpak
+        gamemode lib32-gamemode
+        gamescope
+        mangohud lib32-mangohud
+        vulkan-tools
+    )
+}

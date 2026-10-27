@@ -1,0 +1,13 @@
+post_install() {
+    cat <<'MSG'
+==> Yūrei is ready. Useful commands:
+      yurei doctor --fix   make sure everything games need is set up
+      yurei bundles        browse extra app bundles (streaming, emulation, dev...)
+      yurei update         update everything, including Flatpaks
+    Pick "Steam Game Mode (Yūrei)" at the login screen for a console-style experience.
+MSG
+}
+
+post_upgrade() {
+    :
+}

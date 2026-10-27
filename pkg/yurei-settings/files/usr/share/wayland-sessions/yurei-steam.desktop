@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Steam Game Mode (Yūrei)
+Comment=Steam's console interface, full-screen, like a Steam Deck
+Exec=/usr/bin/yurei-steam-session
+Type=Application
+DesktopNames=gamescope

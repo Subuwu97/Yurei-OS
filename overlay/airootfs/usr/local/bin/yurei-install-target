@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Called by the installer with the mount point of the freshly installed
+# system. Installs the Yūrei packages shipped on the ISO into it.
+set -euo pipefail
+
+root=${1:?usage: yurei-install-target ROOT}
+pkg_src=${YUREI_PKG_DIR:-/opt/yurei/packages}
+[[ -d $root/etc ]] || { echo "yurei-install-target: $root is not a system root" >&2; exit 1; }
+
+shopt -s nullglob
+pkgs=("$pkg_src"/*.pkg.tar.zst)
+(( ${#pkgs[@]} )) || { echo "yurei-install-target: no packages in $pkg_src" >&2; exit 1; }
+
+install -d "$root/var/cache/pacman/pkg"
+cp "${pkgs[@]}" "$root/var/cache/pacman/pkg/"
+targets=()
+for pkg in "${pkgs[@]}"; do
+    targets+=("/var/cache/pacman/pkg/${pkg##*/}")
+done
+arch-chroot "$root" pacman -U --noconfirm --needed "${targets[@]}"
+
+# GameMode needs its group to raise game priority
+if arch-chroot "$root" getent group gamemode >/dev/null; then
+    while IFS=: read -r name _ uid _; do
+        if (( uid >= 1000 && uid < 60000 )); then
+            arch-chroot "$root" usermod -aG gamemode "$name"
+        fi
+    done < "$root/etc/passwd"
+fi

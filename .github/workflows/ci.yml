@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y shellcheck python3-pytest python3-yaml
+      - run: make lint
+      - run: make test
+
+  package:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build yurei packages with makepkg
+        run: |
+          pacman -Syu --noconfirm --needed base-devel git
+          useradd -m builder
+          chown -R builder .
+          su builder -c 'make package'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yurei-packages
+          path: out/packages/*.pkg.tar.zst
