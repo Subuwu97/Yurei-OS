@@ -1,0 +1,9 @@
+#!/bin/sh
+# "Return to Game Mode": make the next login Steam Game Mode, then log out.
+set -e
+if ! sudo -n /usr/lib/yurei/session-select game >/dev/null 2>&1; then
+    command -v kdialog >/dev/null &&
+        kdialog --error "Couldn't switch to Game Mode: your account needs to be an administrator (wheel group)."
+    exit 1
+fi
+dbus-send --session --type=method_call --dest=org.kde.Shutdown /Shutdown org.kde.Shutdown.logout

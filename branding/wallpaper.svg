@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160" width="3840" height="2160">
+  <defs>
+    <radialGradient id="sky" cx=".68" cy=".38" r=".95">
+      <stop offset="0" stop-color="#2a2160"/>
+      <stop offset=".45" stop-color="#151131"/>
+      <stop offset="1" stop-color="#07060f"/>
+    </radialGradient>
+    <radialGradient id="wisp" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#e9fbff"/>
+      <stop offset=".25" stop-color="#8fe6ff" stop-opacity=".85"/>
+      <stop offset=".6" stop-color="#6a5cff" stop-opacity=".25"/>
+      <stop offset="1" stop-color="#6a5cff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mist" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8b7bff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#8b7bff" stop-opacity=".22"/>
+    </linearGradient>
+    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="40"/></filter>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
+    <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .05 0"/></filter>
+  </defs>
+  <rect width="3840" height="2160" fill="url(#sky)"/>
+  <!-- drifting mist bands -->
+  <g filter="url(#blur)" fill="url(#mist)">
+    <path d="M-300 1580C700 1380 1300 1700 2050 1540S3300 1330 4140 1480V2500H-300z"/>
+    <path d="M-300 1820C900 1660 1600 1940 2500 1780S3500 1700 4140 1760V2500H-300z" opacity=".8"/>
+  </g>
+  <!-- trails of the spirit flames -->
+  <g fill="none" stroke-linecap="round" filter="url(#soft)">
+    <path d="M2610 820C2380 900 2250 1120 1980 1180S1500 1120 1260 1290" stroke="#7fe3ff" stroke-opacity=".35" stroke-width="10"/>
+    <path d="M3060 1180C2900 1270 2860 1440 2640 1500" stroke="#a99bff" stroke-opacity=".3" stroke-width="7"/>
+    <path d="M1180 560C1050 650 980 760 800 790" stroke="#a99bff" stroke-opacity=".22" stroke-width="5"/>
+  </g>
+  <!-- hitodama -->
+  <circle cx="2620" cy="810" r="190" fill="url(#wisp)"/>
+  <circle cx="3070" cy="1170" r="120" fill="url(#wisp)" opacity=".8"/>
+  <circle cx="1190" cy="550" r="80" fill="url(#wisp)" opacity=".6"/>
+  <circle cx="1880" cy="420" r="34" fill="url(#wisp)" opacity=".5"/>
+  <circle cx="3440" cy="520" r="26" fill="url(#wisp)" opacity=".45"/>
+  <!-- faint stars -->
+  <g fill="#ffffff">
+    <circle cx="420" cy="260" r="2.4" opacity=".5"/><circle cx="910" cy="180" r="1.8" opacity=".4"/>
+    <circle cx="1540" cy="300" r="2" opacity=".35"/><circle cx="2240" cy="150" r="2.6" opacity=".5"/>
+    <circle cx="3020" cy="250" r="1.8" opacity=".4"/><circle cx="3620" cy="140" r="2.2" opacity=".45"/>
+    <circle cx="640" cy="620" r="1.6" opacity=".3"/><circle cx="3320" cy="820" r="1.6" opacity=".3"/>
+  </g>
+  <rect width="3840" height="2160" filter="url(#grain)"/>
+</svg>

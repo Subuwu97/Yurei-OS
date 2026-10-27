@@ -1,0 +1,66 @@
+name: Publish package repository
+
+# Builds the yurei-* packages, signs them and publishes a pacman repository
+# as assets of the "repo" GitHub release, served from
+#   https://github.com/subuwu97/Y-rei-Linux/releases/download/repo
+# Needs the YUREI_SIGNING_KEY secret; see docs/REPOSITORY.md.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["pkg/**"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    env:
+      SIGNING_KEY: ${{ secrets.YUREI_SIGNING_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for the signing key
+        run: |
+          if [ -z "$SIGNING_KEY" ]; then
+            echo "::error::YUREI_SIGNING_KEY is not set - see docs/REPOSITORY.md"
+            exit 1
+          fi
+      - name: Build and sign
+        run: |
+          pacman -Syu --noconfirm --needed base-devel git gnupg
+          useradd -m builder
+          chown -R builder .
+          su builder -c '
+            set -e
+            printf "%s\n" "$SIGNING_KEY" | gpg --batch --import
+            key=$(gpg --batch --with-colons --list-secret-keys | awk -F: "/^fpr/ {print \$10; exit}")
+            cd pkg/yurei-settings
+            PKGDEST=$PWD/../../repo GPGKEY=$key makepkg --force --cleanbuild --nodeps --sign
+            cd ../../repo
+            repo-add --sign --key "$key" yurei.db.tar.gz *.pkg.tar.zst
+            # release assets can'\''t be symlinks
+            for f in yurei.db yurei.db.sig yurei.files yurei.files.sig; do cp --remove-destination "$(readlink -f "$f")" "$f"; done
+          '
+      - uses: actions/upload-artifact@v4
+        with:
+          name: repo
+          path: repo/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: repo
+          path: repo
+      - name: Upload to the "repo" release
+        run: |
+          gh release view repo --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 ||
+            gh release create repo --repo "$GITHUB_REPOSITORY" --title "Package repository" \
+              --notes "pacman repository for Yūrei. Not a release - don't download from here directly."
+          gh release upload repo repo/* --repo "$GITHUB_REPOSITORY" --clobber

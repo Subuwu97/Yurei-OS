@@ -9,11 +9,12 @@
 - [x] Installer step that installs Yūrei packages into the target system
 - [x] CI: lint, tests, package build; on-demand ISO build
 
-## 0.2 — first boot
+## 0.2 — identity and updates
+- [x] Signed `[yurei]` pacman repository on GitHub Releases (active once a signing key is added)
+- [x] Logo, wallpaper (applied on first Plasma login) and boot menu splash
+- [x] SteamOS-style session switching: `yurei session`, "Switch to Desktop", "Return to Game Mode"
 - [ ] Build and boot the ISO; install on AMD, NVIDIA and Intel test machines
-- [ ] Signed `[yurei]` pacman repository (GitHub Releases) so `yurei-*` updates arrive through `pacman -Syu`
-- [ ] Visual identity: wallpaper, Plasma look-and-feel, boot splash, login theme, Calamares branding
-- [ ] Choose the default session (desktop or Steam Game Mode) from `yurei` and the welcome app
+- [ ] Plasma look-and-feel, login theme and Calamares branding
 
 ## 0.3 — polish
 - [ ] Yūrei welcome app (GUI for bundles, doctor and drivers)

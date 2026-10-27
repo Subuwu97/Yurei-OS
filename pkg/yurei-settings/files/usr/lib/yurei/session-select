@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Choose what the login manager starts automatically, SteamOS-style.
+#   session-select game     log straight into Steam Game Mode
+#   session-select desktop  log straight into the Plasma desktop
+#   session-select off      show the login screen again
+# Run as root; the invoking user (SUDO_USER) is the one logged in.
+# Works with plasma-login-manager (CachyOS's default) and SDDM, which share
+# the same config format. Relogin=true makes logging out of one session
+# start the selected one instead of showing the login screen.
+set -euo pipefail
+
+CONF_NAME=zz-yurei-session.conf
+# (sudo resets the environment, so the override only works for tests)
+read -ra CONF_DIRS <<< "${YUREI_DM_CONF_DIRS:-/etc/plasmalogin.conf.d /etc/sddm.conf.d}"
+
+die() { echo "session-select: $*" >&2; exit 1; }
+
+mode=${1:-}
+case $mode in
+    game) session=yurei-steam.desktop ;;
+    desktop) session=plasma.desktop ;;
+    off) session= ;;
+    *) die "usage: session-select game|desktop|off" ;;
+esac
+
+[[ $EUID -eq 0 ]] || die "must run as root"
+user=${SUDO_USER:-${PKEXEC_UID:+$(id -nu "$PKEXEC_UID")}}
+[[ -n $user ]] || die "can't tell which user to log in"
+uid=$(id -u "$user" 2>/dev/null) || die "no such user: $user"
+(( uid >= 1000 )) || die "refusing to auto-login system user $user"
+
+for dir in "${CONF_DIRS[@]}"; do
+    parent=${dir%.d}
+    # only configure login managers that are installed
+    [[ -d $dir || -e $parent.conf || -e /usr/lib/${parent##*/}.conf.d ]] || continue
+    if [[ -z $session ]]; then
+        rm -f "$dir/$CONF_NAME"
+        continue
+    fi
+    mkdir -p "$dir"
+    tmp=$(mktemp "$dir/.$CONF_NAME.XXXXXX")
+    printf '[Autologin]\nUser=%s\nSession=%s\nRelogin=true\n' "$user" "$session" > "$tmp"
+    chmod 0644 "$tmp"
+    mv -f "$tmp" "$dir/$CONF_NAME"
+done
+echo "next login: ${mode}"

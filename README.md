@@ -14,15 +14,19 @@ running well.
 - Steam, Proton (CachyOS build), Wine, Lutris, Heroic (Epic/GOG/Amazon) and umu-launcher.
   They come from CachyOS's own `cachyos-gaming-meta` and `cachyos-gaming-applications` packages.
 - GameMode, gamescope, and MangoHud with a clean default overlay (toggle with **Right Shift + F12**).
-- **Steam Game Mode session.** Pick *Steam Game Mode (Yūrei)* at the login screen to get Steam's
-  console interface full-screen with VRR and HDR, like a Steam Deck. *Switch to Desktop* in
-  Steam's power menu returns you to the login screen.
+- **Steam Game Mode, SteamOS-style.** Steam's console interface runs full-screen with VRR and HDR,
+  like a Steam Deck. Run `yurei session game` to boot straight into it. *Switch to Desktop* in
+  Steam's power menu then drops you into Plasma, and the **Return to Game Mode** icon takes you
+  back. With `yurei session off` it's simply an option at the login screen.
 - Tuning for games: `vm.max_map_count` as on SteamOS, no split-lock throttling, and NTSYNC for
   Wine/Proton. CachyOS adds its kernel, scheduler, zram and I/O tuning on top.
 - Automatic NVIDIA/AMD/Intel driver setup with CachyOS's `chwd`.
 
 **Ready for everything else**
-- KDE Plasma desktop, Firefox, Flatpak with Flathub, and the AUR through `paru`.
+- KDE Plasma desktop with Yūrei's wallpaper and boot menu, Firefox, Flatpak with Flathub, and
+  the AUR through `paru`.
+- Updates to Yūrei's own packages come from a signed `[yurei]` pacman repository
+  (see [docs/REPOSITORY.md](docs/REPOSITORY.md)).
 - Optional app bundles, one command each:
 
 | Bundle | What's in it |
@@ -45,6 +49,7 @@ yurei update            Update system packages, AUR packages and Flatpaks
 yurei bundles           List app bundles
 yurei install BUNDLE... e.g. yurei install streaming emulation
 yurei drivers           Detect hardware and install the right GPU drivers
+yurei session MODE      Start in game (Steam Game Mode), desktop, or off (login screen)
 ```
 
 ## How it's built
@@ -61,6 +66,9 @@ pkg/yurei-settings/    PKGBUILD for two packages:
 overlay/
   packages.add/.remove   changes to CachyOS's ISO package list
   airootfs/              files placed on the live ISO (branding, installer step)
+  boot/splash.png        boot menu background
+branding/              logo and wallpaper sources; `node branding/render.js` regenerates the images
+keys/                  public key of the [yurei] repository (see docs/REPOSITORY.md)
 build.sh               builds the packages, fetches upstream, applies the overlay, builds the ISO
 ```
 
@@ -94,13 +102,15 @@ except the installer and live-ISO branding.
 ### Tests
 
 `make lint test` runs shellcheck, tests the CLI against stubbed
-pacman/flatpak, tests the installer patch, and applies the overlay to the
-pinned CachyOS profile to check that every change still lands. Run it after
+pacman/flatpak, the session switcher against throwaway login-manager configs,
+the installer step against a fake target system, and the Calamares patch.
+It also applies the overlay to the pinned CachyOS profile to check that every
+change still lands. Run it after
 bumping `UPSTREAM_REF`.
 
 ## Status
 
-Early, working scaffold (0.1). The overlay is tested against the pinned
+Early development (0.2). The overlay is tested against the pinned
 CachyOS profile and the CLI is tested with stubs. **The full ISO has not yet
 been built and booted.** That needs a CachyOS host or the ISO workflow. See
 [docs/ROADMAP.md](docs/ROADMAP.md).

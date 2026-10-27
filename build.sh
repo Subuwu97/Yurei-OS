@@ -81,6 +81,10 @@ apply_overlay() {
     cp -a "$here/overlay/airootfs/." "$iso/airootfs/"
     install -d "$iso/airootfs/opt/yurei/packages"
     cp "$work/packages"/*.pkg.tar.zst "$iso/airootfs/opt/yurei/packages/"
+    # signing key for the [yurei] update repository, once one exists
+    if [[ -f $here/keys/yurei.asc ]]; then
+        cp "$here/keys/yurei.asc" "$iso/airootfs/opt/yurei/yurei.asc"
+    fi
 
     # package list
     local list=$iso/packages_desktop.x86_64 tmp
@@ -116,6 +120,10 @@ file_permissions+=(
 EOF
 
     # boot menus (plain ASCII: the BIOS menu can't draw "ū")
+    [[ -f $iso/grub/splash.png && -f $iso/syslinux/splash.png ]] ||
+        die "upstream boot splash images moved (upstream changed?)"
+    cp "$here/overlay/boot/splash.png" "$iso/grub/splash.png"
+    cp "$here/overlay/boot/splash.png" "$iso/syslinux/splash.png"
     local f
     for f in "$iso"/grub/*.cfg "$iso"/syslinux/*.cfg "$iso"/efiboot/loader/entries/*.conf; do
         sed -i 's/CachyOS/Yurei/g' "$f"

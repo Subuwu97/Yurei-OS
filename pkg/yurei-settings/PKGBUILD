@@ -4,7 +4,7 @@
 
 pkgbase=yurei
 pkgname=(yurei-settings yurei-gaming)
-pkgver=0.1.0
+pkgver=0.2.0
 pkgrel=1
 pkgdesc="Yūrei Linux system settings and tools"
 arch=(any)
@@ -28,7 +28,10 @@ package_yurei-settings() {
     install=yurei-settings.install
 
     cp -a "$startdir/files/." "$pkgdir/"
-    chmod 0755 "$pkgdir"/usr/bin/*
+    # git only records the executable bit, so set modes explicitly
+    chmod 0755 "$pkgdir"/usr/bin/* "$pkgdir"/usr/lib/yurei/session-select
+    chmod 0750 "$pkgdir"/etc/sudoers.d
+    chmod 0440 "$pkgdir"/etc/sudoers.d/yurei-session
 }
 
 package_yurei-gaming() {

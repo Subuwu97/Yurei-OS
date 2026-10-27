@@ -2,7 +2,7 @@
 # yurei - one command for keeping a Yūrei system fast, updated and game-ready.
 set -euo pipefail
 
-VERSION="0.1.0"
+VERSION="0.2.0"
 BUNDLE_DIR="${YUREI_BUNDLE_DIR:-/usr/share/yurei/bundles}"
 MIN_MAP_COUNT=1048576
 
@@ -33,6 +33,8 @@ ${bold}yurei${reset} $VERSION - manage your Yūrei system
   yurei bundles           List the app bundles you can install
   yurei install BUNDLE... Install bundles (e.g. yurei install streaming emulation)
   yurei drivers           Detect hardware and install the right GPU drivers (chwd)
+  yurei session MODE      What starts when the PC boots: game (Steam Game Mode),
+                          desktop, or off (show the login screen)
   yurei version           Print the version
 EOF
 }
@@ -256,6 +258,33 @@ cmd_drivers() {
     as_root chwd --autoconfigure
 }
 
+# ------------------------------------------------------------------ session
+
+SESSION_CONFS=(/etc/plasmalogin.conf.d/zz-yurei-session.conf /etc/sddm.conf.d/zz-yurei-session.conf)
+
+cmd_session() {
+    local mode=${1:-}
+    if [[ -z $mode ]]; then
+        local conf current="off (login screen)"
+        for conf in "${SESSION_CONFS[@]}"; do
+            if [[ -r $conf ]]; then
+                case $(sed -n 's/^Session=//p' "$conf") in
+                    yurei-steam.desktop) current="game (Steam Game Mode)" ;;
+                    plasma.desktop) current="desktop" ;;
+                esac
+                break
+            fi
+        done
+        say "Starts at boot: $current"
+        say "Change with: yurei session game|desktop|off"
+        return
+    fi
+    case $mode in
+        game|desktop|off) as_root /usr/lib/yurei/session-select "$mode" ;;
+        *) die "unknown session '$mode' - use game, desktop or off" ;;
+    esac
+}
+
 # ------------------------------------------------------------------ main
 
 main() {
@@ -268,6 +297,7 @@ main() {
         bundles|list) cmd_bundles ;;
         install) cmd_install "$@" ;;
         drivers|gpu) cmd_drivers ;;
+        session) cmd_session "$@" ;;
         version|--version) say "$VERSION" ;;
         help|-h|--help) usage ;;
         *) usage >&2; exit 2 ;;

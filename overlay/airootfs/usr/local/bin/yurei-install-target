@@ -5,6 +5,8 @@ set -euo pipefail
 
 root=${1:?usage: yurei-install-target ROOT}
 pkg_src=${YUREI_PKG_DIR:-/opt/yurei/packages}
+signing_key=${YUREI_SIGNING_KEY_FILE:-/opt/yurei/yurei.asc}
+repo_url=https://github.com/subuwu97/Y-rei-Linux/releases/download/repo
 [[ -d $root/etc ]] || { echo "yurei-install-target: $root is not a system root" >&2; exit 1; }
 
 shopt -s nullglob
@@ -26,4 +28,15 @@ if arch-chroot "$root" getent group gamemode >/dev/null; then
             arch-chroot "$root" usermod -aG gamemode "$name"
         fi
     done < "$root/etc/passwd"
+fi
+
+# Subscribe to the signed [yurei] repository for future updates
+if [[ -f $signing_key ]] && ! grep -q '^\[yurei\]' "$root/etc/pacman.conf"; then
+    fingerprint=$(gpg --batch --with-colons --show-keys "$signing_key" | awk -F: '/^fpr/ {print $10; exit}')
+    [[ -n $fingerprint ]] || { echo "yurei-install-target: unreadable signing key" >&2; exit 1; }
+    cp "$signing_key" "$root/tmp/yurei.asc"
+    arch-chroot "$root" pacman-key --add /tmp/yurei.asc
+    arch-chroot "$root" pacman-key --lsign-key "$fingerprint"
+    rm -f "$root/tmp/yurei.asc"
+    printf '\n[yurei]\nSigLevel = Required DatabaseRequired\nServer = %s\n' "$repo_url" >> "$root/etc/pacman.conf"
 fi

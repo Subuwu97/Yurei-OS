@@ -19,7 +19,7 @@ git -C "$tmp/upstream" checkout --quiet --force --detach "$UPSTREAM_REF"
 export WORK_DIR=$tmp
 source "$here/build.sh"
 mkdir -p "$work/packages"
-touch "$work/packages/yurei-settings-0.1.0-1-any.pkg.tar.zst" "$work/packages/yurei-gaming-0.1.0-1-any.pkg.tar.zst"
+touch "$work/packages/yurei-settings-0.2.0-1-any.pkg.tar.zst" "$work/packages/yurei-gaming-0.2.0-1-any.pkg.tar.zst"
 
 apply_overlay
 
@@ -41,10 +41,15 @@ expect "$iso/profiledef.sh" 'yurei-install-target"\]="0:0:755"' "installer helpe
 expect "$iso/grub/grub.cfg" 'menuentry "Yurei"' "boot menu rebranded"
 expect "$iso/airootfs/etc/os-release" 'NAME="Yūrei"' "live system rebranded"
 expect "$iso/airootfs/usr/local/bin/calamares-online.sh" 'yurei-calamares-patch' "installer hook added"
-if [[ -f $iso/airootfs/opt/yurei/packages/yurei-gaming-0.1.0-1-any.pkg.tar.zst ]]; then
+if [[ -f $iso/airootfs/opt/yurei/packages/yurei-gaming-0.2.0-1-any.pkg.tar.zst ]]; then
     echo "ok   packages shipped on the ISO"
 else
     echo "FAIL packages shipped on the ISO"; fail=1
+fi
+if cmp -s "$here/overlay/boot/splash.png" "$iso/grub/splash.png"; then
+    echo "ok   boot splash replaced"
+else
+    echo "FAIL boot splash replaced"; fail=1
 fi
 if grep -q 'CachyOS' "$iso/grub/grub.cfg"; then echo "FAIL leftover CachyOS in grub.cfg"; fail=1; fi
 

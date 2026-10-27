@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4f1ff"/>
+      <stop offset="1" stop-color="#b9adff"/>
+    </linearGradient>
+    <radialGradient id="flame" cx=".5" cy=".65" r=".6">
+      <stop offset="0" stop-color="#e8fbff"/>
+      <stop offset=".45" stop-color="#7fe3ff"/>
+      <stop offset="1" stop-color="#5b6cff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="#17132b"/>
+  <!-- hitodama: the floating spirit flame that accompanies a yūrei -->
+  <path d="M96 22c7 9 10 15 10 21a10 10 0 0 1-20 0c0-6 4-12 10-21z" fill="url(#flame)"/>
+  <!-- the ghost: rounded head, trailing wavy hem -->
+  <path d="M30 104V58a30 30 0 0 1 60 0v46l-10-8-10 8-10-8-10 8-10-8z" fill="url(#body)"/>
+  <ellipse cx="50" cy="60" rx="5" ry="7" fill="#17132b"/>
+  <ellipse cx="70" cy="60" rx="5" ry="7" fill="#17132b"/>
+</svg>

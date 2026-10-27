@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Return to Game Mode
+Comment=Log out and start Steam Game Mode
+Exec=/usr/bin/yurei-return-to-gamemode
+Icon=steam
+Type=Application
+Categories=Game;
