@@ -45,13 +45,33 @@ jobs:
         if: always()
         run: sudo chown -R "$(id -u):$(id -g)" .
 
-      - name: Split into parts under 2 GB
+      - name: Split into parts under 2 GB, with join scripts
         run: |
           cd out
           iso=$(ls yurei-*-x86_64.iso)
           split --bytes=1900M --numeric-suffixes=1 --suffix-length=2 "$iso" "$iso.part"
+          parts=$(ls "$iso".part* | xargs)
+          # Windows: double-click to join and check (Command Prompt's copy /b;
+          # PowerShell's own "copy" can't join files)
+          {
+            echo '@echo off'
+            echo 'rem Joins the downloaded parts into the Yurei ISO and checks it.'
+            echo 'cd /d "%~dp0"'
+            for part in $parts; do
+              echo "if not exist \"$part\" (echo Missing $part - download it into this folder first. & pause & exit /b 1)"
+            done
+            echo "echo Joining the parts into $iso, this takes a minute..."
+            echo "copy /b $(echo "$parts" | sed 's/ / + /g') \"$iso\" >nul || (echo Joining failed. & pause & exit /b 1)"
+            echo 'echo Checking it...'
+            echo "powershell -NoProfile -Command \"\$want = (Get-Content '$iso.sha256').Split(' ')[0]; \$got = (Get-FileHash '$iso' -Algorithm SHA256).Hash; if (\$got -ieq \$want) { Write-Host 'OK: $iso is complete.' } else { Write-Host 'The ISO does not match: download the parts again.'; exit 1 }\""
+            echo 'pause'
+          } | sed 's/$/\r/' > join-windows.bat
+          printf '#!/bin/sh\n# Joins the downloaded parts into the Yurei ISO and checks it.\ncd "$(dirname "$0")" && cat %s > %s && sha256sum -c %s.sha256\n' \
+              "$parts" "$iso" "$iso" > join-linux-mac.sh
+          cat join-windows.bat join-linux-mac.sh
           ls -la
           echo "ISO=$iso" >> "$GITHUB_ENV"
+          echo "PARTS=$parts" >> "$GITHUB_ENV"
 
       - name: Publish as a pre-release
         env:
@@ -61,15 +81,18 @@ jobs:
           cat > notes.md <<EOF
           Yūrei test build from ${GITHUB_SHA::7}. Not yet tested on real hardware.
 
-          The ISO is split into parts because GitHub limits files to 2 GB.
-          Download every \`.part\` file and the \`.sha256\` file into one folder, then join them:
+          The ISO is split into parts because GitHub limits files to 2 GB. Download **every
+          \`.part\` file, the \`.sha256\` file and the join script for your system** into one folder:
 
-          - **Linux / macOS:** \`cat ${ISO}.part* > ${ISO} && sha256sum -c ${ISO}.sha256\`
-          - **Windows (Command Prompt):** \`copy /b ${ISO}.part01 + ${ISO}.part02 + ${ISO}.part03 ${ISO}\`
-            (list every part you downloaded, in order), then \`certutil -hashfile ${ISO} SHA256\`
-            and compare it with the \`.sha256\` file.
+          - **Windows:** double-click \`join-windows.bat\`. It joins the parts and checks the result.
+            (If Windows says it protected your PC, choose *More info* → *Run anyway*.)
+            By hand, in **Command Prompt** (not PowerShell):
+            \`copy /b $(echo "$PARTS" | sed 's/ / + /g') ${ISO}\`
+          - **Linux / macOS:** \`sh join-linux-mac.sh\`, or \`cat ${ISO}.part* > ${ISO} && sha256sum -c ${ISO}.sha256\`
 
           Write the joined ISO to a USB stick with Ventoy, balenaEtcher or Rufus (DD mode), or boot it in a VM.
           EOF
+          cd out
+          # shellcheck disable=SC2086 # PARTS is a list of names
           gh release create "$tag" --prerelease --title "Yūrei test build $(date +%Y-%m-%d)" \
-              --notes-file notes.md out/"$ISO".part* out/"$ISO".sha256
+              --notes-file ../notes.md $PARTS "$ISO.sha256" join-windows.bat join-linux-mac.sh
