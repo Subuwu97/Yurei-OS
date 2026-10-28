@@ -88,7 +88,23 @@ During installation, CachyOS's Calamares installer runs one extra step,
 `yurei-install-target`. It installs the `yurei-*` packages shipped on the ISO
 into the new system and gives every user access to GameMode.
 
-### Building the ISO
+### Getting the ISO
+
+**From GitHub (no CachyOS machine needed):** open the repository's
+*Actions* tab, choose **Build ISO**, then **Run workflow**. It takes about
+an hour. The result appears under *Releases* as a pre-release, split into
+parts because GitHub limits files to 2 GB. Download all the parts and the
+`.sha256` file, then join them:
+
+```sh
+cat yurei-*.iso.part* > yurei.iso      # Windows: copy /b part01 + part02 + part03 yurei.iso
+sha256sum yurei.iso                    # compare with the .sha256 file
+```
+
+Write it to a USB stick with Ventoy, balenaEtcher or Rufus (DD mode), or boot
+it in a VM such as VirtualBox, GNOME Boxes or virt-manager (give it 4+ GB RAM).
+
+### Building the ISO yourself
 
 On a CachyOS machine (it needs CachyOS's repositories and keys):
 
@@ -99,8 +115,7 @@ git clone https://github.com/subuwu97/Y-rei-Linux && cd Y-rei-Linux
 # → out/yurei-YYYY.MM.DD-x86_64.iso (+ .sha256)
 ```
 
-You can also run the **Build ISO** GitHub Actions workflow, which builds it in
-CachyOS's container image.
+Allow about 30 GB of free disk space and an hour.
 
 ### Trying it on an existing CachyOS install
 

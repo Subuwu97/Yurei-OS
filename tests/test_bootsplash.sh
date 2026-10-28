@@ -2,7 +2,7 @@
 # Runs the bootsplash and login-screen helpers against fake system roots
 # covering the setups a CachyOS install can have.
 # checks are eval'd strings, so expansions are deliberately single-quoted
-# shellcheck disable=SC2016,SC2034,SC2329
+# shellcheck disable=SC2016,SC2034,SC2317,SC2329
 set -euo pipefail
 
 here=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
