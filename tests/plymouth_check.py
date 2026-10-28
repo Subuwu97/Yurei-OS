@@ -88,6 +88,32 @@ class Daemon:
                 stop()
 
 
+def has_text_plugin() -> bool:
+    """The theme needs Plymouth's text plugin: without it, Plymouth 24 stops
+    taking keyboard input once a theme draws text. On installed systems the
+    yurei-plymouth-text initramfs hook provides it."""
+    dirs = ("/usr/lib/x86_64-linux-gnu/plymouth", "/usr/lib/plymouth", "/usr/lib64/plymouth")
+    return any(any(Path(d).glob("label*.so")) for d in dirs)
+
+
+def focus_splash() -> None:
+    """Give the Plymouth window keyboard focus: the full-screen one (the X11
+    renderer also opens a tiny helper window), with the pointer over it."""
+    ids = subprocess.run(["xdotool", "search", "--name", "."], env=env(),
+                         capture_output=True, text=True).stdout.split()
+    best, area = None, 0
+    for wid in ids:
+        geo = subprocess.run(["xdotool", "getwindowgeometry", "--shell", wid], env=env(),
+                             capture_output=True, text=True).stdout
+        vals = dict(line.split("=", 1) for line in geo.splitlines() if "=" in line)
+        size = int(vals.get("WIDTH", 0)) * int(vals.get("HEIGHT", 0))
+        if size > area:
+            best, area = wid, size
+    subprocess.run(["xdotool", "mousemove", "960", "540"], env=env(), check=False)
+    if best:
+        subprocess.run(["xdotool", "windowfocus", "--sync", best], env=env(), check=False)
+
+
 def uniform_row(img: Image.Image, y: int) -> bool:
     """The frames' edges must not show: a row through empty space should be
     one colour from edge to edge."""
@@ -103,6 +129,8 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
     if os.geteuid() != 0:
         sys.exit("run as root (see the docstring)")
+    if not has_text_plugin():
+        sys.exit("Plymouth's text plugin is missing (Debian/Ubuntu: plymouth-label plymouth-label-ft)")
 
     target = Path("/usr/share/plymouth/themes/yurei")
     if target.exists():
@@ -137,12 +165,15 @@ def main() -> int:
         with answer_file.open("w") as fh:
             asker = subprocess.Popen(["plymouth", "ask-for-password", "--prompt=Unlock cryptroot"],
                                      env=env(), stdout=fh, stderr=subprocess.STDOUT)
-            time.sleep(1)
-            windows = subprocess.run(["xdotool", "search", "--onlyvisible", "--name", "."], env=env(),
-                                     capture_output=True, text=True).stdout.split()
-            if windows:
-                subprocess.run(["xdotool", "windowfocus", windows[-1]], env=env(), check=False)
-            subprocess.run(["xdotool", "type", "--delay", "60", "moonlit"], env=env(), check=False)
+            # wait until the prompt box is on screen before typing
+            deadline = time.time() + 10
+            while time.time() < deadline:
+                time.sleep(0.5)
+                box = grab(out / "password.png").crop((700, 850, 1220, 1000))
+                if box.getextrema()[2][1] > 180:
+                    break
+            focus_splash()
+            subprocess.run(["xdotool", "type", "--delay", "80", "moonlit"], env=env(), check=False)
             time.sleep(0.6)
             prompt = grab(out / "password.png")
             subprocess.run(["xdotool", "key", "Return"], env=env(), check=False)

@@ -72,7 +72,9 @@ installer, which Yūrei uses unchanged:
   with either one.
 * **Boot splash.** `yurei bootsplash on` detects how the system boots:
   * initramfs: **mkinitcpio** (adds the `plymouth` hook after `kms`, or after
-    `systemd`/`udev`, and always before `encrypt`/`sd-encrypt`) or **dracut**
+    `systemd`/`udev`, and always before `encrypt`/`sd-encrypt`, followed by
+    `yurei-plymouth-text`, which adds Plymouth's text plugin and a font) or
+    **dracut** (whose Plymouth module already includes them)
   * bootloader: **Limine** (`/etc/default/limine`), **systemd-boot** via
     `sdboot-manage`, **GRUB**, or `/etc/kernel/cmdline`, where it adds
     `quiet splash` to the default entry only. Fallback entries stay verbose.
@@ -139,9 +141,13 @@ Nothing is overwritten without a backup:
 * **The boot animation hides a problem:** press **Esc** during boot to see
   the text log. To skip it for one boot, edit the boot entry in the boot menu
   and delete `splash`. Then run `yurei bootsplash off`.
-* **Disk-unlock prompt:** it appears below the animation as a box with a lock
-  icon and dots. It stays usable even if the initramfs has no fonts, because
-  the box and dots are images, not text.
+* **Disk-unlock prompt:** it appears below the animation, as a box with a
+  lock icon and one dot per character, with the prompt text above it.
+  Plymouth needs its text plugin and a font in the initramfs for this. Testing
+  showed that Plymouth 24 stops taking keyboard input once a theme draws text
+  while the plugin is missing. That's why `bootsplash on` adds the
+  `yurei-plymouth-text` hook, which puts both in. If you ever edit `HOOKS`
+  by hand, keep it directly after `plymouth`.
 
 ## Building the assets
 
@@ -183,7 +189,9 @@ Run it again whenever the source art changes.
   * status messages, which disappear 8 s after their last update (Plymouth 24
     never calls a script's hide-message hook)
   * a typed passphrase reaching the caller, with one dot per character
-  * the prompt with and without the font plugin
+  * that without the text plugin, Plymouth 24 stops taking input once a theme
+    draws text (reproduced with a minimal control theme too); the
+    `yurei-plymouth-text` hook exists because of this
   * shutdown mode going straight to the wave
   * scaling at 1366×768, 1920×1080 and 3840×2160
 

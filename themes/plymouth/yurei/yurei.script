@@ -7,6 +7,10 @@
 # once; the final wave loops for as long as booting takes. Shutdown and
 # reboot show only the loop. Password and question prompts appear below the
 # animation; Esc still switches to the text log, as with every Plymouth theme.
+#
+# Needs Plymouth's text plugin in the initramfs: Plymouth 24 stops taking
+# keyboard input once a theme calls Image.Text without it. The
+# yurei-plymouth-text mkinitcpio hook (added by `yurei bootsplash on`) provides it.
 
 frame_width = 1085;
 frame_height = 532;

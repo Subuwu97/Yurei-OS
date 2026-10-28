@@ -104,6 +104,26 @@ remove_plymouth_hook() {
     sed -i -E '/^HOOKS=\(/ s/ plymouth([ )])/\1/' "$MKINITCPIO_CONF"
 }
 
+# The theme draws text (prompt label, messages), which needs Plymouth's text
+# plugin and a font in the initramfs; our own small hook adds both.
+TEXT_HOOK=yurei-plymouth-text
+
+hooks_have_text() {
+    grep -Eq "^HOOKS=\(.*\<$TEXT_HOOK\>.*\)" "$MKINITCPIO_CONF"
+}
+
+add_text_hook() {
+    backup "$MKINITCPIO_CONF"
+    local n
+    n=$(grep -nE '^HOOKS=\(' "$MKINITCPIO_CONF" | tail -n1 | cut -d: -f1)
+    sed -i -E "${n}s/([( ])plymouth([ )])/\1plymouth $TEXT_HOOK\2/" "$MKINITCPIO_CONF"
+}
+
+remove_text_hook() {
+    [[ -f $MKINITCPIO_CONF ]] || return 0
+    sed -i -E "/^HOOKS=\(/ s/ $TEXT_HOOK([ )])/\1/" "$MKINITCPIO_CONF"
+}
+
 initramfs_tool() {
     if [[ -f $MKINITCPIO_CONF ]] && have mkinitcpio; then echo mkinitcpio
     elif have dracut; then echo dracut
@@ -223,6 +243,10 @@ cmd_on() {
                 add_plymouth_hook
                 record "mkinitcpio_hook"
             fi
+            if ! hooks_have_text; then
+                add_text_hook
+                record "mkinitcpio_text_hook"
+            fi
             ;;
         dracut)
             mkdir -p "$(dirname "$DRACUT_CONF")"
@@ -249,6 +273,7 @@ cmd_off() {
     elif [[ -f $PLYMOUTH_CONF ]]; then
         sed -i '/^[[:space:]]*Theme[[:space:]]*=[[:space:]]*yurei[[:space:]]*$/d' "$PLYMOUTH_CONF"
     fi
+    recorded "mkinitcpio_text_hook" && remove_text_hook
     recorded "mkinitcpio_hook" && remove_plymouth_hook
     recorded "dracut_conf" && rm -f "$DRACUT_CONF"
     restore_cmdline
