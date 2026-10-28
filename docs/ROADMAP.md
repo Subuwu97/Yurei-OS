@@ -20,10 +20,12 @@
 - [x] SDDM login theme with real controls, matching the approved design
 - [x] `yurei bootsplash` and `yurei login-screen`, with backups and rollback; enabled by the installer
 - [x] New wordmark in the ISO boot menu
+- [x] Mascot wallpaper (desktop and lock screen) and the moon-ghost icon
+- [x] macOS-style default desktop: top bar and floating dock (`yurei layout dock|classic`)
 - [ ] Test both on real hardware (NVIDIA early KMS, LUKS, multiple monitors)
 - [ ] Clean high-resolution login art with the mascot on its own layer
 - [ ] In-between poses for smoother running and leaping
-- [ ] Plasma look-and-feel and Calamares branding
+- [ ] Plasma colour scheme and window decorations to match; Calamares branding
 
 ## 0.4 — polish
 - [ ] Yūrei welcome app (GUI for bundles, doctor and drivers)

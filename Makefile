@@ -11,6 +11,7 @@ test:
 	tests/test_session.sh
 	tests/test_install_target.sh
 	tests/test_bootsplash.sh
+	node tests/test_desktop_layout.js
 	python3 -m pytest -q tests
 	tests/test_overlay.sh
 

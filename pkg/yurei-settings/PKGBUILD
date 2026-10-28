@@ -46,6 +46,9 @@ package_yurei-gaming() {
         gamescope
         mangohud lib32-mangohud
         vulkan-tools
+        # in the default dock
+        discover
+        discord
     )
 }
 

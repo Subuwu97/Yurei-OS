@@ -1,0 +1,7 @@
+# Yūrei default: the lock screen shows the Yūrei wallpaper too.
+# Users' own settings in ~/.config/kscreenlockerrc take precedence.
+[Greeter]
+WallpaperPlugin=org.kde.image
+
+[Greeter][Wallpaper][org.kde.image][General]
+Image=/usr/share/wallpapers/Yurei

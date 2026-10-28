@@ -11,6 +11,7 @@ so packaging needs none of these tools):
   themes/sddm/yurei/assets/logo.png    transparent wordmark
   themes/sddm/yurei/assets/background.jpg  login artwork, baked-in UI removed
   overlay/boot/splash.png              boot menu background with the new wordmark
+  pkg/yurei-settings/files/usr/share/wallpapers/Yurei/  desktop wallpaper
 
 The source files are design assets: the video carries a "motion concept"
 caption and the login reference has a mock-up UI painted into it. Both are
@@ -270,12 +271,28 @@ def build_plymouth_widgets() -> None:
     lock.resize((22, 26), Image.Resampling.LANCZOS).save(PLYMOUTH / "lock.png")
 
 
+def build_wallpaper() -> None:
+    """The desktop wallpaper as a Plasma wallpaper package: the design at its
+    own size and 2x for 1440p/4K screens; Plasma picks the closer one."""
+    images = ROOT / "pkg/yurei-settings/files/usr/share/wallpapers/Yurei/contents/images"
+    for old in images.glob("*"):
+        old.unlink()
+    images.mkdir(parents=True, exist_ok=True)
+    art = Image.open(SRC / "Yurei-Wallpaper.png").convert("RGB")
+    art.save(images / f"{art.width}x{art.height}.jpg", quality=92, optimize=True, progressive=True)
+    big = art.resize((art.width * 2, art.height * 2), Image.Resampling.LANCZOS)
+    big = big.filter(ImageFilter.UnsharpMask(radius=2, percent=60, threshold=2))
+    big.save(images / f"{big.width}x{big.height}.jpg", quality=90, optimize=True, progressive=True)
+    log(f"wallpaper: {art.width}x{art.height} and {big.width}x{big.height}")
+
+
 def main() -> None:
     wave = build_plymouth()
     build_plymouth_widgets()
     logo = build_logo()
     build_login_background()
     build_boot_splash(logo, wave)
+    build_wallpaper()
 
 
 if __name__ == "__main__":

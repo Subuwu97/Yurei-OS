@@ -40,5 +40,18 @@ check "comments are not packages" '! grep -q "description" "$tmp/calls"'
 check "unknown bundle fails" '! "$yurei" install nope 2>/dev/null'
 check "path traversal rejected" '! "$yurei" install ../../etc/passwd 2>/dev/null'
 check "unknown command fails" '! "$yurei" frobnicate 2>/dev/null'
+printf 'var yureiLayout_test = 1;\n' > "$tmp/layout.js"
+cat > "$tmp/bin/qdbus6" <<STUB
+#!/bin/sh
+printf '%s\n' "\$@" > "$tmp/qdbus-args"
+STUB
+chmod +x "$tmp/bin/qdbus6"
+if [[ $EUID -eq 0 ]]; then
+    check "layout refuses to run as root" '! YUREI_LAYOUT_SCRIPT=$tmp/layout.js "$yurei" layout dock 2>/dev/null'
+else
+    YUREI_LAYOUT_SCRIPT=$tmp/layout.js "$yurei" layout dock >/dev/null
+    check "layout runs Plasma's scripting with the mode set" 'grep -q "evaluateScript" "$tmp/qdbus-args" && grep -q "var yureiLayout = \"dock\";" "$tmp/qdbus-args"'
+fi
+check "layout rejects unknown modes" '! "$yurei" layout sideways 2>/dev/null'
 check "version prints" '[[ $("$yurei" version) =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]'
 exit $fail

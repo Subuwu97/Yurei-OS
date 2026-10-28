@@ -37,6 +37,7 @@ ${bold}yurei${reset} $VERSION - manage your Yūrei system
                           desktop, or off (show the login screen)
   yurei login-screen X    yurei (the Yūrei login screen) or plasma (the default)
   yurei bootsplash X      on or off: the animated Yūrei boot screen
+  yurei layout X          dock (top bar and macOS-style dock) or classic (one bottom panel)
   yurei version           Print the version
 EOF
 }
@@ -304,6 +305,32 @@ cmd_bootsplash() {
     esac
 }
 
+# ------------------------------------------------------------------ desktop layout
+
+LAYOUT_SCRIPT=${YUREI_LAYOUT_SCRIPT:-/usr/share/plasma/shells/org.kde.plasma.desktop/contents/updates/yurei-desktop-layout.js}
+
+cmd_layout() {
+    local mode=${1:-}
+    case $mode in
+        dock|classic) ;;
+        *) die "use: yurei layout dock|classic" ;;
+    esac
+    [[ $EUID -ne 0 ]] || die "run this as yourself, inside your Plasma session (not with sudo)"
+    [[ -r $LAYOUT_SCRIPT ]] || die "layout script missing: $LAYOUT_SCRIPT"
+    local script
+    script="var yureiLayout = \"$mode\";"$'\n'"$(< "$LAYOUT_SCRIPT")"
+    # Plasma's own scripting interface, the same one its desktop scripts use
+    if have qdbus6; then
+        qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$script" >/dev/null
+    elif have qdbus; then
+        qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$script" >/dev/null
+    else
+        dbus-send --session --type=method_call --dest=org.kde.plasmashell /PlasmaShell \
+            org.kde.PlasmaShell.evaluateScript "string:$script"
+    fi
+    say "Desktop layout: $mode"
+}
+
 # ------------------------------------------------------------------ main
 
 main() {
@@ -319,6 +346,7 @@ main() {
         session) cmd_session "$@" ;;
         login-screen) cmd_login_screen "$@" ;;
         bootsplash|boot-splash) cmd_bootsplash "$@" ;;
+        layout) cmd_layout "$@" ;;
         version|--version) say "$VERSION" ;;
         help|-h|--help) usage ;;
         *) usage >&2; exit 2 ;;

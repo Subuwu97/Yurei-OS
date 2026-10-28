@@ -1,6 +1,7 @@
-# Boot animation and login screen
+# Boot animation, login screen and desktop
 
-Yūrei's branding has two themes, each in its own package:
+Yūrei's branding has two themes, each in its own package, plus a default
+desktop (see [The desktop](#the-desktop) below):
 
 | Package | What it is | Turn on / off |
 |---|---|---|
@@ -14,6 +15,49 @@ completes.
 | Boot | Disk unlock | Login |
 |---|---|---|
 | ![Boot animation](previews/bootsplash-boot-2.jpg) | ![Disk unlock prompt](previews/bootsplash-password.jpg) | ![Login screen](previews/login.jpg) |
+
+## The desktop
+
+![Desktop design](previews/desktop-design.jpg)
+
+*The approved design. The real desktop is built from Plasma's own widgets,
+so details like fonts and icon artwork follow the system theme.*
+
+`yurei-settings` sets up this desktop for new users:
+
+* **Wallpaper:** the mascot sitting on the shrine steps
+  (`/usr/share/wallpapers/Yurei`, at 1672×941 and 3344×1882; Plasma picks the
+  closer size). The lock screen uses it too, via `/etc/xdg/kscreenlockerrc`.
+* **Top bar:** slim and translucent. On the left, the Yūrei menu (the
+  moon-ghost icon and "Yūrei") and the focused app's menus, as on macOS. The
+  date and time sit in the centre ("Tue 27 Oct · 10:24"), and the system tray
+  (Wi-Fi, volume, battery) on the right.
+* **Dock:** floating, centred, sized to its icons, and it steps aside when a
+  window covers it. From left to right:
+  * the full-screen app grid
+  * Files, Firefox, Terminal, Settings, Discover (app store), Steam and Discord
+  * running apps, with dots underneath
+  * a separator, then the Trash
+
+  Apps that aren't installed are left out automatically.
+* **Icon:** the moon-ghost mark (`branding/icon.svg`), used for the menu, the
+  app grid and the system logo.
+
+**How it's applied.** CachyOS gives every new user a single bottom panel, by
+copying `/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc` from
+`cachyos-kde-settings`. Rather than fight over that file, Yūrei ships a
+Plasma *update script*
+(`/usr/share/plasma/shells/org.kde.plasma.desktop/contents/updates/yurei-desktop-layout.js`).
+Plasma runs it once per user at their first login. It replaces the layout
+only if it is still that untouched stock panel, so anyone who has arranged
+their own panels keeps them.
+
+**Switching any time** (as yourself, in your Plasma session):
+
+```sh
+yurei layout dock      # top bar and dock
+yurei layout classic   # CachyOS's single bottom panel
+```
 
 ## How this fits CachyOS
 
@@ -166,6 +210,14 @@ Run it again whenever the source art changes.
   * Plymouth already configured with another theme
   * idempotence, and rollback restoring the original files byte for byte
 
+* **Desktop layout.** The layout script ran against a stand-in for Plasma 6's
+  desktop scripting API (`tests/test_desktop_layout.js`). Its property names
+  and values (`lengthMode` "fit", `hiding` "dodgewindows", `floating`,
+  `opacity`) were checked against plasma-workspace's source. The tests cover
+  the panels and widgets it creates, the dock apps and their order, leaving out
+  apps that aren't installed, keeping customised layouts, and both
+  `yurei layout` modes.
+
 **Not yet tested (needs a CachyOS machine):**
 
 * the real SDDM greeter (`sddm-greeter-qt6`) and the switch from
@@ -177,6 +229,9 @@ Run it again whenever the source art changes.
 * the exact regeneration commands on current CachyOS, for example the name of
   `limine-update`. When a command is missing, the helper says what to run by hand.
 * the Calamares installer step end to end
+* the layout in a real Plasma 6 session: sizes on HiDPI screens, how the
+  global menu looks, and the panel style (translucency, blur) under the
+  system's Plasma theme
 
 ## Art that would improve this
 

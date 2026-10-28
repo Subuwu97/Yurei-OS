@@ -26,7 +26,11 @@ running well.
 - **Its own boot animation and login screen.** While the system starts, the mascot chases and
   catches a spirit, then waves while booting finishes. The login screen is a moonlit shrine
   with the mascot, the new wordmark, and real controls. See [docs/THEMES.md](docs/THEMES.md).
-- KDE Plasma desktop with Yūrei's wallpaper and boot menu, Firefox, Flatpak with Flathub, and
+- **A macOS-style desktop by default:** a slim top bar (Yūrei menu, app menus, centred clock,
+  tray) and a floating dock (app grid, Files, Firefox, Terminal, Settings, Discover, Steam,
+  Discord, Trash) over the mascot wallpaper. Use `yurei layout classic` for a single bottom
+  panel instead.
+- KDE Plasma desktop with Yūrei's boot menu, Firefox, Flatpak with Flathub, and
   the AUR through `paru`.
 - Updates to Yūrei's own packages come from a signed `[yurei]` pacman repository
   (see [docs/REPOSITORY.md](docs/REPOSITORY.md)).
@@ -55,6 +59,7 @@ yurei drivers           Detect hardware and install the right GPU drivers
 yurei session MODE      Start in game (Steam Game Mode), desktop, or off (login screen)
 yurei login-screen X    yurei (the Yūrei login screen) or plasma (CachyOS's default)
 yurei bootsplash X      on or off: the animated boot screen (with backups and full rollback)
+yurei layout X          dock (top bar and macOS-style dock) or classic (one bottom panel)
 ```
 
 ## How it's built
