@@ -26,7 +26,7 @@
 - [ ] Test both on real hardware (NVIDIA early KMS, LUKS, multiple monitors)
 - [ ] Clean high-resolution login art with the mascot on its own layer
 - [ ] In-between poses for smoother running and leaping
-- [ ] Plasma colour scheme and window decorations to match
+- [x] Plasma colour scheme and window decorations to match: the Yūrei global theme, and a Konsole profile
 
 ## 0.4 — Yūrei from the first screen
 - [x] Live ISO: boot animation, Plasma splash, mascot desktop and dock with an "Install Yūrei" launcher

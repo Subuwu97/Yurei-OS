@@ -23,7 +23,7 @@ from PySide6.QtGui import QGuiApplication  # noqa: E402
 from PySide6.QtQuick import QQuickView  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-SPLASH = ROOT / "themes/ksplash/yurei"
+THEME = ROOT / "themes/plasma/yurei"  # the global theme, with the splash
 BRANDING = ROOT / "overlay/airootfs/usr/share/calamares/branding/yurei"
 
 # just enough of Calamares' QML API for the branding files
@@ -151,7 +151,7 @@ def brightness(img, x, y):
 
 
 def test_splash_matches_boot_animation_placement(load, app):
-    view = load(SPLASH / "contents/splash/Splash.qml", 1920, 1080, stage=3)
+    view = load(THEME / "contents/splash/Splash.qml", 1920, 1080, stage=3)
     root = view.rootObject()
     # same fit as yurei.script: min(1920*0.92/1085, 1080*0.62/532) ~ 1.26
     assert abs(root.property("fit") - min(1920 * 0.92 / 1085, 1080 * 0.62 / 532)) < 1e-6
@@ -164,7 +164,7 @@ def test_splash_matches_boot_animation_placement(load, app):
 
 
 def test_splash_animates_and_tracks_stages(load, app):
-    view = load(SPLASH / "contents/splash/Splash.qml", 1366, 768, stage=1)
+    view = load(THEME / "contents/splash/Splash.qml", 1366, 768, stage=1)
     root = view.rootObject()
     start = root.property("tick")
     for _ in range(10):
@@ -177,13 +177,27 @@ def test_splash_animates_and_tracks_stages(load, app):
     assert not warnings, warnings
 
 
-def test_splash_package_has_metadata():
+def test_global_theme_package():
+    import configparser
     import json
-    meta = json.loads((SPLASH / "metadata.json").read_text())
+    meta = json.loads((THEME / "metadata.json").read_text())
     assert meta["KPackageStructure"] == "Plasma/LookAndFeel"
-    assert meta["KPlugin"]["Id"] == "org.yurei.splash"
-    frames = list((SPLASH / "contents/splash/images").glob("wave-*.png"))
-    count = int(re.search(r"frameCount = (\d+)", (SPLASH / "contents/splash/wave.js").read_text())[1])
+    assert meta["KPlugin"]["Id"] == "org.yurei.desktop"
+    defaults = (THEME / "contents/defaults").read_text()
+    assert "ColorScheme=Yurei" in defaults and "Theme=org.yurei.desktop" in defaults
+    for preview in ("preview.png", "fullscreenpreview.jpg", "splash.png"):
+        assert (THEME / "contents/previews" / preview).is_file()
+    # the colour scheme it names exists and has every colour set
+    files = ROOT / "pkg/yurei-settings/files"
+    scheme = configparser.ConfigParser(interpolation=None)
+    scheme.optionxform = str
+    scheme.read(files / "usr/share/color-schemes/Yurei.colors")
+    for group in ("Button", "Complementary", "Header", "Selection", "Tooltip", "View", "Window"):
+        assert len(scheme[f"Colors:{group}"]) == 12, group
+    assert scheme["General"]["ColorScheme"] == "Yurei"
+    assert "Theme=org.yurei.desktop" in (files / "etc/xdg/ksplashrc").read_text()
+    frames = list((THEME / "contents/splash/images").glob("wave-*.png"))
+    count = int(re.search(r"frameCount = (\d+)", (THEME / "contents/splash/wave.js").read_text())[1])
     assert len(frames) == count
 
 

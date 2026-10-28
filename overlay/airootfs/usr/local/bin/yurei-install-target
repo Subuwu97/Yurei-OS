@@ -65,6 +65,14 @@ fi
 # (yurei-settings keeps it out of /etc/skel). Hello stays in the app menu.
 rm -f "$root"/home/*/.config/autostart/cachyos-hello.desktop
 
+# The Yūrei theme and colours for the accounts the installer created (new
+# accounts get them from /etc/skel, set by yurei-settings' pacman hook)
+if [[ -x $root/usr/lib/yurei/theme-defaults ]]; then
+    for globals in "$root"/home/*/.config/kdeglobals; do
+        arch-chroot "$root" /usr/lib/yurei/theme-defaults "${globals#"$root"}"
+    done
+fi
+
 # Limine boot menu: CachyOS's installer names the entry "CachyOS" and sets
 # its own wallpaper. limine-entry-tool finds the entry by its machine-id
 # comment, so renaming it is safe. Plain ASCII: Limine's font has no "ū".

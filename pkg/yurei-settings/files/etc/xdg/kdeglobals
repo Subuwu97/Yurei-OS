@@ -1,0 +1,11 @@
+# Plasma's defaults for accounts without their own settings: the Yūrei global
+# theme (/usr/share/plasma/look-and-feel/org.yurei.desktop) and its colours.
+# New accounts get the same through /etc/skel (see /usr/lib/yurei/theme-defaults).
+[General]
+ColorScheme=Yurei
+
+[Icons]
+Theme=breeze-dark
+
+[KDE]
+LookAndFeelPackage=org.yurei.desktop

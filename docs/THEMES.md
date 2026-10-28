@@ -66,6 +66,38 @@ yurei layout dock      # top bar and dock
 yurei layout classic   # CachyOS's single bottom panel
 ```
 
+## Colours: the Yūrei global theme
+
+![Theme colours](previews/theme.jpg)
+
+*The palette on Qt widgets over the wallpaper (`branding/preview-theme.py`).
+The real desktop draws its own window borders, panels and fonts.*
+
+`yurei-settings` ships a Plasma global theme, **Yūrei**
+(`/usr/share/plasma/look-and-feel/org.yurei.desktop`), which bundles:
+
+| Part | What it is |
+|---|---|
+| Colours | `Yurei.colors`: navy windows and panels (`#10162e`, views `#0b1026`), lavender selection and focus (`#b9aaff`), light lavender text (`#e6e1ff`); sakura pink for errors, lantern gold for warnings, mint for success, spirit blue for links |
+| Window borders | Breeze, coloured by the scheme: navy title bars |
+| Splash | the waving mascot after login (above) |
+| Wallpaper | the mascot on the shrine steps |
+| Icons, cursor, widgets | Breeze Dark icons, Breeze cursor and widget style |
+| Desktop layout | the top bar and dock, applied only if you tick *Use desktop layout from theme* |
+
+Konsole gets a matching **Yūrei** profile (navy background, lavender prompt
+colours, slight transparency), set as the default in `/etc/xdg/konsolerc`.
+
+**How it becomes the default.** CachyOS gives every new account Breeze Dark
+in `/etc/skel/.config/kdeglobals`, which would win over system defaults. A
+pacman hook runs `/usr/lib/yurei/theme-defaults` whenever CachyOS's KDE
+settings or `yurei-settings` are installed or upgraded. It changes only the
+colour scheme and global theme keys there, so new accounts start with Yūrei.
+The installer runs it for the accounts it creates too. Existing accounts
+are never changed. Use `yurei theme yurei` to switch one over, or
+`yurei theme breeze` to go back to Breeze Dark. System Settings > Global
+Theme does the same.
+
 ## The live ISO and the installer
 
 * **Boot menu:** the wordmark and the waving mascot (`overlay/boot/splash.png`),
@@ -257,6 +289,10 @@ Run it again whenever the source art changes.
   apps that aren't installed, keeping customised layouts, and both
   `yurei layout` modes.
 
+* **Colours.** `tests/test_theme_defaults.sh` covers editing CachyOS's
+  `kdeglobals` (only the two keys, idempotent, file mode kept), and
+  `tests/test_branding_qml.py` checks that the global theme's colour scheme
+  defines every colour.
 * **Plasma splash and installer branding.** The splash, the installer's slides
   and its step bar ran in Qt 6 with stand-ins for Calamares' QML modules
   (`tests/test_branding_qml.py`): placement matching the boot animation, the
@@ -276,6 +312,8 @@ Run it again whenever the source art changes.
   Calamares (window size, fonts, the step bar)
 * the live ISO's boot animation on real hardware (it shows from the
   firmware's framebuffer until the GPU driver loads)
+* the colours in real apps (Dolphin, System Settings, Firefox via Breeze GTK)
+  and the panels' translucency over the wallpaper
 * the layout in a real Plasma 6 session: sizes on HiDPI screens, how the
   global menu looks, and the panel style (translucency, blur) under the
   system's Plasma theme

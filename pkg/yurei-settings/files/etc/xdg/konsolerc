@@ -1,0 +1,4 @@
+# Konsole opens with the Yūrei profile (navy and lavender) unless you pick
+# another in Settings > Configure Konsole > Profiles.
+[Desktop Entry]
+DefaultProfile=Yurei.profile

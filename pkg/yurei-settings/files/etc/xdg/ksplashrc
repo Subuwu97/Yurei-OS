@@ -1,6 +1,6 @@
 # Plasma's start-up splash: the Yūrei wave, carried on from the boot animation
-# (/usr/share/plasma/look-and-feel/org.yurei.splash). Pick another in System
+# (part of the Yūrei global theme, org.yurei.desktop). Pick another in System
 # Settings > Colours & Themes > Splash Screen.
 [KSplash]
 Engine=KSplashQML
-Theme=org.yurei.splash
+Theme=org.yurei.desktop

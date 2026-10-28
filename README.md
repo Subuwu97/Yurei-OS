@@ -28,6 +28,10 @@ running well.
   screen is a moonlit shrine with the mascot, the new wordmark, and real controls. The live ISO
   and the installer are themed too, with Yūrei slides while it installs.
   See [docs/THEMES.md](docs/THEMES.md).
+- **Its own desktop theme:** the Yūrei global theme gives windows, panels, menus and the terminal
+  the boot animation's navy and the login screen's lavender, with sakura pink, lantern gold and
+  spirit blue for warnings and links. It's the default for every account, and is listed as
+  *Yūrei* under System Settings > Global Theme.
 - **A macOS-style desktop by default:** a slim top bar (Yūrei menu, app menus, centred clock,
   tray) and a floating dock (app grid, Files, Firefox, Terminal, Settings, Discover, Steam,
   Discord, Trash) over the mascot wallpaper. Use `yurei layout classic` for a single bottom
@@ -62,6 +66,7 @@ yurei session MODE      Start in game (Steam Game Mode), desktop, or off (login 
 yurei login-screen X    yurei (the Yūrei login screen) or plasma (CachyOS's default)
 yurei bootsplash X      on or off: the animated boot screen (with backups and full rollback)
 yurei layout X          dock (top bar and macOS-style dock) or classic (one bottom panel)
+yurei theme X           yurei (navy and lavender) or breeze (Plasma's Breeze Dark)
 ```
 
 ## How it's built

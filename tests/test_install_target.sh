@@ -30,7 +30,7 @@ chmod +x "$tmp/bin/arch-chroot"
 touch "$tmp/pkgs/yurei-settings-0.1.0-1-any.pkg.tar.zst" "$tmp/pkgs/yurei-gaming-0.1.0-1-any.pkg.tar.zst"
 # helpers the packages would install
 mkdir -p "$tmp/root/usr/lib/yurei"
-for helper in login-screen bootsplash; do
+for helper in login-screen bootsplash theme-defaults; do
     printf '#!/bin/sh\n' > "$tmp/root/usr/lib/yurei/$helper"
     chmod +x "$tmp/root/usr/lib/yurei/$helper"
 done
@@ -38,7 +38,8 @@ printf 'root:x:0:0::/root:/bin/bash\nana:x:1000:1000::/home/ana:/bin/bash\nnobod
 printf '[options]\n\n[cachyos]\nInclude = /etc/pacman.d/cachyos-mirrorlist\n' > "$tmp/root/etc/pacman.conf"
 # what CachyOS's installer leaves behind: Hello's autostart, and a Limine menu
 mkdir -p "$tmp/root/home/ana/.config/autostart" "$tmp/root/boot" "$tmp/root/usr/share/yurei"
-touch "$tmp/root/home/ana/.config/autostart/cachyos-hello.desktop" "$tmp/root/home/ana/.config/autostart/other.desktop"
+touch "$tmp/root/home/ana/.config/autostart/cachyos-hello.desktop" "$tmp/root/home/ana/.config/autostart/other.desktop" \
+      "$tmp/root/home/ana/.config/kdeglobals"
 printf 'timeout: 5\nwallpaper: boot():/limine-splash.png\n\ncomment: machine-id=abc\n/+CachyOS\n  //linux-cachyos\n' > "$tmp/root/boot/limine.conf"
 echo cachyos > "$tmp/root/boot/limine-splash.png"
 echo yurei > "$tmp/root/usr/share/yurei/boot-splash.png"
@@ -86,6 +87,7 @@ check "regular users get GameMode" 'grep -qx "usermod -aG gamemode ana" "$tmp/ch
 check "system users skipped" '! grep -q "usermod -aG gamemode \(root\|nobody\)" "$tmp/chroot-calls"'
 check "Hello no longer starts itself" '[[ ! -e $tmp/root/home/ana/.config/autostart/cachyos-hello.desktop ]]'
 check "other autostart entries kept" '[[ -e $tmp/root/home/ana/.config/autostart/other.desktop ]]'
+check "installer-made accounts get the Yūrei theme" 'grep -qx "/usr/lib/yurei/theme-defaults /home/ana/.config/kdeglobals" "$tmp/chroot-calls"'
 check "Limine entry renamed" 'grep -qx "/+Yurei" "$tmp/root/boot/limine.conf" && ! grep -q CachyOS "$tmp/root/boot/limine.conf"'
 check "kernel entries untouched" 'grep -qx "  //linux-cachyos" "$tmp/root/boot/limine.conf"'
 check "Limine wallpaper is Yūrei's" 'grep -qx "wallpaper: boot():/yurei-splash.png" "$tmp/root/boot/limine.conf" &&

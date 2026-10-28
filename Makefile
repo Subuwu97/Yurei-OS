@@ -3,6 +3,7 @@
 SHELL_SCRIPTS = build.sh tests/*.sh overlay/airootfs/usr/local/bin/yurei-install-target \
                 pkg/yurei-settings/files/usr/lib/yurei/session-select pkg/yurei-settings/files/usr/bin/yurei-return-to-gamemode \
                 pkg/yurei-settings/files/usr/lib/yurei/login-screen pkg/yurei-settings/files/usr/lib/yurei/bootsplash \
+                pkg/yurei-settings/files/usr/lib/yurei/theme-defaults \
                 pkg/yurei-settings/files/usr/lib/initcpio/install/yurei-plymouth-text \
                 pkg/yurei-settings/files/usr/bin/yurei pkg/yurei-settings/files/usr/bin/yurei-steam-session \
                 pkg/yurei-settings/files/usr/bin/steamos-session-select
@@ -11,6 +12,7 @@ test:
 	tests/test_cli.sh
 	tests/test_session.sh
 	tests/test_install_target.sh
+	tests/test_theme_defaults.sh
 	tests/test_bootsplash.sh
 	node tests/test_desktop_layout.js
 	python3 -m pytest -q tests

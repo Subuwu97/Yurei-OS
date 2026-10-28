@@ -53,5 +53,18 @@ else
     check "layout runs Plasma's scripting with the mode set" 'grep -q "evaluateScript" "$tmp/qdbus-args" && grep -q "var yureiLayout = \"dock\";" "$tmp/qdbus-args"'
 fi
 check "layout rejects unknown modes" '! "$yurei" layout sideways 2>/dev/null'
+cat > "$tmp/bin/plasma-apply-lookandfeel" <<STUB
+#!/bin/sh
+echo "plasma-apply-lookandfeel \$*" >> "$tmp/calls"
+STUB
+chmod +x "$tmp/bin/plasma-apply-lookandfeel"
+if [[ $EUID -eq 0 ]]; then
+    check "theme refuses to run as root" '! "$yurei" theme yurei 2>/dev/null'
+else
+    : > "$tmp/calls"
+    "$yurei" theme yurei >/dev/null
+    check "theme applies the Yūrei global theme" 'grep -qx "plasma-apply-lookandfeel --apply org.yurei.desktop" "$tmp/calls"'
+fi
+check "theme rejects unknown themes" '! "$yurei" theme plaid 2>/dev/null'
 check "version prints" '[[ $("$yurei" version) =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]'
 exit $fail

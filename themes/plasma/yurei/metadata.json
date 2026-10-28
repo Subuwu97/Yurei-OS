@@ -6,8 +6,9 @@
                 "Name": "Yūrei Linux"
             }
         ],
-        "Description": "The Yūrei mascot waves while Plasma starts",
-        "Id": "org.yurei.splash",
+        "Category": "",
+        "Description": "Moonlit navy and lavender, the mascot wallpaper, the waving start-up splash and the top bar and dock",
+        "Id": "org.yurei.desktop",
         "License": "GPL-3.0-or-later",
         "Name": "Yūrei",
         "Version": "1.0",

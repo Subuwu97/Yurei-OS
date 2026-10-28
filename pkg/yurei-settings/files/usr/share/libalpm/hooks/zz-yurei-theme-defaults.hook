@@ -1,0 +1,13 @@
+# CachyOS's KDE settings give new accounts Breeze Dark through /etc/skel;
+# make them start with the Yūrei global theme instead (see theme-defaults).
+[Trigger]
+Type = Package
+Operation = Install
+Operation = Upgrade
+Target = cachyos-kde-settings
+Target = yurei-settings
+
+[Action]
+Description = Making Yūrei the default desktop theme for new accounts...
+When = PostTransaction
+Exec = /usr/lib/yurei/theme-defaults

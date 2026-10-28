@@ -38,6 +38,7 @@ The branding is kept in a few places, so rebranding is a small job:
 | Artwork sources | `branding/` |
 | Generated themes | `themes/` (boot animation, login screen, Plasma splash), regenerated with `make assets` |
 | Installer | `overlay/airootfs/usr/share/calamares/branding/yurei/` and `branding:` in `yurei-calamares-patch` |
+| Colours | `pkg/yurei-settings/files/usr/share/color-schemes/Yurei.colors`, `usr/share/konsole/Yurei.*` |
 | Wallpaper and icon | `pkg/yurei-settings/files/usr/share/{wallpapers,icons,pixmaps}` |
 | System name | `pkg/yurei-settings/files/usr/lib/yurei/os-release` and `overlay/airootfs/etc/os-release` |
 | Boot menu | `overlay/boot/splash.png` and `usr/share/yurei/boot-splash.png`, plus the `Yurei` entry names set in `build.sh` and `yurei-install-target` |

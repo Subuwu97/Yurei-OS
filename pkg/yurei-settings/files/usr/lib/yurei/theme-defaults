@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Makes the Yūrei global theme and colours the default in Plasma settings
+# files: /etc/skel/.config/kdeglobals by default (so new accounts start with
+# it), or the files given. CachyOS's KDE settings put "BreezeDark" there,
+# which would win over /etc/xdg/kdeglobals; only these two keys change.
+#
+#   theme-defaults [KDEGLOBALS...]
+#
+# Run from a pacman hook whenever cachyos-kde-settings or yurei-settings is
+# installed or upgraded, and by the installer for the accounts it created.
+set -euo pipefail
+
+# set_ini FILE GROUP KEY VALUE: set one key, keeping everything else as it is
+set_ini() {
+    local file=$1 group=$2 key=$3 value=$4 tmp
+    tmp=$(mktemp)
+    awk -v g="[$group]" -v k="$key" -v v="$value" '
+        function emit() { if (ingroup && !done) { print k "=" v; done = 1 } }
+        $0 == g { ingroup = 1; print; next }
+        /^\[/ { emit(); ingroup = 0; print; next }
+        ingroup && index($0, k "=") == 1 { if (!done) print k "=" v; done = 1; next }
+        { print }
+        END { emit(); if (!done) { print ""; print g; print k "=" v } }
+    ' "$file" > "$tmp"
+    cat "$tmp" > "$file"  # rewrite in place: keeps the file's owner and mode
+    rm -f "$tmp"
+}
+
+(( $# )) || set -- /etc/skel/.config/kdeglobals
+for file in "$@"; do
+    [[ -f $file ]] || continue
+    set_ini "$file" General ColorScheme Yurei
+    set_ini "$file" KDE LookAndFeelPackage org.yurei.desktop
+done
