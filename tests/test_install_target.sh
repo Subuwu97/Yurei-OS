@@ -15,8 +15,17 @@ cat > "$tmp/bin/arch-chroot" <<STUB
 #!/bin/sh
 shift
 echo "\$*" >> "$tmp/chroot-calls"
+# packages "installed" in the fake target
+[ "\$*" = "pacman -Qq" ] && cat "$tmp/installed" 2>/dev/null
 exit 0
 STUB
+# graphics hardware as \`lspci -n\` reports it
+printf '00:02.0 0300: 8086:9bc8 (rev 05)\n01:00.0 0300: 1002:73df (rev c1)\n00:1f.3 0403: 8086:a348\n' > "$tmp/lspci-amd-intel"
+printf '01:00.0 0300: 10de:2684 (rev a1)\n00:1f.3 0403: 8086:a348\n' > "$tmp/lspci-nvidia"
+printf '00:02.0 0300: 1234:1111 (rev 02)\n' > "$tmp/lspci-vm"
+printf '#!/bin/sh\ncat "$YUREI_LSPCI_FIXTURE"\n' > "$tmp/bin/fake-lspci"
+chmod +x "$tmp/bin/fake-lspci"
+export YUREI_LSPCI=$tmp/bin/fake-lspci YUREI_LSPCI_FIXTURE=$tmp/lspci-vm
 chmod +x "$tmp/bin/arch-chroot"
 touch "$tmp/pkgs/yurei-settings-0.1.0-1-any.pkg.tar.zst" "$tmp/pkgs/yurei-gaming-0.1.0-1-any.pkg.tar.zst"
 # helpers the packages would install
@@ -43,6 +52,28 @@ check() {
 PATH="$tmp/bin:$PATH" YUREI_PKG_DIR="$tmp/pkgs" YUREI_SIGNING_KEY_FILE="$tmp/nokey" "$script" "$tmp/root"
 check "login screen switched to Yūrei" 'grep -qx "/usr/lib/yurei/login-screen yurei" "$tmp/chroot-calls"'
 check "boot animation enabled" 'grep -qx "/usr/lib/yurei/bootsplash on" "$tmp/chroot-calls"'
+drivers() {  # drivers FIXTURE [INSTALLED]: the driver install command for that hardware
+    : > "$tmp/chroot-calls"
+    printf '%s' "${2:-}" > "$tmp/installed"
+    PATH="$tmp/bin:$PATH" YUREI_LSPCI_FIXTURE="$tmp/lspci-$1" YUREI_PKG_DIR="$tmp/pkgs" \
+        YUREI_SIGNING_KEY_FILE="$tmp/nokey" "$script" "$tmp/root" >/dev/null
+    grep '^pacman -S ' "$tmp/chroot-calls" || true
+}
+d=$(drivers amd-intel)
+check "AMD + Intel (hybrid): both Vulkan drivers, 32 and 64-bit" '[[ $d == *"vulkan-radeon lib32-vulkan-radeon"* && $d == *"vulkan-intel lib32-vulkan-intel"* ]]'
+check "a sound card (also Intel) doesn't count as graphics" '[[ $(drivers nvidia) != *vulkan-intel* ]]'
+d=$(drivers nvidia "nvidia-utils")
+check "NVIDIA: 32-bit driver matching CachyOS's" '[[ $d == "pacman -S --noconfirm --needed lib32-nvidia-utils" ]]'
+d=$(drivers nvidia "nvidia-470xx-utils")
+check "legacy NVIDIA: matching legacy 32-bit driver" '[[ $d == *" lib32-nvidia-470xx-utils" ]]'
+d=$(drivers nvidia "")
+check "NVIDIA without the proprietary driver: nouveau" '[[ $d == *"vulkan-nouveau lib32-vulkan-nouveau"* ]]'
+d=$(drivers vm)
+check "VM or unknown graphics: CPU Vulkan" '[[ $d == *"vulkan-swrast lib32-vulkan-swrast"* ]]'
+check "drivers installed before the Yūrei packages" '[[ $(grep -n "^pacman -S " "$tmp/chroot-calls" | cut -d: -f1) -lt $(grep -n "^pacman -U " "$tmp/chroot-calls" | cut -d: -f1) ]]'
+: > "$tmp/chroot-calls"
+PATH="$tmp/bin:$PATH" YUREI_PKG_DIR="$tmp/pkgs" YUREI_SIGNING_KEY_FILE="$tmp/nokey" "$script" "$tmp/root"
+
 check "packages copied into target" '[[ -f $tmp/root/var/cache/pacman/pkg/yurei-gaming-0.1.0-1-any.pkg.tar.zst ]]'
 check "packages installed in one transaction" 'grep -q "^pacman -U --noconfirm --needed .*yurei-gaming.*yurei-settings\|^pacman -U --noconfirm --needed .*yurei-settings.*yurei-gaming" "$tmp/chroot-calls"'
 check "regular users get GameMode" 'grep -qx "usermod -aG gamemode ana" "$tmp/chroot-calls"'

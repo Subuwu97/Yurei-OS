@@ -13,6 +13,33 @@ shopt -s nullglob
 pkgs=("$pkg_src"/*.pkg.tar.zst)
 (( ${#pkgs[@]} )) || { echo "yurei-install-target: no packages in $pkg_src" >&2; exit 1; }
 
+# Vulkan drivers for this machine's graphics. The gaming stack needs a
+# (32-bit) Vulkan driver; left to choose on its own with --noconfirm, pacman
+# takes the first provider listed, a legacy NVIDIA driver that conflicts
+# with the one CachyOS installed.
+gpu_drivers() {
+    local vendors nvidia
+    vendors=$(${YUREI_LSPCI:-lspci} -n 2>/dev/null | awk '$2 ~ /^03/ {print substr($3, 1, 4)}' | sort -u)
+    if grep -qx 1002 <<< "$vendors"; then echo vulkan-radeon lib32-vulkan-radeon; fi
+    if grep -qx 8086 <<< "$vendors"; then echo vulkan-intel lib32-vulkan-intel; fi
+    if grep -qx 10de <<< "$vendors"; then
+        # match the NVIDIA driver generation CachyOS's hardware detection installed
+        nvidia=$(arch-chroot "$root" pacman -Qq 2>/dev/null | grep -E '^nvidia(-[0-9]+xx)?-utils$' || true)
+        if [[ -n $nvidia ]]; then
+            echo "lib32-${nvidia//$'\n'/ lib32-}"
+        else
+            echo vulkan-nouveau lib32-vulkan-nouveau
+        fi
+    fi
+    if ! grep -qxE '1002|8086|10de' <<< "$vendors"; then
+        echo vulkan-swrast lib32-vulkan-swrast  # VMs and anything else: CPU rendering
+    fi
+}
+read -ra drivers <<< "$(gpu_drivers | tr '\n' ' ')"
+if (( ${#drivers[@]} )); then
+    arch-chroot "$root" pacman -S --noconfirm --needed "${drivers[@]}"
+fi
+
 install -d "$root/var/cache/pacman/pkg"
 cp "${pkgs[@]}" "$root/var/cache/pacman/pkg/"
 targets=()

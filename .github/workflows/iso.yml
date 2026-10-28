@@ -38,9 +38,12 @@ jobs:
             chown -R builder /src
             su builder -c "./build.sh"
           '
-          # the container's build user now owns the checkout; take it back
-          sudo chown -R "$(id -u):$(id -g)" .
           ls -la out/
+
+      - name: Take back the checkout
+        # the container's build user owns it now, even if the build failed
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" .
 
       - name: Split into parts under 2 GB
         run: |

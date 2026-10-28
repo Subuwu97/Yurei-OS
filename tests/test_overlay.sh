@@ -33,7 +33,8 @@ expect() {
         fail=1
     fi
 }
-expect "$iso/packages_desktop.x86_64" '^yurei-gaming$' "gaming stack added to package list"
+expect "$iso/packages_desktop.x86_64" '^yurei-settings$' "Yūrei settings added to package list"
+if grep -qx yurei-gaming "$iso/packages_desktop.x86_64"; then echo "FAIL gaming stack kept off the live ISO"; fail=1; else echo "ok   gaming stack kept off the live ISO"; fi
 expect "$iso/packages_desktop.x86_64" '^linux-cachyos$' "CachyOS kernel still in package list"
 expect "$iso/pacman.conf" '^\[yurei\]$' "local repository configured"
 expect "$iso/profiledef.sh" 'iso_application="Yūrei' "ISO metadata rebranded"

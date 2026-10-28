@@ -1,6 +1,8 @@
 # Added to CachyOS's desktop ISO package list. yurei-* come from the local
 # repository that build.sh creates from pkg/.
 yurei-settings
-yurei-gaming
+# yurei-gaming is installed onto the target by the installer step, not into
+# the live session: it keeps the ISO small, and the live system has no GPU
+# drivers chosen for the machine yet.
 # used by yurei-calamares-patch on the live ISO
 python-yaml
