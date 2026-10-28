@@ -38,13 +38,15 @@ jobs:
             chown -R builder /src
             su builder -c "./build.sh"
           '
+          # the container's build user now owns the checkout; take it back
+          sudo chown -R "$(id -u):$(id -g)" .
           ls -la out/
 
       - name: Split into parts under 2 GB
         run: |
           cd out
           iso=$(ls yurei-*-x86_64.iso)
-          sudo split --bytes=1900M --numeric-suffixes=1 --suffix-length=2 "$iso" "$iso.part"
+          split --bytes=1900M --numeric-suffixes=1 --suffix-length=2 "$iso" "$iso.part"
           ls -la
           echo "ISO=$iso" >> "$GITHUB_ENV"
 
