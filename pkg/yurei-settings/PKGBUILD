@@ -14,6 +14,7 @@ license=(GPL-3.0-or-later)
 
 package_yurei-settings() {
     pkgdesc="Yūrei Linux branding, gaming tuning, Steam Game Mode session and the yurei CLI"
+    license=(GPL-3.0-or-later CC-BY-SA-4.0)  # code, wallpaper and icon (see ARTWORK.md)
     depends=(bash pciutils sudo)
     optdepends=(
         'chwd: automatic GPU driver setup (yurei drivers)'
@@ -54,6 +55,7 @@ package_yurei-gaming() {
 
 package_yurei-plymouth-theme() {
     pkgdesc="Yūrei boot animation for Plymouth (turn on with: yurei bootsplash on)"
+    license=(GPL-3.0-or-later CC-BY-SA-4.0)  # script, artwork (see ARTWORK.md)
     depends=(plymouth)
 
     local dir="$pkgdir/usr/share/plymouth/themes/yurei"
@@ -63,6 +65,7 @@ package_yurei-plymouth-theme() {
 
 package_yurei-sddm-theme() {
     pkgdesc="Yūrei login screen for SDDM (switch with: yurei login-screen yurei)"
+    license=(GPL-3.0-or-later CC-BY-SA-4.0)  # QML, artwork (see ARTWORK.md)
     depends=(sddm qt6-declarative qt6-svg)
 
     local dir="$pkgdir/usr/share/sddm/themes/yurei"

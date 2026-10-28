@@ -127,5 +127,13 @@ CachyOS profile and the CLI is tested with stubs. **The full ISO has not yet
 been built and booted.** That needs a CachyOS host or the ISO workflow. See
 [docs/ROADMAP.md](docs/ROADMAP.md).
 
+## Artwork and branding
+
+The mascot and artwork were made with ChatGPT and adapted for Yūrei. See
+[ARTWORK.md](ARTWORK.md) for where each piece comes from and its licence
+(CC BY-SA 4.0, to the extent rights exist). The Yūrei name, logo and mascot
+are covered by [TRADEMARKS.md](TRADEMARKS.md): share Yūrei freely, but forks
+that change it need their own name and logo.
+
 Yūrei is an independent project and isn't affiliated with or endorsed by
 CachyOS. Many thanks to the CachyOS team, whose work it builds on.
