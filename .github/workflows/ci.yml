@@ -13,6 +13,26 @@ jobs:
       - run: make lint
       - run: make test
 
+  themes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Plymouth, a virtual display and Qt 6
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y plymouth plymouth-x11 xvfb xdotool imagemagick \
+            python3-pil python3-pytest python3-pip libegl1 libgl1 libxkbcommon0 fonts-noto-core
+          pip install --break-system-packages PySide6-Essentials
+      - name: SDDM theme in Qt 6
+        run: python3 -m pytest -q tests/test_sddm_theme.py
+      - name: Plymouth theme in the real daemon
+        run: sudo python3 tests/plymouth_check.py --out theme-screenshots
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: theme-screenshots
+          path: theme-screenshots/*.png
+
   package:
     runs-on: ubuntu-latest
     container: archlinux:latest

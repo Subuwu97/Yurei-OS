@@ -23,6 +23,9 @@ running well.
 - Automatic NVIDIA/AMD/Intel driver setup with CachyOS's `chwd`.
 
 **Ready for everything else**
+- **Its own boot animation and login screen.** While the system starts, the mascot chases and
+  catches a spirit, then waves while booting finishes. The login screen is a moonlit shrine
+  with the mascot, the new wordmark, and real controls. See [docs/THEMES.md](docs/THEMES.md).
 - KDE Plasma desktop with Yūrei's wallpaper and boot menu, Firefox, Flatpak with Flathub, and
   the AUR through `paru`.
 - Updates to Yūrei's own packages come from a signed `[yurei]` pacman repository
@@ -50,6 +53,8 @@ yurei bundles           List app bundles
 yurei install BUNDLE... e.g. yurei install streaming emulation
 yurei drivers           Detect hardware and install the right GPU drivers
 yurei session MODE      Start in game (Steam Game Mode), desktop, or off (login screen)
+yurei login-screen X    yurei (the Yūrei login screen) or plasma (CachyOS's default)
+yurei bootsplash X      on or off: the animated boot screen (with backups and full rollback)
 ```
 
 ## How it's built
@@ -67,7 +72,9 @@ overlay/
   packages.add/.remove   changes to CachyOS's ISO package list
   airootfs/              files placed on the live ISO (branding, installer step)
   boot/splash.png        boot menu background
-branding/              logo and wallpaper sources; `node branding/render.js` regenerates the images
+branding/              design sources; `make assets` (build-assets.py) builds the boot animation,
+                       login artwork and boot menu from branding/source/
+themes/                the Plymouth boot animation and the SDDM login theme
 keys/                  public key of the [yurei] repository (see docs/REPOSITORY.md)
 build.sh               builds the packages, fetches upstream, applies the overlay, builds the ISO
 ```
@@ -110,7 +117,7 @@ bumping `UPSTREAM_REF`.
 
 ## Status
 
-Early development (0.2). The overlay is tested against the pinned
+Early development (0.3). The overlay is tested against the pinned
 CachyOS profile and the CLI is tested with stubs. **The full ISO has not yet
 been built and booted.** That needs a CachyOS host or the ISO workflow. See
 [docs/ROADMAP.md](docs/ROADMAP.md).

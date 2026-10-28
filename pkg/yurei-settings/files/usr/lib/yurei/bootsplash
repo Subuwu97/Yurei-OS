@@ -1,0 +1,284 @@
+#!/usr/bin/env bash
+# Turn the Yūrei Plymouth boot splash on or off.
+#
+#   bootsplash on      use the Yūrei theme, add Plymouth to the initramfs and
+#                      "splash" to the kernel command line, then regenerate
+#   bootsplash off     undo exactly what "on" changed (recorded in a state file)
+#   bootsplash status  show what is configured
+#
+# Handles mkinitcpio or dracut, and Limine (/etc/default/limine),
+# systemd-boot via sdboot-manage, GRUB and /etc/kernel/cmdline. Every file
+# is backed up as <file>.yurei-bak before its first change.
+#
+# Testing: YUREI_ROOT points at a fake system root; YUREI_DRY_RUN=1 logs the
+# commands that would run to $YUREI_ROOT/commands.log instead of running them.
+set -euo pipefail
+
+ROOT=${YUREI_ROOT:-}
+THEME=yurei
+STATE=$ROOT/var/lib/yurei/bootsplash.state
+PLYMOUTH_CONF=$ROOT/etc/plymouth/plymouthd.conf
+MKINITCPIO_CONF=$ROOT/etc/mkinitcpio.conf
+DRACUT_CONF=$ROOT/etc/dracut.conf.d/yurei-plymouth.conf
+CMDLINE_WORDS=(quiet splash)
+
+say() { printf '%s\n' "$*"; }
+warn() { printf 'bootsplash: %s\n' "$*" >&2; }
+die() { warn "$*"; exit 1; }
+
+run() {
+    if [[ ${YUREI_DRY_RUN:-} == 1 ]]; then
+        printf '%s\n' "$*" >> "$ROOT/commands.log"
+    else
+        "$@"
+    fi
+}
+
+have() {
+    [[ ${YUREI_DRY_RUN:-} == 1 ]] && { [[ -e $ROOT/usr/bin/$1 ]]; return; }
+    command -v "$1" >/dev/null 2>&1
+}
+
+backup() {
+    [[ -e $1 && ! -e $1.yurei-bak ]] && cp -p "$1" "$1.yurei-bak"
+    return 0
+}
+
+record() {
+    mkdir -p "$(dirname "$STATE")"
+    printf '%s\n' "$1" >> "$STATE"
+}
+
+recorded() {
+    [[ -f $STATE ]] && grep -qxF -- "$1" "$STATE"
+}
+
+# --- plymouth theme --------------------------------------------------------
+
+current_theme() {
+    [[ -f $PLYMOUTH_CONF ]] && sed -n 's/^[[:space:]]*Theme[[:space:]]*=[[:space:]]*//p' "$PLYMOUTH_CONF" | tail -n1
+    return 0
+}
+
+set_theme() {
+    local theme=$1
+    mkdir -p "$(dirname "$PLYMOUTH_CONF")"
+    if [[ ! -f $PLYMOUTH_CONF ]]; then
+        printf '[Daemon]\nTheme=%s\n' "$theme" > "$PLYMOUTH_CONF"
+    elif grep -q '^[[:space:]]*Theme[[:space:]]*=' "$PLYMOUTH_CONF"; then
+        sed -i "s/^[[:space:]]*Theme[[:space:]]*=.*/Theme=$theme/" "$PLYMOUTH_CONF"
+    elif grep -q '^\[Daemon\]' "$PLYMOUTH_CONF"; then
+        sed -i "/^\[Daemon\]/a Theme=$theme" "$PLYMOUTH_CONF"
+    else
+        printf '\n[Daemon]\nTheme=%s\n' "$theme" >> "$PLYMOUTH_CONF"
+    fi
+}
+
+# --- initramfs -------------------------------------------------------------
+
+hooks_have_plymouth() {
+    grep -Eq '^HOOKS=\(.*\<plymouth\>.*\)' "$MKINITCPIO_CONF"
+}
+
+add_plymouth_hook() {
+    local line new anchor
+    line=$(grep -E '^HOOKS=\(' "$MKINITCPIO_CONF" | tail -n1) || die "no HOOKS=() in mkinitcpio.conf"
+    # Plymouth must start after the graphics driver (kms) and before any
+    # disk-unlock hook (encrypt / sd-encrypt), so it can show the prompt.
+    for anchor in kms systemd udev; do
+        if [[ " ${line//[()]/ } " == *" $anchor "* ]]; then
+            new=$(sed -E "s/([( ])$anchor([ )])/\1$anchor plymouth\2/" <<< "$line")
+            break
+        fi
+    done
+    [[ -n ${new:-} ]] || die "can't place the plymouth hook in: $line"
+    backup "$MKINITCPIO_CONF"
+    # replace only the last HOOKS line, the one mkinitcpio uses
+    local n
+    n=$(grep -nE '^HOOKS=\(' "$MKINITCPIO_CONF" | tail -n1 | cut -d: -f1)
+    sed -i "${n}s/.*/$new/" "$MKINITCPIO_CONF"
+}
+
+remove_plymouth_hook() {
+    [[ -f $MKINITCPIO_CONF ]] || return 0
+    sed -i -E '/^HOOKS=\(/ s/ plymouth([ )])/\1/' "$MKINITCPIO_CONF"
+}
+
+initramfs_tool() {
+    if [[ -f $MKINITCPIO_CONF ]] && have mkinitcpio; then echo mkinitcpio
+    elif have dracut; then echo dracut
+    else echo none
+    fi
+}
+
+regenerate_initramfs() {
+    case $(initramfs_tool) in
+        mkinitcpio) run mkinitcpio -P ;;
+        dracut) run dracut --regenerate-all --force ;;
+        none) warn "no mkinitcpio or dracut found; regenerate your initramfs by hand" ;;
+    esac
+}
+
+# --- kernel command line ---------------------------------------------------
+
+# Bootloader configs we know how to edit: file|regex of the line(s) holding
+# the default kernel options|command that applies them
+cmdline_targets() {
+    printf '%s\n' \
+        "$ROOT/etc/default/limine|^KERNEL_CMDLINE\[default\]\+?=\"|limine-update" \
+        "$ROOT/etc/sdboot-manage.conf|^LINUX_OPTIONS=\"|sdboot-manage gen" \
+        "$ROOT/etc/default/grub|^GRUB_CMDLINE_LINUX_DEFAULT=\"|grub-mkconfig -o /boot/grub/grub.cfg" \
+        "$ROOT/etc/kernel/cmdline|^|"
+}
+
+has_word() {  # has_word FILE REGEX WORD: any matching line contains WORD?
+    grep -E "$2" "$1" | grep -Eq "(^|[\" ])$3([\" ]|$)"
+}
+
+add_word() {  # appends WORD inside the quotes of the last line matching REGEX
+    local file=$1 regex=$2 word=$3 n
+    n=$(grep -nE "$regex" "$file" | tail -n1 | cut -d: -f1)
+    [[ -n $n ]] || return 1
+    if [[ $regex == "^" ]]; then
+        sed -i "${n}s/[[:space:]]*\$/ $word/" "$file"
+    else
+        sed -i -E "${n}s/\"[[:space:]]*\$/ $word\"/; ${n}s/=\" /=\"/" "$file"
+    fi
+}
+
+remove_word() {
+    local file=$1 regex=$2 word=$3
+    [[ -f $file ]] || return 0
+    if [[ $regex == "^" ]]; then
+        sed -i -E "s/(^| )$word( |\$)/\1\2/; s/  +/ /g; s/^ //; s/ \$//" "$file"
+    else
+        sed -i -E "/$regex/ { s/([\" ])$word( |\")/\1\2/; s/\" /\"/; s/ \"/\"/; s/  +/ /g }" "$file"
+    fi
+}
+
+edit_cmdline() {
+    local entry file regex regen word found=0
+    while IFS= read -r entry; do
+        IFS='|' read -r file regex regen <<< "$entry"
+        if [[ ! -f $file ]] || ! grep -qE "$regex" "$file"; then
+            continue
+        fi
+        found=1
+        local changed=0
+        for word in "${CMDLINE_WORDS[@]}"; do
+            if ! has_word "$file" "$regex" "$word"; then
+                backup "$file"
+                add_word "$file" "$regex" "$word"
+                record "cmdline=${file#"$ROOT"}|$word"
+                changed=1
+            fi
+        done
+        if (( changed )) && [[ -n $regen ]]; then
+            read -ra cmd <<< "$regen"
+            if have "${cmd[0]}"; then run "${cmd[@]}"; else warn "run '$regen' to apply the new kernel options"; fi
+        fi
+    done < <(cmdline_targets)
+    if (( ! found )); then
+        warn "couldn't find your bootloader's config; add 'quiet splash' to the kernel command line by hand"
+    fi
+}
+
+restore_cmdline() {
+    local line file word entry tfile regex regen
+    [[ -f $STATE ]] || return 0
+    while IFS= read -r line; do
+        [[ $line == cmdline=* ]] || continue
+        IFS='|' read -r file word <<< "${line#cmdline=}"
+        while IFS= read -r entry; do
+            IFS='|' read -r tfile regex regen <<< "$entry"
+            if [[ $tfile == "$ROOT$file" ]]; then
+                remove_word "$tfile" "$regex" "$word"
+                if [[ -n $regen ]]; then
+                    read -ra cmd <<< "$regen"
+                    have "${cmd[0]}" && run "${cmd[@]}"
+                fi
+            fi
+        done < <(cmdline_targets)
+    done < "$STATE"
+}
+
+# --- commands --------------------------------------------------------------
+
+cmd_on() {
+    [[ -d $ROOT/usr/share/plymouth/themes/$THEME ]] || die "the Yūrei Plymouth theme isn't installed (pacman -S yurei-plymouth-theme)"
+    if recorded "enabled"; then
+        say "Boot splash is already on."
+        return
+    fi
+    mkdir -p "$(dirname "$STATE")"
+    : > "$STATE"
+
+    record "previous_theme=$(current_theme)"
+    backup "$PLYMOUTH_CONF"
+    set_theme "$THEME"
+
+    case $(initramfs_tool) in
+        mkinitcpio)
+            if ! hooks_have_plymouth; then
+                add_plymouth_hook
+                record "mkinitcpio_hook"
+            fi
+            ;;
+        dracut)
+            mkdir -p "$(dirname "$DRACUT_CONF")"
+            printf 'add_dracutmodules+=" plymouth "\n' > "$DRACUT_CONF"
+            record "dracut_conf"
+            ;;
+    esac
+
+    edit_cmdline
+    regenerate_initramfs
+    record "enabled"
+    say "Boot splash on. You'll see it from the next boot (undo with: yurei bootsplash off)."
+}
+
+cmd_off() {
+    if [[ ! -f $STATE ]]; then
+        say "Boot splash wasn't turned on by Yūrei; nothing to undo."
+        return
+    fi
+    local previous
+    previous=$(sed -n 's/^previous_theme=//p' "$STATE")
+    if [[ -n $previous ]]; then
+        set_theme "$previous"
+    elif [[ -f $PLYMOUTH_CONF ]]; then
+        sed -i '/^[[:space:]]*Theme[[:space:]]*=[[:space:]]*yurei[[:space:]]*$/d' "$PLYMOUTH_CONF"
+    fi
+    recorded "mkinitcpio_hook" && remove_plymouth_hook
+    recorded "dracut_conf" && rm -f "$DRACUT_CONF"
+    restore_cmdline
+    regenerate_initramfs
+    rm -f "$STATE"
+    say "Boot splash off; previous settings restored."
+}
+
+cmd_status() {
+    local theme hook="no" splash="no" entry file regex regen
+    theme=$(current_theme)
+    case $(initramfs_tool) in
+        mkinitcpio) hooks_have_plymouth && hook="yes (mkinitcpio)" ;;
+        dracut) [[ -f $DRACUT_CONF ]] && hook="yes (dracut)" || hook="dracut default" ;;
+    esac
+    while IFS= read -r entry; do
+        IFS='|' read -r file regex regen <<< "$entry"
+        [[ -f $file ]] && grep -qE "$regex" "$file" && has_word "$file" "$regex" splash && splash="yes (${file#"$ROOT"})"
+    done < <(cmdline_targets)
+    say "Plymouth theme:    ${theme:-default}"
+    say "In initramfs:      $hook"
+    say "'splash' on boot:  $splash"
+    recorded "enabled" && say "Managed by Yūrei:  yes (undo with: yurei bootsplash off)"
+    return 0
+}
+
+[[ $EUID -eq 0 || -n $ROOT ]] || die "run as root"
+case ${1:-status} in
+    on) cmd_on ;;
+    off) cmd_off ;;
+    status) cmd_status ;;
+    *) die "usage: bootsplash on|off|status" ;;
+esac

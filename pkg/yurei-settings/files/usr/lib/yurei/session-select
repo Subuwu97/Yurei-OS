@@ -30,9 +30,13 @@ uid=$(id -u "$user" 2>/dev/null) || die "no such user: $user"
 (( uid >= 1000 )) || die "refusing to auto-login system user $user"
 
 for dir in "${CONF_DIRS[@]}"; do
-    parent=${dir%.d}
-    # only configure login managers that are installed
-    [[ -d $dir || -e $parent.conf || -e /usr/lib/${parent##*/}.conf.d ]] || continue
+    parent=${dir%.d}          # /etc/sddm.conf
+    manager=${parent##*/}     # sddm.conf
+    manager=${manager%.conf}  # sddm
+    # only configure login managers that are installed; SDDM keeps its
+    # defaults in /usr/lib/sddm/sddm.conf.d and may have nothing in /etc
+    [[ -d $dir || -e $parent || -d /usr/lib/$manager/$manager.conf.d ||
+       -x /usr/bin/$manager ]] || continue
     if [[ -z $session ]]; then
         rm -f "$dir/$CONF_NAME"
         continue

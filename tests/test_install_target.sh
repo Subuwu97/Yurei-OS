@@ -19,6 +19,12 @@ exit 0
 STUB
 chmod +x "$tmp/bin/arch-chroot"
 touch "$tmp/pkgs/yurei-settings-0.1.0-1-any.pkg.tar.zst" "$tmp/pkgs/yurei-gaming-0.1.0-1-any.pkg.tar.zst"
+# helpers the packages would install
+mkdir -p "$tmp/root/usr/lib/yurei"
+for helper in login-screen bootsplash; do
+    printf '#!/bin/sh\n' > "$tmp/root/usr/lib/yurei/$helper"
+    chmod +x "$tmp/root/usr/lib/yurei/$helper"
+done
 printf 'root:x:0:0::/root:/bin/bash\nana:x:1000:1000::/home/ana:/bin/bash\nnobody:x:65534:65534::/:/usr/bin/nologin\n' > "$tmp/root/etc/passwd"
 printf '[options]\n\n[cachyos]\nInclude = /etc/pacman.d/cachyos-mirrorlist\n' > "$tmp/root/etc/pacman.conf"
 
@@ -35,6 +41,8 @@ check() {
 }
 
 PATH="$tmp/bin:$PATH" YUREI_PKG_DIR="$tmp/pkgs" YUREI_SIGNING_KEY_FILE="$tmp/nokey" "$script" "$tmp/root"
+check "login screen switched to Yūrei" 'grep -qx "/usr/lib/yurei/login-screen yurei" "$tmp/chroot-calls"'
+check "boot animation enabled" 'grep -qx "/usr/lib/yurei/bootsplash on" "$tmp/chroot-calls"'
 check "packages copied into target" '[[ -f $tmp/root/var/cache/pacman/pkg/yurei-gaming-0.1.0-1-any.pkg.tar.zst ]]'
 check "packages installed in one transaction" 'grep -q "^pacman -U --noconfirm --needed .*yurei-gaming.*yurei-settings\|^pacman -U --noconfirm --needed .*yurei-settings.*yurei-gaming" "$tmp/chroot-calls"'
 check "regular users get GameMode" 'grep -qx "usermod -aG gamemode ana" "$tmp/chroot-calls"'

@@ -2,7 +2,7 @@
 # yurei - one command for keeping a Yūrei system fast, updated and game-ready.
 set -euo pipefail
 
-VERSION="0.2.0"
+VERSION="0.3.0"
 BUNDLE_DIR="${YUREI_BUNDLE_DIR:-/usr/share/yurei/bundles}"
 MIN_MAP_COUNT=1048576
 
@@ -35,6 +35,8 @@ ${bold}yurei${reset} $VERSION - manage your Yūrei system
   yurei drivers           Detect hardware and install the right GPU drivers (chwd)
   yurei session MODE      What starts when the PC boots: game (Steam Game Mode),
                           desktop, or off (show the login screen)
+  yurei login-screen X    yurei (the Yūrei login screen) or plasma (the default)
+  yurei bootsplash X      on or off: the animated Yūrei boot screen
   yurei version           Print the version
 EOF
 }
@@ -285,6 +287,23 @@ cmd_session() {
     esac
 }
 
+# ------------------------------------------------------------------ themes
+
+cmd_login_screen() {
+    case ${1:-status} in
+        yurei|plasma|default) as_root /usr/lib/yurei/login-screen "$1" ;;
+        status) /usr/lib/yurei/login-screen status 2>/dev/null || as_root /usr/lib/yurei/login-screen status ;;
+        *) die "use: yurei login-screen yurei|plasma" ;;
+    esac
+}
+
+cmd_bootsplash() {
+    case ${1:-status} in
+        on|off|status) as_root /usr/lib/yurei/bootsplash "${1:-status}" ;;
+        *) die "use: yurei bootsplash on|off" ;;
+    esac
+}
+
 # ------------------------------------------------------------------ main
 
 main() {
@@ -298,6 +317,8 @@ main() {
         install) cmd_install "$@" ;;
         drivers|gpu) cmd_drivers ;;
         session) cmd_session "$@" ;;
+        login-screen) cmd_login_screen "$@" ;;
+        bootsplash|boot-splash) cmd_bootsplash "$@" ;;
         version|--version) say "$VERSION" ;;
         help|-h|--help) usage ;;
         *) usage >&2; exit 2 ;;

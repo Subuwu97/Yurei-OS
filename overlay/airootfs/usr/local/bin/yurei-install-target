@@ -21,6 +21,18 @@ for pkg in "${pkgs[@]}"; do
 done
 arch-chroot "$root" pacman -U --noconfirm --needed "${targets[@]}"
 
+# Yūrei's login screen and boot animation. Neither is essential, so a
+# failure is reported and the installation carries on; both can be retried
+# or undone later with "yurei login-screen" and "yurei bootsplash".
+if [[ -x $root/usr/lib/yurei/login-screen ]]; then
+    arch-chroot "$root" /usr/lib/yurei/login-screen yurei ||
+        echo "yurei-install-target: couldn't switch to the Yūrei login screen" >&2
+fi
+if [[ -x $root/usr/lib/yurei/bootsplash ]]; then
+    arch-chroot "$root" /usr/lib/yurei/bootsplash on ||
+        echo "yurei-install-target: couldn't enable the boot animation" >&2
+fi
+
 # GameMode needs its group to raise game priority
 if arch-chroot "$root" getent group gamemode >/dev/null; then
     while IFS=: read -r name _ uid _; do

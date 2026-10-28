@@ -1,0 +1,174 @@
+# Yūrei boot splash for Plymouth's script plugin.
+#
+# GENERATED: yurei.script is produced from yurei.script.in by
+# branding/build-assets.py - edit the .in file.
+#
+# She spots a spirit, chases it, leaps, catches it and waves. The intro plays
+# once; the final wave loops for as long as booting takes. Shutdown and
+# reboot show only the loop. Password and question prompts appear below the
+# animation; Esc still switches to the text log, as with every Plymouth theme.
+
+frame_width = @FRAME_WIDTH@;
+frame_height = @FRAME_HEIGHT@;
+ticks = @TICKS@;
+loop_start = @LOOP_START@;
+@TIMELINE@
+
+# exactly the frames' background colour (6, 12, 31), so their edges vanish
+Window.SetBackgroundTopColor(6 / 255, 12 / 255, 31 / 255);
+Window.SetBackgroundBottomColor(6 / 255, 12 / 255, 31 / 255);
+
+screen_width = Window.GetWidth();
+screen_height = Window.GetHeight();
+
+# fit the animation on any screen; leave room for prompts below it
+scale = Math.Min(screen_width * 0.92 / frame_width, screen_height * 0.62 / frame_height);
+if (scale > 2) scale = 2;
+if (scale > 0.95 && scale < 1.05) scale = 1;
+shown_width = Math.Int(frame_width * scale);
+shown_height = Math.Int(frame_height * scale);
+anim_x = Window.GetX() + Math.Int((screen_width - shown_width) / 2);
+anim_y = Window.GetY() + Math.Int((screen_height - shown_height) * 0.4);
+
+anim = Sprite();
+anim.SetPosition(anim_x, anim_y, 0);
+
+tick = 0;
+shown_frame = -1;
+mode = Plymouth.GetMode();
+if (mode == "shutdown" || mode == "reboot") tick = loop_start;
+
+fun frame_name(index) {
+    if (index < 10) return "frame-00" + index + ".png";
+    if (index < 100) return "frame-0" + index + ".png";
+    return "frame-" + index + ".png";
+}
+
+fun show_frame(index) {
+    if (index == global.shown_frame) return;
+    # load lazily: keeps memory low, and decoding one PNG per change is cheap
+    image = Image(frame_name(index));
+    if (global.scale != 1) image = image.Scale(global.shown_width, global.shown_height);
+    global.anim.SetImage(image);
+    global.shown_frame = index;
+}
+
+# Plymouth refreshes at 50 Hz; the animation was drawn at 24 fps,
+# so advance one frame every other refresh (25 fps).
+refresh_count = 0;
+fun refresh_callback() {
+    if (global.message_ttl > 0) {
+        global.message_ttl--;
+        if (global.message_ttl == 0) global.message.SetOpacity(0);
+    }
+    global.refresh_count++;
+    if (global.refresh_count % 2) return;
+    show_frame(global.timeline[global.tick]);
+    global.tick++;
+    if (global.tick >= global.ticks) global.tick = global.loop_start;
+}
+Plymouth.SetRefreshFunction(refresh_callback);
+show_frame(timeline[tick]);
+
+# --- prompts (disk unlock, questions) --------------------------------------
+
+prompt_y = anim_y + shown_height + 24;
+if (prompt_y > Window.GetY() + screen_height - 120) prompt_y = Window.GetY() + screen_height - 120;
+center_x = Window.GetX() + screen_width / 2;
+
+entry_image = Image("entry.png");
+entry = Sprite(entry_image);
+entry.SetPosition(center_x - entry_image.GetWidth() / 2, prompt_y + 30, 10);
+entry.SetOpacity(0);
+
+lock_image = Image("lock.png");
+lock = Sprite(lock_image);
+lock.SetPosition(center_x - entry_image.GetWidth() / 2 + 22,
+                 prompt_y + 30 + (entry_image.GetHeight() - lock_image.GetHeight()) / 2, 11);
+lock.SetOpacity(0);
+
+bullet_image = Image("bullet.png");
+bullets = [];
+max_bullets = 18;
+for (i = 0; i < max_bullets; i++) {
+    bullets[i] = Sprite(bullet_image);
+    bullets[i].SetPosition(center_x - entry_image.GetWidth() / 2 + 64 + i * 19,
+                           prompt_y + 30 + (entry_image.GetHeight() - bullet_image.GetHeight()) / 2, 11);
+    bullets[i].SetOpacity(0);
+}
+
+label = Sprite();
+label.SetPosition(0, prompt_y, 11);
+answer = Sprite();
+answer.SetPosition(0, prompt_y + 46, 11);
+
+fun set_label(text) {
+    image = Image.Text(text, 0.93, 0.91, 1, 1, "Sans 13");
+    global.label.SetImage(image);
+    global.label.SetX(global.center_x - image.GetWidth() / 2);
+}
+
+fun hide_prompt() {
+    global.entry.SetOpacity(0);
+    global.lock.SetOpacity(0);
+    global.label.SetOpacity(0);
+    global.answer.SetOpacity(0);
+    for (i = 0; i < global.max_bullets; i++) global.bullets[i].SetOpacity(0);
+}
+
+fun display_normal_callback() {
+    hide_prompt();
+}
+
+fun display_password_callback(prompt, count) {
+    if (prompt == "") prompt = "Enter the passphrase to unlock your disk";
+    set_label(prompt);
+    global.label.SetOpacity(1);
+    global.entry.SetOpacity(1);
+    global.lock.SetOpacity(1);
+    global.answer.SetOpacity(0);
+    for (i = 0; i < global.max_bullets; i++) {
+        if (i < count) global.bullets[i].SetOpacity(1);
+        else global.bullets[i].SetOpacity(0);
+    }
+}
+
+fun display_question_callback(prompt, text) {
+    set_label(prompt);
+    global.label.SetOpacity(1);
+    global.entry.SetOpacity(1);
+    global.lock.SetOpacity(0);
+    for (i = 0; i < global.max_bullets; i++) global.bullets[i].SetOpacity(0);
+    image = Image.Text(text, 0.93, 0.91, 1, 1, "Sans 13");
+    global.answer.SetImage(image);
+    global.answer.SetX(global.center_x - image.GetWidth() / 2);
+    global.answer.SetOpacity(1);
+}
+
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+Plymouth.SetDisplayQuestionFunction(display_question_callback);
+
+# --- status messages ---------------------------------------------------------
+
+message = Sprite();
+message.SetPosition(0, Window.GetY() + screen_height - 48, 10);
+# Plymouth 24 never calls the script's hide-message hook, so a message also
+# disappears 8 seconds after its last update (systemd repeats live ones).
+message_ttl = 0;
+
+fun display_message_callback(text) {
+    image = Image.Text(text, 0.72, 0.69, 0.86, 1, "Sans 11");
+    global.message.SetImage(image);
+    global.message.SetX(global.center_x - image.GetWidth() / 2);
+    global.message.SetOpacity(1);
+    global.message_ttl = 8 * 50;
+}
+
+fun hide_message_callback(text) {
+    global.message.SetOpacity(0);
+    global.message_ttl = 0;
+}
+
+Plymouth.SetDisplayMessageFunction(display_message_callback);
+Plymouth.SetHideMessageFunction(hide_message_callback);

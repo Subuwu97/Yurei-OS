@@ -1,10 +1,11 @@
 # Maintainer: Yūrei Linux project
-# Built from the files/ directory next to this PKGBUILD:
+# Built from the files/ directory next to this PKGBUILD and the themes/
+# directory at the top of the repository:
 #   cd pkg/yurei-settings && makepkg
 
 pkgbase=yurei
-pkgname=(yurei-settings yurei-gaming)
-pkgver=0.2.0
+pkgname=(yurei-settings yurei-gaming yurei-plymouth-theme yurei-sddm-theme)
+pkgver=0.3.0
 pkgrel=1
 pkgdesc="Yūrei Linux system settings and tools"
 arch=(any)
@@ -29,7 +30,7 @@ package_yurei-settings() {
 
     cp -a "$startdir/files/." "$pkgdir/"
     # git only records the executable bit, so set modes explicitly
-    chmod 0755 "$pkgdir"/usr/bin/* "$pkgdir"/usr/lib/yurei/session-select
+    chmod 0755 "$pkgdir"/usr/bin/* "$pkgdir"/usr/lib/yurei/{session-select,login-screen,bootsplash}
     chmod 0750 "$pkgdir"/etc/sudoers.d
     chmod 0440 "$pkgdir"/etc/sudoers.d/yurei-session
 }
@@ -46,4 +47,23 @@ package_yurei-gaming() {
         mangohud lib32-mangohud
         vulkan-tools
     )
+}
+
+package_yurei-plymouth-theme() {
+    pkgdesc="Yūrei boot animation for Plymouth (turn on with: yurei bootsplash on)"
+    depends=(plymouth)
+
+    local dir="$pkgdir/usr/share/plymouth/themes/yurei"
+    install -d "$dir"
+    install -m644 "$startdir"/../../themes/plymouth/yurei/{yurei.plymouth,yurei.script,*.png} "$dir/"
+}
+
+package_yurei-sddm-theme() {
+    pkgdesc="Yūrei login screen for SDDM (switch with: yurei login-screen yurei)"
+    depends=(sddm qt6-declarative qt6-svg)
+
+    local dir="$pkgdir/usr/share/sddm/themes/yurei"
+    install -d "$dir"
+    cp -r "$startdir"/../../themes/sddm/yurei/. "$dir/"
+    find "$dir" -type d -exec chmod 755 {} + -o -type f -exec chmod 644 {} +
 }
