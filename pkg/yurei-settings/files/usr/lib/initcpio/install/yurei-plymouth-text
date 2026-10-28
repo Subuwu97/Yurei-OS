@@ -1,0 +1,33 @@
+#!/bin/bash
+# mkinitcpio hook: text rendering for Plymouth (disk-unlock prompt label,
+# boot messages). Placed right after the "plymouth" hook by `yurei bootsplash on`.
+#
+# Plymouth 24 stops taking keyboard input once a theme asks it to draw text
+# while no text plugin is available, which would make a disk passphrase
+# impossible to type. This adds the plugin and a font, laid out the way
+# upstream's plymouth-populate-initrd does for dracut.
+
+build() {
+    local dir plugin font
+    dir=$(plymouth --get-splash-plugin-path 2>/dev/null)
+    [[ -n $dir ]] || dir=/usr/lib/plymouth
+    dir=${dir%/}
+    for plugin in label-freetype.so label-pango.so; do
+        if [[ -f $dir/$plugin ]]; then
+            add_binary "$dir/$plugin"
+            break
+        fi
+    done
+    # label-freetype reads its font from this fixed path
+    font=$(fc-match -f '%{file}' 'sans-serif' 2>/dev/null)
+    if [[ -f $font ]]; then
+        add_file "$font" /usr/share/fonts/Plymouth.ttf
+    fi
+}
+
+help() {
+    cat <<HELP
+Adds Plymouth's text plugin and a font to the initramfs, so the Yūrei boot
+theme can show the disk-unlock prompt and boot messages.
+HELP
+}

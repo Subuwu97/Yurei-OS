@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# Called by the installer with the mount point of the freshly installed
+# system. Installs the Yūrei packages shipped on the ISO into it.
+set -euo pipefail
+
+root=${1:?usage: yurei-install-target ROOT}
+pkg_src=${YUREI_PKG_DIR:-/opt/yurei/packages}
+signing_key=${YUREI_SIGNING_KEY_FILE:-/opt/yurei/yurei.asc}
+repo_url=https://github.com/subuwu97/Y-rei-Linux/releases/download/repo
+[[ -d $root/etc ]] || { echo "yurei-install-target: $root is not a system root" >&2; exit 1; }
+
+shopt -s nullglob
+pkgs=("$pkg_src"/*.pkg.tar.zst)
+(( ${#pkgs[@]} )) || { echo "yurei-install-target: no packages in $pkg_src" >&2; exit 1; }
+
+install -d "$root/var/cache/pacman/pkg"
+cp "${pkgs[@]}" "$root/var/cache/pacman/pkg/"
+targets=()
+for pkg in "${pkgs[@]}"; do
+    targets+=("/var/cache/pacman/pkg/${pkg##*/}")
+done
+arch-chroot "$root" pacman -U --noconfirm --needed "${targets[@]}"
+
+# Yūrei's login screen and boot animation. Neither is essential, so a
+# failure is reported and the installation carries on; both can be retried
+# or undone later with "yurei login-screen" and "yurei bootsplash".
+if [[ -x $root/usr/lib/yurei/login-screen ]]; then
+    arch-chroot "$root" /usr/lib/yurei/login-screen yurei ||
+        echo "yurei-install-target: couldn't switch to the Yūrei login screen" >&2
+fi
+if [[ -x $root/usr/lib/yurei/bootsplash ]]; then
+    arch-chroot "$root" /usr/lib/yurei/bootsplash on ||
+        echo "yurei-install-target: couldn't enable the boot animation" >&2
+fi
+
+# GameMode needs its group to raise game priority
+if arch-chroot "$root" getent group gamemode >/dev/null; then
+    while IFS=: read -r name _ uid _; do
+        if (( uid >= 1000 && uid < 60000 )); then
+            arch-chroot "$root" usermod -aG gamemode "$name"
+        fi
+    done < "$root/etc/passwd"
+fi
+
+# Subscribe to the signed [yurei] repository for future updates
+if [[ -f $signing_key ]] && ! grep -q '^\[yurei\]' "$root/etc/pacman.conf"; then
+    fingerprint=$(gpg --batch --with-colons --show-keys "$signing_key" | awk -F: '/^fpr/ {print $10; exit}')
+    [[ -n $fingerprint ]] || { echo "yurei-install-target: unreadable signing key" >&2; exit 1; }
+    cp "$signing_key" "$root/tmp/yurei.asc"
+    arch-chroot "$root" pacman-key --add /tmp/yurei.asc
+    arch-chroot "$root" pacman-key --lsign-key "$fingerprint"
+    rm -f "$root/tmp/yurei.asc"
+    printf '\n[yurei]\nSigLevel = Required DatabaseRequired\nServer = %s\n' "$repo_url" >> "$root/etc/pacman.conf"
+fi

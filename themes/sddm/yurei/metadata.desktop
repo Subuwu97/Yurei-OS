@@ -1,0 +1,14 @@
+[SddmGreeterTheme]
+Name=Yūrei
+Description=Moonlit shrine login screen with the Yūrei mascot
+Author=Yūrei Linux
+License=GPL-3.0-or-later AND CC-BY-SA-4.0
+Type=sddm-theme
+Version=0.3.0
+Website=https://github.com/subuwu97/Y-rei-Linux
+Screenshot=preview.jpg
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=yurei
+Theme-API=2.0
+QtVersion=6

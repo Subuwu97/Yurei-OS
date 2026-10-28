@@ -1,0 +1,7 @@
+/work/
+/out/
+pkg/*/src/
+pkg/*/pkg/
+*.pkg.tar.zst
+__pycache__/
+.pytest_cache/

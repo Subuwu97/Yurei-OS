@@ -1,0 +1,75 @@
+# Maintainer: Yūrei Linux project
+# Built from the files/ directory next to this PKGBUILD and the themes/
+# directory at the top of the repository:
+#   cd pkg/yurei-settings && makepkg
+
+pkgbase=yurei
+pkgname=(yurei-settings yurei-gaming yurei-plymouth-theme yurei-sddm-theme)
+pkgver=0.3.0
+pkgrel=1
+pkgdesc="Yūrei Linux system settings and tools"
+arch=(any)
+url="https://github.com/subuwu97/Y-rei-Linux"
+license=(GPL-3.0-or-later)
+
+package_yurei-settings() {
+    pkgdesc="Yūrei Linux branding, gaming tuning, Steam Game Mode session and the yurei CLI"
+    license=(GPL-3.0-or-later CC-BY-SA-4.0)  # code, wallpaper and icon (see ARTWORK.md)
+    depends=(bash pciutils sudo)
+    optdepends=(
+        'chwd: automatic GPU driver setup (yurei drivers)'
+        'flatpak: Flatpak app bundles'
+        'gamescope: Steam Game Mode session'
+        'paru: AUR support in yurei install/update'
+        'power-profiles-daemon: power profile in yurei status'
+        'steam: Steam Game Mode session'
+        'vulkan-tools: Vulkan check in yurei doctor'
+    )
+    # both ship /usr/bin/steamos-session-select
+    conflicts=(gamescope-session-steam gamescope-session-steam-git)
+    install=yurei-settings.install
+
+    cp -a "$startdir/files/." "$pkgdir/"
+    # git only records the executable bit, so set modes explicitly
+    chmod 0755 "$pkgdir"/usr/bin/* "$pkgdir"/usr/lib/yurei/{session-select,login-screen,bootsplash}
+    chmod 0750 "$pkgdir"/etc/sudoers.d
+    chmod 0440 "$pkgdir"/etc/sudoers.d/yurei-session
+}
+
+package_yurei-gaming() {
+    pkgdesc="Yūrei's default gaming stack: Steam, Proton, Wine, Lutris, Heroic, GameMode, MangoHud, gamescope"
+    depends=(
+        yurei-settings
+        cachyos-gaming-meta
+        cachyos-gaming-applications
+        flatpak
+        gamemode lib32-gamemode
+        gamescope
+        mangohud lib32-mangohud
+        vulkan-tools
+        # in the default dock
+        discover
+        discord
+    )
+}
+
+package_yurei-plymouth-theme() {
+    pkgdesc="Yūrei boot animation for Plymouth (turn on with: yurei bootsplash on)"
+    license=(GPL-3.0-or-later CC-BY-SA-4.0)  # script, artwork (see ARTWORK.md)
+    depends=(plymouth)
+
+    local dir="$pkgdir/usr/share/plymouth/themes/yurei"
+    install -d "$dir"
+    install -m644 "$startdir"/../../themes/plymouth/yurei/{yurei.plymouth,yurei.script,*.png} "$dir/"
+}
+
+package_yurei-sddm-theme() {
+    pkgdesc="Yūrei login screen for SDDM (switch with: yurei login-screen yurei)"
+    license=(GPL-3.0-or-later CC-BY-SA-4.0)  # QML, artwork (see ARTWORK.md)
+    depends=(sddm qt6-declarative qt6-svg)
+
+    local dir="$pkgdir/usr/share/sddm/themes/yurei"
+    install -d "$dir"
+    cp -r "$startdir"/../../themes/sddm/yurei/. "$dir/"
+    find "$dir" -type d -exec chmod 755 {} + -o -type f -exec chmod 644 {} +
+}

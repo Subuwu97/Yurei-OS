@@ -1,0 +1,15 @@
+# description: Programming - compilers, Git, Docker, Podman, VS Code (OSS), Neovim
+base-devel
+git
+github-cli
+docker
+docker-compose
+docker-buildx
+podman
+code
+neovim
+python
+nodejs
+npm
+rustup
+go

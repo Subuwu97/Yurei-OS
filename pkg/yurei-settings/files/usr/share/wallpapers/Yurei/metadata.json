@@ -1,0 +1,12 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Yūrei Linux"
+            }
+        ],
+        "Id": "Yurei",
+        "License": "CC-BY-SA-4.0",
+        "Name": "Yūrei"
+    }
+}

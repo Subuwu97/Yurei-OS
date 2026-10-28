@@ -1,0 +1,11 @@
+# description: RetroArch plus standalone emulators for PlayStation, Nintendo and more
+retroarch
+retroarch-assets-xmb
+libretro-core-info
+flatpak:org.DolphinEmu.dolphin-emu
+flatpak:net.pcsx2.PCSX2
+flatpak:org.duckstation.DuckStation
+flatpak:net.rpcs3.RPCS3
+flatpak:org.ppsspp.PPSSPP
+flatpak:info.cemu.Cemu
+flatpak:org.azahar_emu.Azahar

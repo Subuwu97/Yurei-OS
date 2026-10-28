@@ -1,0 +1,5 @@
+# description: Record and stream - OBS with Vulkan/OpenGL game capture, Discord
+obs-studio
+obs-vkcapture
+lib32-obs-vkcapture
+discord

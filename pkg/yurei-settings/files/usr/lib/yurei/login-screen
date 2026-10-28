@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+# Choose the login screen.
+#
+#   login-screen yurei   SDDM with the Yūrei theme
+#   login-screen plasma  back to the login manager that was there before
+#                        (CachyOS's plasma-login-manager by default)
+#   login-screen status
+#
+# Switching takes effect at the next boot. The previous display manager is
+# remembered in /var/lib/yurei/login-screen.previous.
+#
+# Testing: YUREI_ROOT points at a fake system root; YUREI_DRY_RUN=1 logs the
+# commands that would run to $YUREI_ROOT/commands.log instead of running them.
+set -euo pipefail
+
+ROOT=${YUREI_ROOT:-}
+ALIAS=$ROOT/etc/systemd/system/display-manager.service
+PREVIOUS=$ROOT/var/lib/yurei/login-screen.previous
+THEME_CONF=$ROOT/etc/sddm.conf.d/10-yurei-theme.conf
+SESSION_CONF=zz-yurei-session.conf
+
+say() { printf '%s\n' "$*"; }
+die() { printf 'login-screen: %s\n' "$*" >&2; exit 1; }
+
+run() {
+    if [[ ${YUREI_DRY_RUN:-} == 1 ]]; then
+        printf '%s\n' "$*" >> "$ROOT/commands.log"
+    else
+        "$@"
+    fi
+}
+
+current_dm() {
+    [[ -L $ALIAS ]] && basename "$(readlink "$ALIAS")"
+    return 0
+}
+
+cmd_yurei() {
+    [[ -x $ROOT/usr/bin/sddm ]] || die "SDDM isn't installed (pacman -S yurei-sddm-theme)"
+    [[ -d $ROOT/usr/share/sddm/themes/yurei ]] || die "the Yūrei SDDM theme isn't installed (pacman -S yurei-sddm-theme)"
+    local current
+    current=$(current_dm)
+    if [[ -n $current && $current != sddm.service && ! -f $PREVIOUS ]]; then
+        mkdir -p "$(dirname "$PREVIOUS")"
+        printf '%s\n' "$current" > "$PREVIOUS"
+    fi
+    mkdir -p "$(dirname "$THEME_CONF")"
+    printf '# Set by "yurei login-screen"\n[Theme]\nCurrent=yurei\n' > "$THEME_CONF"
+    # keep "yurei session game/desktop" working after the switch
+    if [[ -f $ROOT/etc/plasmalogin.conf.d/$SESSION_CONF ]]; then
+        cp "$ROOT/etc/plasmalogin.conf.d/$SESSION_CONF" "$ROOT/etc/sddm.conf.d/$SESSION_CONF"
+    fi
+    [[ $current == sddm.service ]] || run systemctl enable --force sddm.service
+    say "Login screen: Yūrei (SDDM). It appears from the next boot."
+    say "To go back: yurei login-screen plasma"
+}
+
+cmd_plasma() {
+    local target
+    if [[ -f $PREVIOUS ]]; then
+        target=$(< "$PREVIOUS")
+    elif [[ -e $ROOT/usr/lib/systemd/system/plasmalogin.service ]]; then
+        target=plasmalogin.service
+    else
+        die "don't know which login manager to go back to"
+    fi
+    if [[ -f $ROOT/etc/sddm.conf.d/$SESSION_CONF ]]; then
+        mkdir -p "$ROOT/etc/plasmalogin.conf.d"
+        cp "$ROOT/etc/sddm.conf.d/$SESSION_CONF" "$ROOT/etc/plasmalogin.conf.d/$SESSION_CONF"
+    fi
+    rm -f "$THEME_CONF" "$PREVIOUS"
+    run systemctl enable --force "$target"
+    say "Login screen: ${target%.service}. It appears from the next boot."
+}
+
+cmd_status() {
+    local dm theme=""
+    dm=$(current_dm)
+    [[ -f $THEME_CONF ]] && theme=$(sed -n 's/^Current=//p' "$THEME_CONF")
+    say "Display manager: ${dm:-unknown}"
+    [[ $dm == sddm.service ]] && say "SDDM theme:      ${theme:-default}"
+    return 0
+}
+
+[[ $EUID -eq 0 || -n $ROOT ]] || die "run as root"
+case ${1:-status} in
+    yurei) cmd_yurei ;;
+    plasma|default) cmd_plasma ;;
+    status) cmd_status ;;
+    *) die "usage: login-screen yurei|plasma|status" ;;
+esac

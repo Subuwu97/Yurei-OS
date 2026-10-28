@@ -1,0 +1,8 @@
+# description: Steam, Lutris, Heroic, Proton/Wine, MangoHud, GameMode (installed by default)
+cachyos-gaming-meta
+cachyos-gaming-applications
+gamemode
+lib32-gamemode
+gamescope
+mangohud
+lib32-mangohud

@@ -1,0 +1,3 @@
+# Let desktop users switch between Steam Game Mode and the desktop
+# (used by Steam's "Switch to Desktop" and the "Return to Game Mode" icon).
+%wheel ALL=(root) NOPASSWD: /usr/lib/yurei/session-select

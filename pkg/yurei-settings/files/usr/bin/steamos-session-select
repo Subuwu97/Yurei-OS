@@ -1,0 +1,15 @@
+#!/bin/sh
+# Called by Steam's "Switch to Desktop" (with "plasma" or "desktop").
+# If Game Mode is set to start automatically, make the next login the
+# desktop; then close Steam, which ends the gamescope session.
+case "${1:-plasma}" in
+    plasma|plasma-wayland|plasma-x11|desktop)
+        for conf in /etc/plasmalogin.conf.d/zz-yurei-session.conf /etc/sddm.conf.d/zz-yurei-session.conf; do
+            if [ -e "$conf" ]; then
+                sudo -n /usr/lib/yurei/session-select desktop >/dev/null 2>&1 || true
+                break
+            fi
+        done
+        ;;
+esac
+steam -shutdown

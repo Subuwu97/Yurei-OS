@@ -1,0 +1,5 @@
+# description: Extra game stores and tools - Bottles, ProtonPlus, Prism (Minecraft), itch
+flatpak:com.usebottles.bottles
+flatpak:com.vysp3r.ProtonPlus
+flatpak:org.prismlauncher.PrismLauncher
+flatpak:io.itch.itch

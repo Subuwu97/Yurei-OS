@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Yūrei
+Description=The Yūrei mascot chases a spirit while your system starts
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/yurei
+ScriptFile=/usr/share/plymouth/themes/yurei/yurei.script

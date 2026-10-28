@@ -1,0 +1,356 @@
+#!/usr/bin/env bash
+# yurei - one command for keeping a Yūrei system fast, updated and game-ready.
+set -euo pipefail
+
+VERSION="0.3.0"
+BUNDLE_DIR="${YUREI_BUNDLE_DIR:-/usr/share/yurei/bundles}"
+MIN_MAP_COUNT=1048576
+
+if [[ -t 1 ]]; then
+    bold=$'\e[1m' red=$'\e[31m' green=$'\e[32m' yellow=$'\e[33m' reset=$'\e[0m'
+else
+    bold="" red="" green="" yellow="" reset=""
+fi
+
+say()  { printf '%s\n' "$*"; }
+ok()   { printf '  %s✓%s %s\n' "$green" "$reset" "$*"; }
+warn() { printf '  %s!%s %s\n' "$yellow" "$reset" "$*"; }
+bad()  { printf '  %s✗%s %s\n' "$red" "$reset" "$*"; }
+die()  { printf '%syurei:%s %s\n' "$red" "$reset" "$*" >&2; exit 1; }
+have() { command -v "$1" >/dev/null 2>&1; }
+
+as_root() {
+    if [[ $EUID -eq 0 ]]; then "$@"; else sudo "$@"; fi
+}
+
+usage() {
+    cat <<EOF
+${bold}yurei${reset} $VERSION - manage your Yūrei system
+
+  yurei status            What this machine is running (kernel, GPU, tuning)
+  yurei doctor [--fix]    Check that gaming essentials are set up; --fix repairs them
+  yurei update            Update system packages, AUR packages and Flatpaks
+  yurei bundles           List the app bundles you can install
+  yurei install BUNDLE... Install bundles (e.g. yurei install streaming emulation)
+  yurei drivers           Detect hardware and install the right GPU drivers (chwd)
+  yurei session MODE      What starts when the PC boots: game (Steam Game Mode),
+                          desktop, or off (show the login screen)
+  yurei login-screen X    yurei (the Yūrei login screen) or plasma (the default)
+  yurei bootsplash X      on or off: the animated Yūrei boot screen
+  yurei layout X          dock (top bar and macOS-style dock) or classic (one bottom panel)
+  yurei version           Print the version
+EOF
+}
+
+# ------------------------------------------------------------------ status
+
+gpu_summary() {
+    if have lspci; then
+        lspci -mm 2>/dev/null | awk -F'"' '$2 ~ /VGA|3D|Display/ {print $4 " " $6}'
+    fi
+}
+
+cmd_status() {
+    local governor="unknown" sched="default (EEVDF)" profile="n/a"
+    [[ -r /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ]] &&
+        governor=$(< /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
+    if [[ -r /sys/kernel/sched_ext/root/ops ]]; then
+        local ops
+        ops=$(< /sys/kernel/sched_ext/root/ops)
+        [[ -n $ops ]] && sched="sched-ext: $ops"
+    fi
+    have powerprofilesctl && profile=$(powerprofilesctl get 2>/dev/null || echo n/a)
+
+    say "${bold}Yūrei${reset} $VERSION"
+    say "  Kernel         $(uname -r)"
+    say "  CPU scheduler  $sched"
+    say "  CPU governor   $governor"
+    say "  Power profile  $profile"
+    while IFS= read -r gpu; do
+        [[ -n $gpu ]] && say "  GPU            $gpu"
+    done < <(gpu_summary)
+    say "  Session        ${XDG_SESSION_DESKTOP:-unknown} (${XDG_SESSION_TYPE:-tty})"
+}
+
+# ------------------------------------------------------------------ doctor
+
+cmd_doctor() {
+    local fix=false problems=0
+    [[ ${1:-} == "--fix" ]] && fix=true
+    local user="${SUDO_USER:-$USER}"
+
+    say "${bold}Checking gaming essentials${reset}"
+
+    if grep -q '^\[multilib\]' /etc/pacman.conf 2>/dev/null; then
+        ok "32-bit (multilib) repository enabled"
+    else
+        bad "multilib repository is disabled - Steam and Wine need it"
+        problems=$((problems + 1))
+        if $fix; then
+            as_root sed -i '/^#\[multilib\]/,/^#Include/ s/^#//' /etc/pacman.conf
+            ok "enabled multilib"
+        fi
+    fi
+
+    local maps
+    maps=$(sysctl -n vm.max_map_count 2>/dev/null || echo 0)
+    if (( maps >= MIN_MAP_COUNT )); then
+        ok "vm.max_map_count is $maps"
+    else
+        bad "vm.max_map_count is $maps - some games crash below $MIN_MAP_COUNT"
+        problems=$((problems + 1))
+        $fix && as_root sysctl -q --system && ok "reloaded sysctl settings"
+    fi
+
+    if have vulkaninfo; then
+        if vulkaninfo --summary >/dev/null 2>&1; then
+            ok "Vulkan works"
+        else
+            bad "Vulkan isn't working - run: yurei drivers"
+            problems=$((problems + 1))
+        fi
+    else
+        warn "vulkaninfo not installed; skipping Vulkan check (pacman -S vulkan-tools)"
+    fi
+
+    local lib32_vulkan
+    lib32_vulkan=$(pacman -Qq 2>/dev/null | grep -E '^lib32-(vulkan-radeon|vulkan-intel|nvidia-utils|vulkan-nouveau)$' || true)
+    if [[ -n $lib32_vulkan ]]; then
+        ok "32-bit Vulkan driver: ${lib32_vulkan//$'\n'/, }"
+    else
+        bad "no 32-bit Vulkan driver - many Windows games need one"
+        problems=$((problems + 1))
+        $fix && cmd_drivers
+    fi
+
+    if getent group gamemode >/dev/null; then
+        if id -nG "$user" 2>/dev/null | tr ' ' '\n' | grep -qx gamemode; then
+            ok "$user can use GameMode"
+        else
+            bad "$user isn't in the gamemode group"
+            problems=$((problems + 1))
+            $fix && as_root usermod -aG gamemode "$user" && ok "added $user to gamemode (log out and back in)"
+        fi
+    else
+        warn "GameMode not installed"
+    fi
+
+    if [[ -e /dev/ntsync ]]; then
+        ok "NTSYNC available for Wine/Proton"
+    else
+        warn "NTSYNC unavailable - Wine falls back to esync/fsync"
+    fi
+
+    if have flatpak; then
+        if flatpak remotes --columns=name 2>/dev/null | grep -qx flathub; then
+            ok "Flathub enabled"
+        else
+            bad "Flathub isn't set up"
+            problems=$((problems + 1))
+            $fix && ensure_flathub && ok "added Flathub"
+        fi
+    fi
+
+    say ""
+    if (( problems == 0 )); then
+        say "${green}All good - have fun!${reset}"
+    elif $fix; then
+        say "Fixed what could be fixed automatically. Run ${bold}yurei doctor${reset} again to confirm."
+    else
+        say "$problems problem(s) found. Run ${bold}yurei doctor --fix${reset} to repair them."
+        return 1
+    fi
+}
+
+# ------------------------------------------------------------------ update
+
+cmd_update() {
+    say "${bold}Updating system packages${reset}"
+    if have paru; then
+        # paru updates repo packages and AUR packages in one go
+        if [[ $EUID -eq 0 ]]; then pacman -Syu; else paru -Syu; fi
+    else
+        as_root pacman -Syu
+    fi
+    if have flatpak; then
+        say "${bold}Updating Flatpaks${reset}"
+        flatpak update -y
+    fi
+    say "${green}Up to date.${reset}"
+}
+
+# ------------------------------------------------------------------ bundles
+
+ensure_flathub() {
+    flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+}
+
+bundle_file() {
+    local name=$1
+    [[ $name =~ ^[a-z0-9-]+$ ]] || die "invalid bundle name: $name"
+    local file="$BUNDLE_DIR/$name.list"
+    [[ -r $file ]] || die "no bundle called '$name' - see: yurei bundles"
+    printf '%s\n' "$file"
+}
+
+bundle_description() {
+    sed -n 's/^# *description: *//p' "$1" | head -n1
+}
+
+cmd_bundles() {
+    local file
+    say "${bold}Available bundles${reset}  (install with: yurei install NAME)"
+    for file in "$BUNDLE_DIR"/*.list; do
+        [[ -e $file ]] || continue
+        printf '  %-12s %s\n' "$(basename "$file" .list)" "$(bundle_description "$file")"
+    done
+}
+
+# Prints "pacman <pkg>" / "flatpak <id>" lines for the given bundles.
+bundle_entries() {
+    local name file line
+    for name in "$@"; do
+        file=$(bundle_file "$name")
+        while IFS= read -r line || [[ -n $line ]]; do
+            line=${line%%#*}
+            line=${line//[[:space:]]/}
+            [[ -z $line ]] && continue
+            if [[ $line == flatpak:* ]]; then
+                printf 'flatpak %s\n' "${line#flatpak:}"
+            else
+                printf 'pacman %s\n' "$line"
+            fi
+        done < "$file"
+    done
+}
+
+cmd_install() {
+    (( $# )) || die "which bundle? see: yurei bundles"
+    local entries kind item
+    local -a pkgs=() flatpaks=()
+    entries=$(bundle_entries "$@")
+    while read -r kind item; do
+        case $kind in
+            pacman) pkgs+=("$item") ;;
+            flatpak) flatpaks+=("$item") ;;
+        esac
+    done <<< "$entries"
+
+    if (( ${#pkgs[@]} )); then
+        say "${bold}Installing packages:${reset} ${pkgs[*]}"
+        if have paru && [[ $EUID -ne 0 ]]; then
+            paru -S --needed "${pkgs[@]}"
+        else
+            as_root pacman -S --needed "${pkgs[@]}"
+        fi
+    fi
+    if (( ${#flatpaks[@]} )); then
+        have flatpak || as_root pacman -S --needed flatpak
+        ensure_flathub
+        say "${bold}Installing Flatpaks:${reset} ${flatpaks[*]}"
+        flatpak install -y flathub "${flatpaks[@]}"
+    fi
+    say "${green}Done.${reset}"
+}
+
+# ------------------------------------------------------------------ drivers
+
+cmd_drivers() {
+    have chwd || die "chwd (CachyOS hardware detection) is not installed"
+    say "${bold}Detecting hardware and installing drivers${reset}"
+    as_root chwd --autoconfigure
+}
+
+# ------------------------------------------------------------------ session
+
+SESSION_CONFS=(/etc/plasmalogin.conf.d/zz-yurei-session.conf /etc/sddm.conf.d/zz-yurei-session.conf)
+
+cmd_session() {
+    local mode=${1:-}
+    if [[ -z $mode ]]; then
+        local conf current="off (login screen)"
+        for conf in "${SESSION_CONFS[@]}"; do
+            if [[ -r $conf ]]; then
+                case $(sed -n 's/^Session=//p' "$conf") in
+                    yurei-steam.desktop) current="game (Steam Game Mode)" ;;
+                    plasma.desktop) current="desktop" ;;
+                esac
+                break
+            fi
+        done
+        say "Starts at boot: $current"
+        say "Change with: yurei session game|desktop|off"
+        return
+    fi
+    case $mode in
+        game|desktop|off) as_root /usr/lib/yurei/session-select "$mode" ;;
+        *) die "unknown session '$mode' - use game, desktop or off" ;;
+    esac
+}
+
+# ------------------------------------------------------------------ themes
+
+cmd_login_screen() {
+    case ${1:-status} in
+        yurei|plasma|default) as_root /usr/lib/yurei/login-screen "$1" ;;
+        status) /usr/lib/yurei/login-screen status 2>/dev/null || as_root /usr/lib/yurei/login-screen status ;;
+        *) die "use: yurei login-screen yurei|plasma" ;;
+    esac
+}
+
+cmd_bootsplash() {
+    case ${1:-status} in
+        on|off|status) as_root /usr/lib/yurei/bootsplash "${1:-status}" ;;
+        *) die "use: yurei bootsplash on|off" ;;
+    esac
+}
+
+# ------------------------------------------------------------------ desktop layout
+
+LAYOUT_SCRIPT=${YUREI_LAYOUT_SCRIPT:-/usr/share/plasma/shells/org.kde.plasma.desktop/contents/updates/yurei-desktop-layout.js}
+
+cmd_layout() {
+    local mode=${1:-}
+    case $mode in
+        dock|classic) ;;
+        *) die "use: yurei layout dock|classic" ;;
+    esac
+    [[ $EUID -ne 0 ]] || die "run this as yourself, inside your Plasma session (not with sudo)"
+    [[ -r $LAYOUT_SCRIPT ]] || die "layout script missing: $LAYOUT_SCRIPT"
+    local script
+    script="var yureiLayout = \"$mode\";"$'\n'"$(< "$LAYOUT_SCRIPT")"
+    # Plasma's own scripting interface, the same one its desktop scripts use
+    if have qdbus6; then
+        qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$script" >/dev/null
+    elif have qdbus; then
+        qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$script" >/dev/null
+    else
+        dbus-send --session --type=method_call --dest=org.kde.plasmashell /PlasmaShell \
+            org.kde.PlasmaShell.evaluateScript "string:$script"
+    fi
+    say "Desktop layout: $mode"
+}
+
+# ------------------------------------------------------------------ main
+
+main() {
+    local cmd=${1:-help}
+    shift || true
+    case $cmd in
+        status) cmd_status ;;
+        doctor) cmd_doctor "$@" ;;
+        update|upgrade) cmd_update ;;
+        bundles|list) cmd_bundles ;;
+        install) cmd_install "$@" ;;
+        drivers|gpu) cmd_drivers ;;
+        session) cmd_session "$@" ;;
+        login-screen) cmd_login_screen "$@" ;;
+        bootsplash|boot-splash) cmd_bootsplash "$@" ;;
+        layout) cmd_layout "$@" ;;
+        version|--version) say "$VERSION" ;;
+        help|-h|--help) usage ;;
+        *) usage >&2; exit 2 ;;
+    esac
+}
+
+main "$@"

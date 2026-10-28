@@ -1,0 +1,15 @@
+# The filesystem package (and CachyOS's own hooks) rewrite os-release on
+# upgrade; put the Yūrei branding back afterwards. "zz" makes this run last.
+[Trigger]
+Type = Package
+Operation = Install
+Operation = Upgrade
+Target = filesystem
+Target = cachyos-hooks
+Target = lsb-release
+Target = yurei-settings
+
+[Action]
+Description = Applying Yūrei branding...
+When = PostTransaction
+Exec = /usr/bin/install -m 0644 /usr/lib/yurei/os-release /usr/lib/os-release
