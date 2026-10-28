@@ -116,6 +116,7 @@ EOF
 file_permissions+=(
   ["/usr/local/bin/yurei-install-target"]="0:0:755"
   ["/usr/local/bin/yurei-calamares-patch"]="0:0:755"
+  ["/usr/local/bin/yurei-install"]="0:0:755"
 )
 EOF
 

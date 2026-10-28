@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# "Install Yūrei" on the live desktop: starts CachyOS's installer script
+# (calamares-online.sh) in a terminal window, so you can see what it's doing.
+# Before the installer opens, that script refreshes the package keys and
+# downloads the latest installer, which takes a few minutes and needs the
+# internet; without a window it looked as if nothing happened.
+
+bold=$'\e[1m' lavender=$'\e[38;2;185;170;255m' pink=$'\e[38;2;255;110;150m' reset=$'\e[0m'
+log=${YUREI_INSTALL_LOG:-$HOME/cachy-install.log}
+installer=${YUREI_INSTALLER:-/usr/local/bin/calamares-online.sh}
+
+say() { printf '%s\n' "$*"; }
+wait_for_enter() { say ""; read -rp "$1" _ || true; }
+
+online() {
+    curl -fsI --max-time 8 https://cachyos.org >/dev/null 2>&1 ||
+        curl -fsI --max-time 8 https://archlinux.org >/dev/null 2>&1
+}
+
+# one at a time: a second click would start a second installer
+exec 9>"${XDG_RUNTIME_DIR:-/tmp}/yurei-install.lock"
+if ! flock -n 9; then
+    say "The installer is already starting in another window."
+    sleep 4
+    exit 0
+fi
+
+say "${bold}${lavender}Yūrei installer${reset}"
+say ""
+until online; do
+    say "${pink}No internet connection.${reset}"
+    say "The installer downloads Yūrei's packages while it installs, so it needs the internet."
+    say "Connect with the network icon in the top bar (or plug in a cable)."
+    wait_for_enter "Then press Enter to try again, or close this window. "
+    say ""
+done
+
+say "Getting the installer ready: refreshing package keys and downloading the"
+say "latest installer. This takes a minute or two; the installer opens by itself."
+say ""
+"$installer"
+status=$?
+if (( status != 0 )); then
+    say ""
+    say "${pink}The installer stopped (code $status).${reset} The end of its log ($log):"
+    say ""
+    tail -n 25 "$log" 2>/dev/null || say "(no log)"
+    wait_for_enter "A photo of this window helps to find out why. Press Enter to close. "
+fi

@@ -70,8 +70,10 @@ fi
 
 # the installer's branding and the live desktop's install launcher
 expect "$iso/airootfs/usr/share/calamares/branding/yurei/branding.desc" '^componentName:  yurei$' "installer branding shipped"
-expect "$iso/airootfs/usr/share/applications/yurei-install.desktop" '^Exec=/usr/local/bin/calamares-online.sh$' \
-    "Install Yūrei launcher starts CachyOS's installer script"
+expect "$iso/airootfs/usr/share/applications/yurei-install.desktop" '^Exec=konsole .* -e /usr/local/bin/yurei-install$' \
+    "Install Yūrei launcher opens a window showing the installer starting"
+expect "$iso/airootfs/usr/local/bin/yurei-install" 'calamares-online.sh' "it starts CachyOS's installer script"
+expect "$iso/profiledef.sh" 'yurei-install"\]="0:0:755"' "Install Yūrei script is executable"
 
 # profiledef.sh must still load the way mkarchiso loads it
 if (declare -A file_permissions=()

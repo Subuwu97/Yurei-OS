@@ -106,8 +106,11 @@ Theme does the same.
   initramfs and `quiet splash` to the normal entries. The "Legacy Hardware
   (nomodeset)" entry stays verbose, so problems stay visible there.
 * **Desktop:** the mascot wallpaper, the top bar and the dock, with
-  **Install Yūrei** first in the dock. It starts CachyOS's installer script,
-  as CachyOS Hello's install button does. Hello is still in the app menu but
+  **Install Yūrei** first in the dock. It opens a small window that checks
+  for an internet connection, then starts CachyOS's installer script, as
+  CachyOS Hello's install button does. That script refreshes the package
+  keys and downloads the latest installer first, which takes a minute or
+  two; the window shows its progress, and the log if anything fails. Hello is still in the app menu but
   no longer opens by itself.
 * **Installer:** Calamares with Yūrei branding
   (`overlay/airootfs/usr/share/calamares/branding/yurei`): the moon-ghost icon,
