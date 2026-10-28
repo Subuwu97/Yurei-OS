@@ -45,16 +45,27 @@ STATIC_PIXELS = 200  # frames differing in fewer pixels than this count as ident
 FRAME_SCALE = 0.85
 FRAME_COLORS = 128
 
-# Mock-up UI painted into the login reference (x0, y0, x1, y1 in its 1505x631 pixels)
-BAKED_UI = [
-    (548, 172, 880, 268),   # old wordmark and its flourishes
-    (652, 278, 770, 390),   # avatar
-    (668, 388, 752, 418),   # "Alex"
-    (540, 418, 886, 482),   # password field and button
-    (12, 548, 204, 604),    # session selector
-    (1296, 544, 1498, 606),  # sleep / restart / power buttons
+# The login design (1672x941). Its mock-up UI is painted in; these are the
+# areas to repair, in its pixels. The theme puts its real controls in the
+# same places (see LOGIN_LAYOUT in themes/sddm/yurei/Main.qml).
+# Bright strokes (text, wordmark) are masked by brightness inside these boxes,
+# so the scenery between the letters survives.
+BAKED_TEXT = [
+    (350, 168, 812, 372),   # wordmark with its flame
+    (516, 538, 594, 570),   # "Alex"
+    (498, 659, 614, 686),   # "Switch user"
+    (1386, 860, 1422, 887),  # "US"
 ]
-
+BAKED_SHAPES = [  # ("circle", cx, cy, r) or ("pill", x0, y0, x1, y1)
+    ("circle", 555, 457, 69),          # avatar and its ring
+    ("pill", 366, 576, 746, 648),      # password field
+    ("circle", 67, 872, 30),           # gear
+    ("pill", 94, 845, 270, 898),       # session menu
+    ("circle", 1471, 873, 33),         # sleep
+    ("circle", 1538, 873, 33),         # restart
+    ("circle", 1605, 873, 33),         # power
+]
+AVATAR = (555, 457, 61)  # the design's avatar picture: the default avatar
 
 def log(msg: str) -> None:
     print(f"  {msg}", file=sys.stderr)
@@ -160,8 +171,8 @@ def build_logo() -> Image.Image:
     logo = Image.fromarray(rgba, "RGBA")
     # drop near-invisible noise from compression before cropping
     a = np.asarray(logo)[..., 3]
-    ys, xs = np.nonzero(a > 10)
-    pad = 24
+    ys, xs = np.nonzero(a > 40)
+    pad = 20
     logo = logo.crop((max(xs.min() - pad, 0), max(ys.min() - pad, 0),
                       min(xs.max() + pad, logo.width), min(ys.max() + pad, logo.height)))
     logo.thumbnail((1200, 1200), Image.Resampling.LANCZOS)
@@ -176,19 +187,39 @@ def build_logo() -> Image.Image:
 
 def build_login_background() -> None:
     ref = cv2.imread(str(SRC / "Yurei-Login-Reference.png"))
-    # rounded masks: square patches leave straight edges the eye picks up
+
+    # the moon-over-torii picture in the design's avatar becomes the default
+    # picture for accounts without their own
+    cx, cy, r = AVATAR
+    avatar = Image.fromarray(cv2.cvtColor(ref[cy - r:cy + r, cx - r:cx + r], cv2.COLOR_BGR2RGB))
+    avatar.resize((256, 256), Image.Resampling.LANCZOS).save(SDDM / "assets" / "avatar.png", optimize=True)
+
     mask = np.zeros(ref.shape[:2], np.uint8)
-    for x0, y0, x1, y1 in BAKED_UI:
-        cv2.ellipse(mask, ((x0 + x1) // 2, (y0 + y1) // 2), ((x1 - x0) // 2 + 6, (y1 - y0) // 2 + 6),
-                    0, 0, 360, 255, -1)
-    clean = cv2.inpaint(ref, mask, 15, cv2.INPAINT_NS)
-    # soften the repaired areas into a misty glow with a wide, gradual edge
-    soft = cv2.GaussianBlur(clean, (0, 0), 14)
-    feather = np.clip(cv2.GaussianBlur(mask, (0, 0), 22).astype(float) * 1.4, 0, 255)[..., None] / 255
+    gray = cv2.cvtColor(ref, cv2.COLOR_BGR2GRAY)
+    hsv = cv2.cvtColor(ref, cv2.COLOR_BGR2HSV)
+    for x0, y0, x1, y1 in BAKED_TEXT:
+        # white/lavender strokes and their glow: bright and only lightly saturated
+        region = (gray[y0:y1, x0:x1] > 120) & (hsv[y0:y1, x0:x1, 1] < 140)
+        mask[y0:y1, x0:x1][region] = 255
+    mask = cv2.dilate(mask, np.ones((7, 7), np.uint8))
+    for shape in BAKED_SHAPES:
+        if shape[0] == "circle":
+            _, cx, cy, r = shape
+            cv2.circle(mask, (cx, cy), r, 255, -1)
+        else:
+            _, x0, y0, x1, y1 = shape
+            r = (y1 - y0) // 2
+            cv2.rectangle(mask, (x0 + r, y0), (x1 - r, y1), 255, -1)
+            cv2.circle(mask, (x0 + r, y0 + r), r, 255, -1)
+            cv2.circle(mask, (x1 - r, y0 + r), r, 255, -1)
+    clean = cv2.inpaint(ref, mask, 7, cv2.INPAINT_TELEA)
+    # soften the repaired areas slightly so they read as haze, not smears
+    soft = cv2.GaussianBlur(clean, (0, 0), 4)
+    feather = cv2.GaussianBlur(mask, (0, 0), 6).astype(float)[..., None] / 255
     clean = (clean * (1 - feather) + soft * feather).astype(np.uint8)
 
     img = Image.fromarray(cv2.cvtColor(clean, cv2.COLOR_BGR2RGB))
-    # the reference is only 631 px tall: upscale for 1440p screens, sharpen lightly
+    # the design is 941 px tall: upscale for 1440p+ screens, sharpen lightly
     img = img.resize((img.width * 2, img.height * 2), Image.Resampling.LANCZOS)
     img = img.filter(ImageFilter.UnsharpMask(radius=2, percent=60, threshold=2))
     out = SDDM / "assets" / "background.jpg"

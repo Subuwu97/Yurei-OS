@@ -113,10 +113,11 @@ def test_submit_button_logs_in(theme):
 def test_tab_order_reaches_every_control(theme):
     app, view, objects, find = theme
     order = []
-    for _ in range(6):
+    for _ in range(7):
         press(app, view, Qt.Key_Tab)
         order.append(focused(view))
-    assert order == ["submit", "session", "suspendButton", "rebootButton", "powerButton", "password"]
+    assert order == ["submit", "switchUser", "session", "suspendButton", "rebootButton",
+                     "powerButton", "password"]
 
 
 def test_power_buttons(theme):
@@ -138,19 +139,75 @@ def test_caps_lock_warning(theme):
     assert find("message").property("text") == "Wrong password - Caps Lock is on"
 
 
-@pytest.mark.parametrize("theme", [{"users": [
-    {"name": "alex", "realName": "Alex", "icon": ""},
-    {"name": "sam", "realName": "", "icon": ""},
-]}], indirect=True)
-def test_arrow_keys_switch_user(theme):
+TWO_USERS = [{"name": "alex", "realName": "Alex", "icon": ""}, {"name": "sam", "realName": "", "icon": ""}]
+
+
+@pytest.mark.parametrize("theme", [{"users": TWO_USERS}], indirect=True)
+def test_up_down_switch_user(theme):
     app, view, objects, find = theme
-    press(app, view, Qt.Key_Right)
+    press(app, view, Qt.Key_Down)
     assert find("userLabel").property("text") == "sam"
     type_text(app, view, "x")
-    press(app, view, Qt.Key_Left)  # with text typed, arrows move the cursor instead
+    press(app, view, Qt.Key_Up)  # with text typed, keys edit the field instead
     assert find("userLabel").property("text") == "sam"
     press(app, view, Qt.Key_Return)
     assert objects["sddm"].calls[-1][1] == "sam"
+
+
+@pytest.mark.parametrize("theme", [{"users": TWO_USERS}], indirect=True)
+def test_switch_user_opens_account_list(theme):
+    app, view, objects, find = theme
+    find("switchUser").forceActiveFocus()
+    h.settle(app)
+    press(app, view, Qt.Key_Return)
+    assert find("userMenu").property("visible")
+    press(app, view, Qt.Key_Down)  # alex -> sam
+    press(app, view, Qt.Key_Return)
+    assert not find("userMenu").property("visible")
+    assert find("userLabel").property("text") == "sam"
+    assert focused(view) == "password"
+
+
+@pytest.mark.parametrize("theme", [{"users": TWO_USERS}], indirect=True)
+def test_account_list_offers_other_user(theme):
+    app, view, objects, find = theme
+    find("switchUser").forceActiveFocus()
+    h.settle(app)
+    press(app, view, Qt.Key_Return)
+    press(app, view, Qt.Key_Down)
+    press(app, view, Qt.Key_Down)  # past the last account: "Other user…"
+    press(app, view, Qt.Key_Return)
+    assert find("usernameField").property("visible")
+    assert focused(view) == "usernameField"
+
+
+def test_switch_user_with_one_account_types_a_username(theme):
+    app, view, objects, find = theme
+    switch = find("switchUser")
+    switch.forceActiveFocus()
+    h.settle(app)
+    press(app, view, Qt.Key_Return)
+    assert find("usernameField").property("visible")
+    assert switch.property("text") == "Back"
+    type_text(app, view, "guest")
+    press(app, view, Qt.Key_Return)
+    type_text(app, view, h.CORRECT_PASSWORD)
+    press(app, view, Qt.Key_Return)
+    assert objects["sddm"].calls == [("login", "guest", h.CORRECT_PASSWORD, 0)]
+
+
+def test_default_avatar_picture(theme):
+    app, view, objects, find = theme
+    avatar = find("avatar")
+    h.settle(app, 60)
+    assert avatar.property("usingFallback")
+    assert avatar.property("hasPicture")
+
+
+def test_single_keyboard_layout_is_shown_but_not_a_stop(theme):
+    app, view, objects, find = theme
+    layout = find("layoutButton")
+    assert layout.property("visible") and not layout.property("switchable")
 
 
 @pytest.mark.parametrize("theme", [{"users": []}], indirect=True)

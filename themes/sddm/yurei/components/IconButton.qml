@@ -1,12 +1,13 @@
 import QtQuick
 import QtQuick.Controls
 
-// Round glass button with an SVG icon, used for the power controls.
+// A white glyph on a soft dark disc, as in the design's power controls.
 AbstractButton {
     id: control
 
     property url iconSource
-    property real size: 52
+    property real size: 58
+    property real glyph: 0.5  // glyph size as a fraction of the disc
     property string tip
 
     implicitWidth: size
@@ -18,16 +19,16 @@ AbstractButton {
 
     background: Rectangle {
         radius: width / 2
-        color: control.down ? "#3a3470" : control.hovered ? "#2a2658" : "#c0101530"
-        border.width: control.activeFocus ? 2 : 1
-        border.color: control.activeFocus ? "#cbbcff" : "#66b9aaff"
+        color: control.down ? "#99302a66" : control.hovered ? "#80241f55" : "#400b0e2a"
+        border.width: control.activeFocus ? 2 : 0
+        border.color: "#d6ccff"
         Behavior on color { ColorAnimation { duration: 120 } }
     }
 
     contentItem: Item {
         Image {
             anchors.centerIn: parent
-            width: control.size * 0.46
+            width: control.size * control.glyph
             height: width
             sourceSize: Qt.size(width * 2, height * 2)
             source: control.iconSource

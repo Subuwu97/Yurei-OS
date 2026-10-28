@@ -5,7 +5,7 @@ Yūrei's branding has two themes, each in its own package:
 | Package | What it is | Turn on / off |
 |---|---|---|
 | `yurei-plymouth-theme` | Boot and shutdown animation: the mascot spots a spirit, chases it, leaps, catches it and waves beside the wordmark. The wave loops for as long as booting takes. | `yurei bootsplash on` / `off` |
-| `yurei-sddm-theme` | Login screen: moonlit shrine and sakura, the mascot, the new wordmark, and real controls (password, user picker, session menu, keyboard layout, sleep/restart/shut down). | `yurei login-screen yurei` / `plasma` |
+| `yurei-sddm-theme` | Login screen: moonlit shrine and sakura, the mascot, the new wordmark, and real controls (password, "Switch user" with an account list, session menu, keyboard layout, sleep/restart/shut down). Accounts without their own picture get the design's moon-over-torii avatar. | `yurei login-screen yurei` / `plasma` |
 
 New installs from the Yūrei ISO get both automatically. The installer step
 runs the two commands above, and if either fails, the installation still
@@ -119,7 +119,10 @@ Pillow, numpy and opencv-python-headless. It:
   6 MB in each initramfs
 * makes the frame background transparent, so no edge shows at any scaling
 * extracts the wordmark onto a transparent background, keeping its glow
-* removes the mock-up UI painted into the login reference, and upscales it 2×
+* removes the mock-up UI painted into the login design (`Yurei-Login-Reference.png`,
+  1672×941). Text and the wordmark are masked by their bright strokes only, so
+  the scenery between letters survives. It then upscales the design 2× and
+  keeps its avatar picture as the default avatar
 * regenerates `overlay/boot/splash.png`, the ISO boot menu, with the new wordmark
 
 Run it again whenever the source art changes.
@@ -149,7 +152,9 @@ Run it again whenever the source art changes.
   * the selected session being passed to login
   * Tab order through every control, Enter and Escape
   * the power buttons, the Caps Lock warning, and the keyboard layout button
-  * switching users with the arrow keys, and typing a username when no users are listed
+  * switching users with Up/Down, through "Switch user" (account list, "Other user…"),
+    and typing a username when no users are listed
+  * the default avatar picture, and the layout indicator with one or more layouts
   * no QML warnings
   * the controls staying on screen at 16:9, 5:4, 21:9 and portrait
 
@@ -177,7 +182,7 @@ Run it again whenever the source art changes.
 
 * **Clean login artwork** with no mock-up UI, at least 3840 px wide, ideally
   with the mascot on a separate transparent layer. The current background is
-  the 1505×631 reference, upscaled. The repaired centre is hidden behind the
+  the 1672×941 design, upscaled. The repaired spots are hidden behind the
   real controls on most screens, but a separate mascot layer would let the
   layout adapt properly to 16:9 and portrait screens.
 * **In-between poses** for the run, leap and catch. The animation uses the

@@ -1,34 +1,34 @@
 import QtQuick
 
-// Circular user picture with a glowing ring. Falls back to the first letter
-// of the name on a moonlit gradient when the user has no picture.
-// Drawn with Canvas rather than a shader effect so it also works with
+// Circular user picture with a thin light ring. Uses the account's own
+// picture, then the theme's moonlit default, then the first letter of the
+// name. Drawn with Canvas rather than a shader effect so it also works with
 // software rendering (VMs, machines before GPU drivers are installed).
 Item {
     id: avatar
 
     property url source
+    property url fallback
     property string name
 
+    readonly property bool usingFallback: !source.toString().length || own.status === Image.Error
+    readonly property var picture: usingFallback ? standard : own
     readonly property bool hasPicture: picture.status === Image.Ready
 
-    Rectangle {  // soft outer glow
-        anchors.centerIn: parent
-        width: parent.width + 14
-        height: width
-        radius: width / 2
-        color: "transparent"
-        border.width: 6
-        border.color: "#33a99bff"
-    }
-
-    Image {  // loaded only to learn whether the picture exists
-        id: picture
+    Image {
+        id: own
         source: avatar.source
         visible: false
         asynchronous: true
         onStatusChanged: canvas.requestPaint()
     }
+    Image {
+        id: standard
+        source: avatar.fallback
+        visible: false
+        onStatusChanged: canvas.requestPaint()
+    }
+    onPictureChanged: canvas.requestPaint()
 
     Canvas {
         id: canvas
@@ -42,7 +42,7 @@ Item {
             ctx.closePath()
             ctx.clip()
             if (avatar.hasPicture) {
-                ctx.drawImage(picture, 0, 0, width, height)
+                ctx.drawImage(avatar.picture, 0, 0, width, height)
             } else {
                 const g = ctx.createLinearGradient(0, 0, width, height)
                 g.addColorStop(0, "#6c5ce7")
@@ -64,11 +64,12 @@ Item {
         font.weight: Font.DemiBold
     }
 
-    Rectangle {  // crisp ring
+    Rectangle {  // the ring
         anchors.fill: parent
+        anchors.margins: -2
         radius: width / 2
         color: "transparent"
         border.width: 2
-        border.color: "#d8ccff"
+        border.color: "#e2dcff"
     }
 }

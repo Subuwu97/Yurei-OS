@@ -1,10 +1,10 @@
 // Yūrei login screen for SDDM (Qt 6).
 //
-// Layout follows the approved design: shrine and sakura on the left, the
-// mascot on the right, and the wordmark, avatar and password field in the
-// gap between them. Those controls are positioned in the artwork's own
-// coordinates, so they stay in that gap on every screen shape; the session
-// menu and power buttons sit in the screen corners.
+// Recreates the approved design (branding/source/Yurei-Login-Reference.png,
+// 1672x941) with real controls: the wordmark, avatar, name, password field
+// and "Switch user" sit at the design's own coordinates over the artwork, so
+// they cover the spots where the mock-up was painted; the session menu and
+// power controls sit in the screen corners, as in the design.
 //
 // Context objects provided by SDDM: sddm, userModel, sessionModel, keyboard,
 // config (theme.conf).
@@ -22,29 +22,24 @@ Rectangle {
 
     // --- where the artwork lands on this screen -----------------------------
 
-    // pixel size of the design the coordinates below refer to
-    readonly property real designWidth: 1505
-    readonly property real designHeight: 631
-    // centre of the gap between shrine and mascot, in design pixels
-    readonly property real columnX: 713
+    // LOGIN_LAYOUT: positions below are pixels of the 1672x941 design
+    readonly property real designWidth: 1672
+    readonly property real designHeight: 941
+    readonly property real columnX: 555  // centre of the avatar and password field
 
     readonly property real s: Math.max(width / designWidth, height / designHeight)
-    // size of the login controls: follows the artwork, but on portrait
-    // screens (where the art is cropped hard) it's capped by the width
-    readonly property real k: Math.min(s, width * 0.82 / 360)
+    // control size: follows the artwork, capped on narrow (portrait) screens
+    readonly property real k: Math.min(s, width * 0.82 / 368)
+    // corner controls: follow the artwork too, but stay small enough to fit
+    readonly property real c: Math.min(k, width / 900)
     readonly property real artWidth: designWidth * s
     readonly property real artHeight: designHeight * s
     // anchor the art to the right so the mascot stays in frame, but never
     // push the login column off the left edge on narrow screens
-    readonly property real columnHalf: 190 * k
-    readonly property real artX: Math.min(0, Math.max(width - artWidth,
-                                                      columnHalf + 24 - columnX * s))
+    readonly property real artX: Math.min(0, Math.max(width - artWidth, 184 * k + 24 - columnX * s))
     readonly property real artY: (height - artHeight) / 2
-    readonly property real centerX: artX + columnX * s
+    function designX(x) { return artX + x * s }
     function designY(y) { return artY + y * s }
-
-    // text and corner controls scale with the screen, within limits
-    readonly property real ui: Math.max(0.75, Math.min(2.2, height / 1080))
 
     // --- state ---------------------------------------------------------------
 
@@ -52,6 +47,7 @@ Rectangle {
     property int userIndex: userModel.lastIndex >= 0 ? userModel.lastIndex : 0
     readonly property var user: users.count > 0 ? users.itemAt(Math.min(userIndex, users.count - 1)) : null
     readonly property string userName: manualLogin ? usernameField.text : (user ? user.userName : "")
+    readonly property string displayName: user ? (user.userRealName || user.userName) : ""
     property bool busy: false
     property string error: ""
 
@@ -63,13 +59,24 @@ Rectangle {
         sddm.login(userName, password.text, session.currentIndex)
     }
 
-    function switchUser(step) {
-        if (userModel.count < 2)
-            return
-        userIndex = (userIndex + step + userModel.count) % userModel.count
+    function chooseUser(index) {
+        manualLogin = false
+        userIndex = index
         password.text = ""
         error = ""
         password.forceActiveFocus()
+    }
+
+    function typeUsername() {
+        manualLogin = true
+        error = ""
+        usernameField.text = ""  // switching means another account
+        usernameField.forceActiveFocus()
+    }
+
+    function switchUser(step) {
+        if (userModel.count > 1)
+            chooseUser((userIndex + step + userModel.count) % userModel.count)
     }
 
     Repeater {  // exposes each user's name, real name and picture
@@ -100,7 +107,6 @@ Rectangle {
     // --- artwork ---------------------------------------------------------------
 
     Image {
-        id: art
         x: root.artX
         y: root.artY
         width: root.artWidth
@@ -108,7 +114,6 @@ Rectangle {
         source: config.background || "assets/background.jpg"
         fillMode: Image.Stretch
         smooth: true
-        asynchronous: false
     }
 
     // --- login column ----------------------------------------------------------
@@ -116,10 +121,11 @@ Rectangle {
     Image {
         id: logo
         source: "assets/logo.png"
-        width: 290 * root.k
-        height: width / 2
-        x: root.centerX - width / 2
-        y: root.designY(152)
+        // the wordmark's box in the design: x 349.6, y 170.6, 464.7 wide
+        width: 464.7 * root.k
+        height: width * 0.4
+        x: root.designX(349.6 + 464.7 / 2) - width / 2
+        y: root.designY(170.6)
         sourceSize.width: width
         smooth: true
         mipmap: true
@@ -129,60 +135,34 @@ Rectangle {
     Avatar {
         id: avatar
         objectName: "avatar"
-        width: 92 * root.k
+        width: 128 * root.k
         height: width
-        x: root.centerX - width / 2
-        y: root.designY(287)
-        visible: !root.manualLogin
-        source: root.user && root.user.userIcon ? root.user.userIcon : ""
-        name: root.user ? (root.user.userRealName || root.user.userName) : ""
+        x: root.designX(root.columnX) - width / 2
+        y: root.designY(457) - height / 2
+        source: !root.manualLogin && root.user && root.user.userIcon ? root.user.userIcon : ""
+        fallback: Qt.resolvedUrl("assets/avatar.png")
+        name: root.manualLogin ? usernameField.text : root.displayName
     }
 
-    Row {  // user name, with arrows when there are several users
-        id: nameRow
-        objectName: "nameRow"
-        anchors.horizontalCenter: avatar.horizontalCenter
-        y: root.designY(388)
-        spacing: 10 * root.k
+    Text {
+        id: userLabel
+        objectName: "userLabel"
         visible: !root.manualLogin
-
-        Image {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: userModel.count > 1
-            source: "assets/icons/left.svg"
-            width: 14 * root.k
-            height: width
-            sourceSize: Qt.size(width * 2, height * 2)
-            opacity: prevArea.containsMouse ? 1 : 0.65
-            MouseArea { id: prevArea; anchors.fill: parent; anchors.margins: -8; hoverEnabled: true; onClicked: root.switchUser(-1) }
-        }
-        Text {
-            objectName: "userLabel"
-            text: root.user ? (root.user.userRealName || root.user.userName) : ""
-            color: "#f6f2ff"
-            font.pixelSize: 17 * root.k
-            font.weight: Font.DemiBold
-            style: Text.Raised
-            styleColor: "#80060c1f"
-        }
-        Image {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: userModel.count > 1
-            source: "assets/icons/right.svg"
-            width: 14 * root.k
-            height: width
-            sourceSize: Qt.size(width * 2, height * 2)
-            opacity: nextArea.containsMouse ? 1 : 0.65
-            MouseArea { id: nextArea; anchors.fill: parent; anchors.margins: -8; hoverEnabled: true; onClicked: root.switchUser(1) }
-        }
+        anchors.horizontalCenter: avatar.horizontalCenter
+        y: root.designY(553) - height / 2
+        text: root.displayName
+        color: "#ffffff"
+        font.pixelSize: 25 * root.k
+        style: Text.Raised
+        styleColor: "#80060c1f"
     }
 
     Column {
         id: form
-        width: 330 * root.k
-        x: root.centerX - width / 2
-        y: root.manualLogin ? root.designY(330) : root.designY(424)
-        spacing: 10 * root.k
+        width: 368 * root.k
+        x: root.designX(root.columnX + 1) - width / 2
+        y: root.designY(root.manualLogin ? 528 : 582)
+        spacing: 8 * root.k
 
         TextField {
             id: usernameField
@@ -191,76 +171,76 @@ Rectangle {
             width: parent.width
             height: 46 * root.k
             placeholderText: "Username"
-            placeholderTextColor: "#a99fd6"
-            color: "#f6f2ff"
-            font.pixelSize: 14 * root.k
-            leftPadding: 22 * root.k
+            placeholderTextColor: "#9d97c9"
+            color: "#ffffff"
+            font.pixelSize: 16 * root.k
+            leftPadding: 24 * root.k
             text: userModel.lastUser || ""
+            Accessible.name: "Username"
             KeyNavigation.tab: password
             Keys.onReturnPressed: password.forceActiveFocus()
             Keys.onEnterPressed: password.forceActiveFocus()
             background: Rectangle {
                 radius: height / 2
-                color: "#cc0e1430"
-                border.width: usernameField.activeFocus ? 2 : 1
-                border.color: usernameField.activeFocus ? "#cbbcff" : "#80b9aaff"
+                color: "#cc0b0f2b"
+                border.width: usernameField.activeFocus ? 2 : 1.5
+                border.color: usernameField.activeFocus ? "#e2dcff" : "#b9b0f0"
             }
         }
 
         Item {
             id: passwordBox
             width: parent.width
-            height: 50 * root.k
+            height: 60 * root.k
 
             TextField {
                 id: password
-            objectName: "password"
+                objectName: "password"
                 anchors.fill: parent
                 echoMode: TextInput.Password
                 passwordCharacter: "●"
                 placeholderText: "Password"
-                placeholderTextColor: "#c9c0f0"
-                color: "#f6f2ff"
-                font.pixelSize: 14 * root.k
-                leftPadding: 52 * root.k
-                rightPadding: 56 * root.k
+                placeholderTextColor: "#9d97c9"
+                color: "#ffffff"
+                font.pixelSize: 16 * root.k
+                leftPadding: 62 * root.k
+                rightPadding: 62 * root.k
                 enabled: !root.busy
                 focus: !root.manualLogin
                 Accessible.name: "Password for " + root.userName
                 Keys.onReturnPressed: root.login()
                 Keys.onEnterPressed: root.login()
                 Keys.onEscapePressed: { text = ""; root.error = "" }
-                Keys.onLeftPressed: event => { if (text.length === 0) root.switchUser(-1); else event.accepted = false }
-                Keys.onRightPressed: event => { if (text.length === 0) root.switchUser(1); else event.accepted = false }
+                Keys.onUpPressed: event => { if (text.length === 0) root.switchUser(-1); else event.accepted = false }
+                Keys.onDownPressed: event => { if (text.length === 0) root.switchUser(1); else event.accepted = false }
                 onTextChanged: if (text.length) root.error = ""
                 KeyNavigation.tab: submit
                 background: Rectangle {
                     radius: height / 2
-                    color: "#d00e1430"
-                    border.width: password.activeFocus ? 2 : 1
-                    border.color: root.error ? "#ff9ab8" : password.activeFocus ? "#cbbcff" : "#99b9aaff"
+                    color: "#d90b0f2b"
+                    border.width: password.activeFocus ? 2 : 1.5
+                    border.color: root.error ? "#ff9ab8" : password.activeFocus ? "#e2dcff" : "#b9b0f0"
                     Behavior on border.color { ColorAnimation { duration: 150 } }
                 }
             }
 
             Image {
                 anchors.left: parent.left
-                anchors.leftMargin: 20 * root.k
+                anchors.leftMargin: 22 * root.k
                 anchors.verticalCenter: parent.verticalCenter
-                width: 18 * root.k
+                width: 20 * root.k
                 height: width
                 sourceSize: Qt.size(width * 2, height * 2)
                 source: "assets/icons/lock.svg"
-                opacity: 0.85
             }
 
             AbstractButton {
                 id: submit
-            objectName: "submit"
+                objectName: "submit"
                 anchors.right: parent.right
-                anchors.rightMargin: 6 * root.k
+                anchors.rightMargin: 8 * root.k
                 anchors.verticalCenter: parent.verticalCenter
-                width: 40 * root.k
+                width: 46 * root.k
                 height: width
                 enabled: !root.busy
                 focusPolicy: Qt.StrongFocus
@@ -268,18 +248,21 @@ Rectangle {
                 onClicked: root.login()
                 Keys.onReturnPressed: root.login()
                 Keys.onEnterPressed: root.login()
-                KeyNavigation.tab: session
+                KeyNavigation.tab: switchUser
                 background: Rectangle {
                     radius: width / 2
-                    color: submit.down ? "#b9aaff" : submit.hovered || submit.activeFocus ? "#ece6ff" : "#d9d0ff"
                     border.width: submit.activeFocus ? 2 : 0
                     border.color: "#ffffff"
+                    gradient: Gradient {
+                        GradientStop { position: 0.0; color: submit.down ? "#7d6be6" : submit.hovered ? "#b3a4ff" : "#a594ff" }
+                        GradientStop { position: 1.0; color: submit.down ? "#5f4fc4" : "#7b6af0" }
+                    }
                 }
                 contentItem: Item {
                     Image {
                         anchors.centerIn: parent
                         visible: !root.busy
-                        width: parent.width * 0.5
+                        width: parent.width * 0.48
                         height: width
                         sourceSize: Qt.size(width * 2, height * 2)
                         source: "assets/icons/arrow.svg"
@@ -302,199 +285,276 @@ Rectangle {
                 NumberAnimation { target: passwordBox; property: "x"; to: 0; duration: 60 }
             }
         }
+    }
 
-        Text {  // errors and warnings, announced to screen readers
-            objectName: "message"
-            width: parent.width
-            horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.WordWrap
-            text: root.error ? root.error
-                  : keyboard.capsLock ? "Caps Lock is on" : ""
-            color: root.error ? "#ffb4c9" : "#ffe3a3"
-            font.pixelSize: 13 * root.k
+    AbstractButton {  // "Switch user": a list of accounts, or type a username
+        id: switchUser
+        objectName: "switchUser"
+        anchors.horizontalCenter: form.horizontalCenter
+        y: root.designY(672) - height / 2
+        visible: userModel.count > 0
+        focusPolicy: Qt.StrongFocus
+        Accessible.name: text
+        text: root.manualLogin ? "Back" : "Switch user"
+        KeyNavigation.tab: session
+        onClicked: {
+            if (root.manualLogin)
+                root.chooseUser(root.userIndex)
+            else if (userModel.count > 1)
+                userMenu.open()
+            else
+                root.typeUsername()
+        }
+        Keys.onReturnPressed: clicked()
+        Keys.onEnterPressed: clicked()
+        contentItem: Text {
+            text: switchUser.text
+            color: switchUser.hovered || switchUser.activeFocus ? "#ffffff" : "#cdc6ff"
+            font.pixelSize: 17 * root.k
+            font.underline: switchUser.activeFocus
             style: Text.Raised
             styleColor: "#c0060c1f"
-            Accessible.role: Accessible.AlertMessage
-            Accessible.name: text
         }
+        background: null
     }
 
-    Text {  // switch between picking a user and typing a username
+    Text {  // errors and warnings, announced to screen readers
+        objectName: "message"
         anchors.horizontalCenter: form.horizontalCenter
-        y: root.designY(512)
-        visible: userModel.count > 0
-        text: root.manualLogin ? "Choose a user" : "Other user"
-        color: otherArea.containsMouse ? "#ffffff" : "#ddd6ff"
-        font.pixelSize: 12 * root.k
-        font.underline: otherArea.containsMouse
+        y: root.designY(700)
+        width: form.width
+        horizontalAlignment: Text.AlignHCenter
+        wrapMode: Text.WordWrap
+        text: root.error ? root.error : keyboard.capsLock ? "Caps Lock is on" : ""
+        color: root.error ? "#ffb4c9" : "#ffe3a3"
+        font.pixelSize: 15 * root.k
         style: Text.Raised
         styleColor: "#c0060c1f"
-        MouseArea {
-            id: otherArea
-            anchors.fill: parent
-            anchors.margins: -6
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: {
-                root.manualLogin = !root.manualLogin
-                root.error = ""
-                if (root.manualLogin) usernameField.forceActiveFocus()
-                else password.forceActiveFocus()
-            }
-        }
+        Accessible.role: Accessible.AlertMessage
+        Accessible.name: text
     }
 
-    // --- bottom left: session and keyboard layout --------------------------------
-
-    Row {
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
-        anchors.margins: 28 * root.ui
-        spacing: 12 * root.ui
-
-        ComboBox {
-            id: session
-            objectName: "session"
-            model: sessionModel
-            textRole: "name"
-            currentIndex: sessionModel.lastIndex >= 0 ? sessionModel.lastIndex : 0
-            width: 210 * root.ui
-            height: 46 * root.ui
-            font.pixelSize: 14 * root.ui
-            Accessible.name: "Session"
-            KeyNavigation.tab: layoutButton.visible ? layoutButton : suspendButton
-
-            background: Rectangle {
-                radius: height / 2
-                color: session.pressed ? "#2a2658" : "#c0101530"
-                border.width: session.activeFocus ? 2 : 1
-                border.color: session.activeFocus ? "#cbbcff" : "#66b9aaff"
-            }
-            contentItem: Row {
-                leftPadding: 16 * root.ui
-                spacing: 10 * root.ui
-                Image {
-                    anchors.verticalCenter: parent.verticalCenter
-                    source: "assets/icons/gear.svg"
-                    width: 18 * root.ui
-                    height: width
-                    sourceSize: Qt.size(width * 2, height * 2)
-                }
-                Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: session.width - 90 * root.ui
-                    text: session.displayText
-                    color: "#f6f2ff"
-                    font: session.font
-                    elide: Text.ElideRight
-                }
-            }
-            indicator: Image {
-                x: session.width - width - 16 * root.ui
-                anchors.verticalCenter: parent.verticalCenter
-                source: "assets/icons/chevron.svg"
-                width: 16 * root.ui
-                height: width
-                sourceSize: Qt.size(width * 2, height * 2)
-                rotation: session.popup.visible ? 180 : 0
+    Popup {  // the account list behind "Switch user"
+        id: userMenu
+        objectName: "userMenu"
+        x: form.x
+        y: switchUser.y + switchUser.height + 8 * root.k
+        width: form.width
+        padding: 6 * root.k
+        modal: true
+        focus: true
+        onOpened: userList.forceActiveFocus()
+        background: Rectangle {
+            radius: 16 * root.k
+            color: "#f00b0f2b"
+            border.color: "#b9b0f0"
+        }
+        contentItem: ListView {
+            id: userList
+            implicitHeight: contentHeight
+            interactive: false
+            currentIndex: root.userIndex
+            keyNavigationEnabled: true
+            model: userModel.count + 1  // every account, then "Other user"
+            Keys.onReturnPressed: activate(currentIndex)
+            Keys.onEnterPressed: activate(currentIndex)
+            function activate(index) {
+                userMenu.close()
+                if (index < userModel.count)
+                    root.chooseUser(index)
+                else
+                    root.typeUsername()
             }
             delegate: ItemDelegate {
-                required property var model
                 required property int index
-                width: session.width
-                highlighted: session.highlightedIndex === index
+                readonly property var account: index < users.count ? users.itemAt(index) : null
+                width: userList.width
+                height: 44 * root.k
+                highlighted: ListView.isCurrentItem
+                onClicked: userList.activate(index)
                 contentItem: Text {
-                    text: model.name
-                    color: "#f6f2ff"
-                    font: session.font
-                    elide: Text.ElideRight
+                    text: account ? (account.userRealName || account.userName) : "Other user…"
+                    color: "#ffffff"
+                    font.pixelSize: 16 * root.k
+                    verticalAlignment: Text.AlignVCenter
+                    leftPadding: 10 * root.k
                 }
                 background: Rectangle {
-                    color: highlighted ? "#3a3470" : "transparent"
-                    radius: 8
+                    radius: 10 * root.k
+                    color: highlighted || hovered ? "#4d3f8f" : "transparent"
                 }
-            }
-            popup: Popup {
-                y: -implicitHeight - 8
-                width: session.width
-                implicitHeight: contentItem.implicitHeight + 12
-                padding: 6
-                contentItem: ListView {
-                    clip: true
-                    implicitHeight: contentHeight
-                    model: session.popup.visible ? session.delegateModel : null
-                    currentIndex: session.highlightedIndex
-                }
-                background: Rectangle {
-                    radius: 14
-                    color: "#f0101530"
-                    border.color: "#66b9aaff"
-                }
-            }
-        }
-
-        IconButton {
-            id: layoutButton
-            objectName: "layoutButton"
-            visible: keyboard.layouts.length > 1
-            size: 46 * root.ui
-            iconSource: Qt.resolvedUrl("assets/icons/keyboard.svg")
-            tip: visible ? "Keyboard layout: " + keyboard.layouts[keyboard.currentLayout].longName : ""
-            onClicked: keyboard.currentLayout = (keyboard.currentLayout + 1) % keyboard.layouts.length
-            KeyNavigation.tab: suspendButton
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.bottom
-                anchors.topMargin: 2
-                text: parent.visible ? keyboard.layouts[keyboard.currentLayout].shortName.toUpperCase() : ""
-                color: "#c9c0f0"
-                font.pixelSize: 10 * root.ui
             }
         }
     }
 
-    // --- bottom right: power ---------------------------------------------------
+    // --- bottom left: session ----------------------------------------------------
 
-    Row {
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.margins: 28 * root.ui
-        spacing: 14 * root.ui
+    IconButton {  // the gear opens the session menu, as in the design
+        id: gear
+        x: 67 * root.c - width / 2
+        y: root.height - 69 * root.c - height / 2
+        size: 50 * root.c
+        glyph: 0.56
+        iconSource: Qt.resolvedUrl("assets/icons/gear.svg")
+        tip: "Session"
+        focusPolicy: Qt.NoFocus
+        onClicked: session.popup.open()
+    }
 
-        IconButton {
-            id: suspendButton
-            objectName: "suspendButton"
-            visible: sddm.canSuspend
-            size: 52 * root.ui
-            iconSource: Qt.resolvedUrl("assets/icons/moon.svg")
-            tip: "Sleep"
-            onClicked: sddm.suspend()
-            KeyNavigation.tab: rebootButton
+    ComboBox {
+        id: session
+        objectName: "session"
+        model: sessionModel
+        textRole: "name"
+        currentIndex: sessionModel.lastIndex >= 0 ? sessionModel.lastIndex : 0
+        x: 99 * root.c
+        y: root.height - 69 * root.c - height / 2
+        // the design's pill is 166 wide; grow to fit names like "Plasma (Wayland)"
+        width: Math.min(Math.max(166 * root.c, sessionName.width + 64 * root.c), 320 * root.c)
+        height: 43 * root.c
+        leftPadding: 0  // the text's own padding below leaves room for the arrow
+        rightPadding: 0
+        font.pixelSize: 17 * root.c
+        Accessible.name: "Session"
+        TextMetrics {
+            id: sessionName
+            font: session.font
+            text: session.displayText
         }
-        IconButton {
-            id: rebootButton
-            objectName: "rebootButton"
-            visible: sddm.canReboot
-            size: 52 * root.ui
-            iconSource: Qt.resolvedUrl("assets/icons/restart.svg")
-            tip: "Restart"
-            onClicked: sddm.reboot()
-            KeyNavigation.tab: powerButton
+        KeyNavigation.tab: layoutButton.switchable ? layoutButton : suspendButton
+
+        background: Rectangle {
+            radius: height / 2
+            color: session.pressed ? "#cc2a2458" : "#b30b0f2b"
+            border.width: session.activeFocus ? 2 : 1.5
+            border.color: session.activeFocus ? "#e2dcff" : "#b9b0f0"
         }
-        IconButton {
-            id: powerButton
-            objectName: "powerButton"
-            visible: sddm.canPowerOff
-            size: 52 * root.ui
-            iconSource: Qt.resolvedUrl("assets/icons/power.svg")
-            tip: "Shut down"
-            onClicked: sddm.powerOff()
-            KeyNavigation.tab: root.manualLogin ? usernameField : password
+        contentItem: Text {
+            leftPadding: 20 * root.c
+            rightPadding: 40 * root.c
+            verticalAlignment: Text.AlignVCenter
+            text: session.displayText
+            color: "#ffffff"
+            font: session.font
+            elide: Text.ElideRight
+        }
+        indicator: Image {
+            x: session.width - width - 16 * root.c
+            anchors.verticalCenter: parent.verticalCenter
+            source: "assets/icons/chevron.svg"
+            width: 16 * root.c
+            height: width
+            sourceSize: Qt.size(width * 2, height * 2)
+            rotation: session.popup.visible ? 180 : 0
+        }
+        delegate: ItemDelegate {
+            required property var model
+            required property int index
+            width: Math.max(session.width, 260 * root.c)
+            highlighted: session.highlightedIndex === index
+            contentItem: Text {
+                text: model.name
+                color: "#ffffff"
+                font: session.font
+                elide: Text.ElideRight
+            }
+            background: Rectangle {
+                color: highlighted ? "#4d3f8f" : "transparent"
+                radius: 8
+            }
+        }
+        popup: Popup {
+            y: -implicitHeight - 8
+            width: Math.max(session.width, 260 * root.c)
+            implicitHeight: contentItem.implicitHeight + 12
+            padding: 6
+            contentItem: ListView {
+                clip: true
+                implicitHeight: contentHeight
+                model: session.popup.visible ? session.delegateModel : null
+                currentIndex: session.highlightedIndex
+            }
+            background: Rectangle {
+                radius: 14
+                color: "#f00b0f2b"
+                border.color: "#b9b0f0"
+            }
         }
     }
 
-    Rectangle {  // fade to the session's colour after a successful login
-        id: curtain
+    // --- bottom right: keyboard layout and power ------------------------------------
+
+    AbstractButton {
+        id: layoutButton
+        objectName: "layoutButton"
+        readonly property bool switchable: keyboard.layouts.length > 1
+        visible: keyboard.layouts.length > 0
+        x: root.width - 268 * root.c - width / 2
+        y: root.height - 69 * root.c - height / 2
+        width: 50 * root.c
+        height: width
+        enabled: switchable
+        focusPolicy: switchable ? Qt.StrongFocus : Qt.NoFocus
+        Accessible.name: visible ? "Keyboard layout: " + keyboard.layouts[keyboard.currentLayout].longName : ""
+        onClicked: keyboard.currentLayout = (keyboard.currentLayout + 1) % keyboard.layouts.length
+        Keys.onReturnPressed: clicked()
+        Keys.onSpacePressed: clicked()
+        KeyNavigation.tab: suspendButton
+        contentItem: Text {
+            text: layoutButton.visible ? keyboard.layouts[keyboard.currentLayout].shortName.toUpperCase() : ""
+            color: "#ffffff"
+            font.pixelSize: 17 * root.c
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
+        background: Rectangle {
+            radius: width / 2
+            color: layoutButton.hovered && layoutButton.switchable ? "#80241f55" : "transparent"
+            border.width: layoutButton.activeFocus ? 2 : 0
+            border.color: "#d6ccff"
+        }
+        ToolTip.visible: hovered && switchable
+        ToolTip.text: "Switch keyboard layout"
+    }
+
+    IconButton {
+        id: suspendButton
+        objectName: "suspendButton"
+        visible: sddm.canSuspend
+        x: root.width - 201 * root.c - width / 2
+        y: root.height - 69 * root.c - height / 2
+        size: 60 * root.c
+        iconSource: Qt.resolvedUrl("assets/icons/moon.svg")
+        tip: "Sleep"
+        onClicked: sddm.suspend()
+        KeyNavigation.tab: rebootButton
+    }
+    IconButton {
+        id: rebootButton
+        objectName: "rebootButton"
+        visible: sddm.canReboot
+        x: root.width - 134 * root.c - width / 2
+        y: root.height - 69 * root.c - height / 2
+        size: 60 * root.c
+        iconSource: Qt.resolvedUrl("assets/icons/restart.svg")
+        tip: "Restart"
+        onClicked: sddm.reboot()
+        KeyNavigation.tab: powerButton
+    }
+    IconButton {
+        id: powerButton
+        objectName: "powerButton"
+        visible: sddm.canPowerOff
+        x: root.width - 67 * root.c - width / 2
+        y: root.height - 69 * root.c - height / 2
+        size: 60 * root.c
+        iconSource: Qt.resolvedUrl("assets/icons/power.svg")
+        tip: "Shut down"
+        onClicked: sddm.powerOff()
+        KeyNavigation.tab: root.manualLogin ? usernameField : password
+    }
+
+    Rectangle {  // fade out after a successful login
         anchors.fill: parent
         color: "#060c1f"
         opacity: 0
