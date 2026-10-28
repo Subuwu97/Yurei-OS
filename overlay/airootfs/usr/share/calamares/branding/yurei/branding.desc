@@ -1,0 +1,47 @@
+# Yūrei branding for CachyOS's Calamares installer. yurei-calamares-patch
+# selects it when the installer starts. Images are made by
+# branding/build-assets.py; the slides' text is in show.qml.
+---
+componentName:  yurei
+
+welcomeStyleCalamares:   false
+welcomeExpandingLogo:   true
+windowExpanding:    normal
+windowSize: 1100px,560px
+windowPlacement: center
+sidebar: qml,bottom
+navigation: widget
+
+strings:
+    productName:         Yūrei
+    shortProductName:    Yūrei
+    version:             rolling
+    shortVersion:        rolling
+    versionedName:       Yūrei Linux
+    shortVersionedName:  Yūrei
+    # boot menu entries and the GRUB distributor: plain ASCII, because
+    # firmware and BIOS boot menus can't draw "ū"
+    bootloaderEntryName: Yurei
+    productUrl:          https://github.com/subuwu97/Y-rei-Linux
+    supportUrl:          https://github.com/subuwu97/Y-rei-Linux/discussions
+    knownIssuesUrl:      https://github.com/subuwu97/Y-rei-Linux/issues
+
+images:
+    productLogo:         "logo.png"
+    productIcon:         "icon.png"
+    productWelcome:      "welcome.png"
+
+# the boot animation's navy and the login screen's lavender
+style:
+   SidebarBackground:        "#0e1430"
+   SidebarText:              "#e6e1ff"
+   SidebarTextCurrent:       "#060c1f"
+   SidebarBackgroundCurrent: "#b9aaff"
+
+slideshow:               "show.qml"
+slideshowAPI: 2
+
+uploadServer :
+    type :    "http"
+    url :     "https://paste.cachyos.org"
+    sizeLimit : -1

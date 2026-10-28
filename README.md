@@ -23,9 +23,11 @@ running well.
 - Automatic NVIDIA/AMD/Intel driver setup with CachyOS's `chwd`.
 
 **Ready for everything else**
-- **Its own boot animation and login screen.** While the system starts, the mascot chases and
-  catches a spirit, then waves while booting finishes. The login screen is a moonlit shrine
-  with the mascot, the new wordmark, and real controls. See [docs/THEMES.md](docs/THEMES.md).
+- **Yūrei from the first screen.** While the system starts, the mascot chases and catches a
+  spirit, then waves while booting finishes, and keeps waving while the desktop loads. The login
+  screen is a moonlit shrine with the mascot, the new wordmark, and real controls. The live ISO
+  and the installer are themed too, with Yūrei slides while it installs.
+  See [docs/THEMES.md](docs/THEMES.md).
 - **A macOS-style desktop by default:** a slim top bar (Yūrei menu, app menus, centred clock,
   tray) and a floating dock (app grid, Files, Firefox, Terminal, Settings, Discover, Steam,
   Discord, Trash) over the mascot wallpaper. Use `yurei layout classic` for a single bottom
@@ -84,9 +86,12 @@ keys/                  public key of the [yurei] repository (see docs/REPOSITORY
 build.sh               builds the packages, fetches upstream, applies the overlay, builds the ISO
 ```
 
-During installation, CachyOS's Calamares installer runs one extra step,
-`yurei-install-target`. It installs the `yurei-*` packages shipped on the ISO
-into the new system and gives every user access to GameMode.
+On the live ISO, **Install Yūrei** (first in the dock) starts CachyOS's
+Calamares installer with Yūrei's branding. It runs one extra step,
+`yurei-install-target`, which installs the GPU's Vulkan drivers and the
+`yurei-*` packages shipped on the ISO into the new system, turns on the boot
+animation and login screen, names the boot menu entry, and gives every user
+access to GameMode.
 
 ### Getting the ISO
 
@@ -137,7 +142,7 @@ bumping `UPSTREAM_REF`.
 
 ## Status
 
-Early development (0.3). The overlay is tested against the pinned
+Early development (0.4). The overlay is tested against the pinned
 CachyOS profile and the CLI is tested with stubs. **The full ISO has not yet
 been built and booted.** That needs a CachyOS host or the ISO workflow. See
 [docs/ROADMAP.md](docs/ROADMAP.md).

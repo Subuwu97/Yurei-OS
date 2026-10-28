@@ -16,11 +16,11 @@ test:
 	python3 -m pytest -q tests
 	tests/test_overlay.sh
 
-# Runs the real themes: the SDDM theme in Qt 6 (needs PySide6) and Plymouth
-# in a virtual display (needs root, plymouth's X11 renderer, Xvfb, xdotool,
-# ImageMagick). See docs/THEMES.md.
+# Runs the real themes: the SDDM theme, Plasma splash and installer branding
+# in Qt 6 (needs PySide6), and Plymouth in a virtual display (needs root,
+# plymouth's X11 renderer, Xvfb, xdotool, ImageMagick). See docs/THEMES.md.
 test-themes:
-	python3 -m pytest -q tests/test_sddm_theme.py
+	python3 -m pytest -q tests/test_sddm_theme.py tests/test_branding_qml.py
 	sudo python3 tests/plymouth_check.py --out out/theme-screenshots
 
 # Regenerate theme assets from branding/source/ (needs ffmpeg, Pillow,

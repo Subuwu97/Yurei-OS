@@ -13,7 +13,8 @@
 - [x] Signed `[yurei]` pacman repository on GitHub Releases (active once a signing key is added)
 - [x] Logo, wallpaper (applied on first Plasma login) and boot menu splash
 - [x] SteamOS-style session switching: `yurei session`, "Switch to Desktop", "Return to Game Mode"
-- [ ] Build and boot the ISO; install on AMD, NVIDIA and Intel test machines
+- [x] Build the ISO (GitHub Actions, published as a pre-release)
+- [ ] Boot the ISO; install on AMD, NVIDIA and Intel test machines
 
 ## 0.3 — mascot branding
 - [x] Plymouth boot animation from the approved motion concept, with a waiting loop and a disk-unlock prompt
@@ -25,9 +26,15 @@
 - [ ] Test both on real hardware (NVIDIA early KMS, LUKS, multiple monitors)
 - [ ] Clean high-resolution login art with the mascot on its own layer
 - [ ] In-between poses for smoother running and leaping
-- [ ] Plasma colour scheme and window decorations to match; Calamares branding
+- [ ] Plasma colour scheme and window decorations to match
 
-## 0.4 — polish
+## 0.4 — Yūrei from the first screen
+- [x] Live ISO: boot animation, Plasma splash, mascot desktop and dock with an "Install Yūrei" launcher
+- [x] Installer (Calamares) branding: icon, wordmark, colours and Yūrei slides
+- [x] Plasma start-up splash that continues the boot animation (live and installed)
+- [x] Installed system: "Yurei" boot menu entry (Limine, GRUB), Yūrei Limine wallpaper, no CachyOS Hello autostart
+
+## 0.5 — polish
 - [ ] Yūrei welcome app (GUI for bundles, doctor and drivers)
 - [ ] Btrfs snapshots before every update, bootable from the boot menu
 - [ ] Handheld support (Legion Go, ROG Ally, Steam Deck): controller, TDP and orientation fixes

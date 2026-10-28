@@ -1,0 +1,25 @@
+/* Yūrei installer stylesheet. The colours come from branding.desc and the
+   desktop's colour scheme; this only sets sizes, as CachyOS's does. */
+
+QWidget {
+    font: 13px;
+}
+
+QDialogButtonBox {
+    dialogbuttonbox-buttons-have-icons: 0;
+}
+
+#debugButton {
+    background-color: none;
+    font: bold 8px;
+    color: #e6e1ff;
+    height: 32px;
+    padding: 0px;
+    border: none;
+}
+
+#aboutButton {
+    background-color: none;
+    font: 14px;
+    border: none;
+}

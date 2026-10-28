@@ -1,0 +1,17 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Yūrei Linux"
+            }
+        ],
+        "Description": "The Yūrei mascot waves while Plasma starts",
+        "Id": "org.yurei.splash",
+        "License": "GPL-3.0-or-later",
+        "Name": "Yūrei",
+        "Version": "1.0",
+        "Website": "https://github.com/subuwu97/Y-rei-Linux"
+    },
+    "X-Plasma-APIVersion": "2"
+}

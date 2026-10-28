@@ -17,8 +17,10 @@ reasonably want to know how the art they see was made.
 | `branding/source/Yurei-Desktop-Reference.png` | ChatGPT | Design reference for the default desktop |
 | `branding/icon.svg` | Drawn as SVG by Claude (Anthropic), after the ChatGPT logo | App menu, dock and system icon |
 
-Everything under `themes/`, the wallpaper package and `overlay/boot/splash.png`
-is derived from those files by `branding/build-assets.py`. It removes captions
+Everything under `themes/` (boot animation, login screen, Plasma splash), the
+wallpaper package, `overlay/boot/splash.png` and the installer's images in
+`overlay/airootfs/usr/share/calamares/branding/yurei/` are derived from those
+files by `branding/build-assets.py`. It removes captions
 and mock-up controls, cuts out the wordmark, picks animation frames, and so on.
 
 ### Provenance log

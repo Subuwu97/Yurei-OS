@@ -36,6 +36,12 @@ for helper in login-screen bootsplash; do
 done
 printf 'root:x:0:0::/root:/bin/bash\nana:x:1000:1000::/home/ana:/bin/bash\nnobody:x:65534:65534::/:/usr/bin/nologin\n' > "$tmp/root/etc/passwd"
 printf '[options]\n\n[cachyos]\nInclude = /etc/pacman.d/cachyos-mirrorlist\n' > "$tmp/root/etc/pacman.conf"
+# what CachyOS's installer leaves behind: Hello's autostart, and a Limine menu
+mkdir -p "$tmp/root/home/ana/.config/autostart" "$tmp/root/boot" "$tmp/root/usr/share/yurei"
+touch "$tmp/root/home/ana/.config/autostart/cachyos-hello.desktop" "$tmp/root/home/ana/.config/autostart/other.desktop"
+printf 'timeout: 5\nwallpaper: boot():/limine-splash.png\n\ncomment: machine-id=abc\n/+CachyOS\n  //linux-cachyos\n' > "$tmp/root/boot/limine.conf"
+echo cachyos > "$tmp/root/boot/limine-splash.png"
+echo yurei > "$tmp/root/usr/share/yurei/boot-splash.png"
 
 # throwaway signing key
 export GNUPGHOME=$tmp/gnupg
@@ -78,6 +84,12 @@ check "packages copied into target" '[[ -f $tmp/root/var/cache/pacman/pkg/yurei-
 check "packages installed in one transaction" 'grep -q "^pacman -U --noconfirm --needed .*yurei-gaming.*yurei-settings\|^pacman -U --noconfirm --needed .*yurei-settings.*yurei-gaming" "$tmp/chroot-calls"'
 check "regular users get GameMode" 'grep -qx "usermod -aG gamemode ana" "$tmp/chroot-calls"'
 check "system users skipped" '! grep -q "usermod -aG gamemode \(root\|nobody\)" "$tmp/chroot-calls"'
+check "Hello no longer starts itself" '[[ ! -e $tmp/root/home/ana/.config/autostart/cachyos-hello.desktop ]]'
+check "other autostart entries kept" '[[ -e $tmp/root/home/ana/.config/autostart/other.desktop ]]'
+check "Limine entry renamed" 'grep -qx "/+Yurei" "$tmp/root/boot/limine.conf" && ! grep -q CachyOS "$tmp/root/boot/limine.conf"'
+check "kernel entries untouched" 'grep -qx "  //linux-cachyos" "$tmp/root/boot/limine.conf"'
+check "Limine wallpaper is Yūrei's" 'grep -qx "wallpaper: boot():/yurei-splash.png" "$tmp/root/boot/limine.conf" &&
+    [[ $(cat "$tmp/root/boot/yurei-splash.png") == yurei ]]'
 check "no repo without a key" '! grep -q "^\[yurei\]" "$tmp/root/etc/pacman.conf"'
 
 : > "$tmp/chroot-calls"

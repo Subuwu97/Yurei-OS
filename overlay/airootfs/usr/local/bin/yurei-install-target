@@ -60,6 +60,25 @@ if [[ -x $root/usr/lib/yurei/bootsplash ]]; then
         echo "yurei-install-target: couldn't enable the boot animation" >&2
 fi
 
+# CachyOS Hello greets every new user from /etc/skel; the accounts made by
+# the installer already have a copy. Yūrei's desktop greets them instead
+# (yurei-settings keeps it out of /etc/skel). Hello stays in the app menu.
+rm -f "$root"/home/*/.config/autostart/cachyos-hello.desktop
+
+# Limine boot menu: CachyOS's installer names the entry "CachyOS" and sets
+# its own wallpaper. limine-entry-tool finds the entry by its machine-id
+# comment, so renaming it is safe. Plain ASCII: Limine's font has no "ū".
+splash=$root/usr/share/yurei/boot-splash.png
+for conf in "$root"/{boot,efi,boot/efi}/limine.conf; do
+    [[ -f $conf ]] || continue
+    sed -i 's|^/+CachyOS$|/+Yurei|' "$conf"
+    old=$(sed -n 's|^wallpaper: boot():/||p' "$conf" | head -n1)
+    if [[ -f $splash && -n $old && -f ${conf%/*}/$old ]]; then
+        cp "$splash" "${conf%/*}/yurei-splash.png"
+        sed -i 's|^wallpaper: boot():/.*|wallpaper: boot():/yurei-splash.png|' "$conf"
+    fi
+done
+
 # GameMode needs its group to raise game priority
 if arch-chroot "$root" getent group gamemode >/dev/null; then
     while IFS=: read -r name _ uid _; do

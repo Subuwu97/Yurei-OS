@@ -1,0 +1,13 @@
+# CachyOS Hello starts itself for every new user from /etc/skel. Yūrei greets
+# people with its own desktop instead; Hello stays in the app menu.
+[Trigger]
+Type = Package
+Operation = Install
+Operation = Upgrade
+Target = cachyos-hello
+Target = yurei-settings
+
+[Action]
+Description = Keeping CachyOS Hello out of autostart...
+When = PostTransaction
+Exec = /usr/bin/rm -f /etc/skel/.config/autostart/cachyos-hello.desktop

@@ -82,7 +82,12 @@ const launchers = dock.widgets()[1].config["General/launchers"].split(",");
 check("dock apps in design order", launchers.join() === ["preferred://filemanager", "preferred://browser",
       "applications:org.kde.konsole.desktop", "applications:systemsettings.desktop",
       "applications:org.kde.discover.desktop", "applications:steam.desktop"].join());
-check("apps that aren't installed are left out", !launchers.includes("applications:discord.desktop"));
+check("apps that aren't installed are left out", !launchers.includes("applications:discord.desktop") &&
+      !launchers.includes("applications:yurei-install.desktop"));
+ps = run(CACHYOS, { installed: ["yurei-install.desktop", "org.kde.konsole.desktop"] });
+check("live ISO: 'Install Yūrei' comes first in the dock",
+      ps.find((p) => p.location === "bottom").widgets()[1].config["General/launchers"].split(",")[0] ===
+      "applications:yurei-install.desktop");
 
 // --- users who arranged their own panels keep them ---------------------------
 const custom = [{ location: "bottom", widgets: [...CACHYOS[0].widgets, "org.kde.plasma.weather"] }];

@@ -129,6 +129,19 @@ EOF
         sed -i 's/CachyOS/Yurei/g' "$f"
     done
 
+    # the boot animation on the live system too: in its initramfs, and
+    # "quiet splash" on the normal entries (the nomodeset fallback stays verbose)
+    replace "$iso/airootfs/etc/mkinitcpio.conf.d/archiso.conf" \
+        'HOOKS=(base udev ' 'HOOKS=(base udev plymouth yurei-plymouth-text '
+    local entries=0
+    for f in "$iso"/grub/*.cfg "$iso"/syslinux/*.cfg "$iso"/efiboot/loader/entries/*.conf; do
+        if grep -q 'module_blacklist=pcspkr ' "$f"; then
+            sed -i '/nomodeset/!s/module_blacklist=pcspkr /&quiet splash /' "$f"
+            entries=$((entries + 1))
+        fi
+    done
+    (( entries > 0 )) || die "found no boot entries to add the boot animation to (upstream changed?)"
+
     # hook Yūrei's install step into the installer
     replace "$iso/airootfs/usr/local/bin/calamares-online.sh" \
         '    exec pkexec-wrapper calamares' \

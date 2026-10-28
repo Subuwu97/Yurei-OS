@@ -1,0 +1,16 @@
+# remove from airootfs!
+# Selects the Yūrei boot animation while the ISO is built, before mkinitcpio
+# (90-mkinitcpio-install.hook) puts it into the live system's initramfs.
+# The "remove from airootfs" line above makes CachyOS's cleanup hook delete
+# this file afterwards, as it does with its own build-time hooks.
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = yurei-plymouth-theme
+
+[Action]
+Description = Selecting the Yūrei boot animation for the live system...
+When = PostTransaction
+Depends = plymouth
+Exec = /usr/bin/plymouth-set-default-theme yurei

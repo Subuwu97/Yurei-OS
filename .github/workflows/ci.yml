@@ -25,6 +25,8 @@ jobs:
           pip install --break-system-packages PySide6-Essentials
       - name: SDDM theme in Qt 6
         run: python3 -m pytest -q tests/test_sddm_theme.py
+      - name: Plasma splash and installer branding in Qt 6
+        run: YUREI_SCREENSHOTS=theme-screenshots python3 -m pytest -q tests/test_branding_qml.py
       - name: Plymouth theme in the real daemon
         run: sudo python3 tests/plymouth_check.py --out theme-screenshots
       - uses: actions/upload-artifact@v4

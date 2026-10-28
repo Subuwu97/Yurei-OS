@@ -1,14 +1,21 @@
 # Boot animation, login screen and desktop
 
-Yūrei's branding has two themes, each in its own package, plus a default
-desktop (see [The desktop](#the-desktop) below):
+Yūrei's branding has two themes, each in its own package, plus a Plasma
+splash, a default desktop (see [The desktop](#the-desktop) below), and the
+live ISO and installer (see [The live ISO and the installer](#the-live-iso-and-the-installer)):
 
 | Package | What it is | Turn on / off |
 |---|---|---|
 | `yurei-plymouth-theme` | Boot and shutdown animation: the mascot spots a spirit, chases it, leaps, catches it and waves beside the wordmark. The wave loops for as long as booting takes. | `yurei bootsplash on` / `off` |
 | `yurei-sddm-theme` | Login screen: moonlit shrine and sakura, the mascot, the new wordmark, and real controls (password, "Switch user" with an account list, session menu, keyboard layout, sleep/restart/shut down). Accounts without their own picture get the design's moon-over-torii avatar. | `yurei login-screen yurei` / `plasma` |
 
-New installs from the Yūrei ISO get both automatically. The installer step
+After you log in, Plasma's start-up splash carries the boot animation on:
+the same waving loop, at the same size and place on the same navy, with a
+thin progress bar. It comes with `yurei-settings` (selected in
+`/etc/xdg/ksplashrc`; pick another in System Settings > Colours & Themes >
+Splash Screen).
+
+New installs from the Yūrei ISO get both themes automatically. The installer step
 runs the two commands above, and if either fails, the installation still
 completes.
 
@@ -59,6 +66,30 @@ yurei layout dock      # top bar and dock
 yurei layout classic   # CachyOS's single bottom panel
 ```
 
+## The live ISO and the installer
+
+* **Boot menu:** the wordmark and the waving mascot (`overlay/boot/splash.png`),
+  with the entries named "Yurei" (boot menus can't draw "ū").
+* **Boot:** the boot animation. `build.sh` adds Plymouth to the live
+  initramfs and `quiet splash` to the normal entries. The "Legacy Hardware
+  (nomodeset)" entry stays verbose, so problems stay visible there.
+* **Desktop:** the mascot wallpaper, the top bar and the dock, with
+  **Install Yūrei** first in the dock. It starts CachyOS's installer script,
+  as CachyOS Hello's install button does. Hello is still in the app menu but
+  no longer opens by itself.
+* **Installer:** Calamares with Yūrei branding
+  (`overlay/airootfs/usr/share/calamares/branding/yurei`): the moon-ghost icon,
+  the wordmark on the welcome page, the navy and lavender step bar along the
+  bottom, and five slides about Yūrei while it installs. `yurei-calamares-patch`
+  selects it each time the installer starts. The branding also names the new
+  system's GRUB entries.
+* **The installed system's boot menu:** with Limine (CachyOS's default), the
+  installer step renames CachyOS's entry to "Yurei" and swaps its wallpaper
+  for the boot menu art. Limine's tools find the entry by machine ID, so the
+  name change is safe.
+
+![Installer slides](previews/installer-slide.jpg)
+
 ## How this fits CachyOS
 
 These are the parts of the system the themes touch, as set up by CachyOS's
@@ -81,8 +112,8 @@ installer, which Yūrei uses unchanged:
 
   It then regenerates the initramfs and bootloader entries.
 * **Desktop.** KDE Plasma is unchanged; the themes cover only what comes before it.
-* **Live ISO.** It keeps CachyOS's login manager and has no Plymouth. The
-  themes apply to installed systems.
+* **Live ISO.** It has the boot animation and the Plasma splash, and logs
+  straight in (CachyOS's automatic login), so its login screen isn't shown.
 
 ## Previewing
 
@@ -226,6 +257,11 @@ Run it again whenever the source art changes.
   apps that aren't installed, keeping customised layouts, and both
   `yurei layout` modes.
 
+* **Plasma splash and installer branding.** The splash, the installer's slides
+  and its step bar ran in Qt 6 with stand-ins for Calamares' QML modules
+  (`tests/test_branding_qml.py`): placement matching the boot animation, the
+  animation running, every slide's picture and text, and no QML warnings.
+
 **Not yet tested (needs a CachyOS machine):**
 
 * the real SDDM greeter (`sddm-greeter-qt6`) and the switch from
@@ -236,7 +272,10 @@ Run it again whenever the source art changes.
 * a LUKS unlock in the real initramfs, and the fonts available there on Arch
 * the exact regeneration commands on current CachyOS, for example the name of
   `limine-update`. When a command is missing, the helper says what to run by hand.
-* the Calamares installer step end to end
+* the Calamares installer step end to end, and the branding in the real
+  Calamares (window size, fonts, the step bar)
+* the live ISO's boot animation on real hardware (it shows from the
+  firmware's framebuffer until the GPU driver loads)
 * the layout in a real Plasma 6 session: sizes on HiDPI screens, how the
   global menu looks, and the panel style (translucency, blur) under the
   system's Plasma theme

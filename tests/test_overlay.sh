@@ -54,6 +54,25 @@ else
 fi
 if grep -q 'CachyOS' "$iso/grub/grub.cfg"; then echo "FAIL leftover CachyOS in grub.cfg"; fail=1; fi
 
+# the boot animation on the live system
+expect "$iso/packages_desktop.x86_64" '^yurei-plymouth-theme$' "boot animation on the live ISO"
+expect "$iso/airootfs/etc/mkinitcpio.conf.d/archiso.conf" '^HOOKS=(base udev plymouth yurei-plymouth-text microcode ' \
+    "boot animation in the live initramfs"
+expect "$iso/airootfs/etc/pacman.d/hooks/85-yurei-live-plymouth.hook" 'remove from airootfs' "theme hook cleaned up after the build"
+for f in "$iso/grub/grub.cfg" "$iso/syslinux/archiso_sys-linux.cfg" "$iso"/efiboot/loader/entries/0[12]-*.conf; do
+    expect "$f" 'pcspkr quiet splash ' "boot animation on: ${f#"$iso"/}"
+done
+if grep -h 'nomodeset' "$iso"/grub/*.cfg "$iso"/syslinux/*.cfg "$iso"/efiboot/loader/entries/*.conf | grep -q splash; then
+    echo "FAIL nomodeset fallback should stay verbose"; fail=1
+else
+    echo "ok   nomodeset fallback stays verbose"
+fi
+
+# the installer's branding and the live desktop's install launcher
+expect "$iso/airootfs/usr/share/calamares/branding/yurei/branding.desc" '^componentName:  yurei$' "installer branding shipped"
+expect "$iso/airootfs/usr/share/applications/yurei-install.desktop" '^Exec=/usr/local/bin/calamares-online.sh$' \
+    "Install Yūrei launcher starts CachyOS's installer script"
+
 # profiledef.sh must still load the way mkarchiso loads it
 if (declare -A file_permissions=()
     # shellcheck disable=SC1091

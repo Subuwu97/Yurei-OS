@@ -8,8 +8,9 @@
 // interface with `yureiLayout` set, which applies that layout regardless.
 //
 //   top bar:  Yūrei menu · global menu ········ date and time ········ tray
-//   dock:     apps launcher | Files Firefox Terminal Settings Discover
-//             Steam Discord (running apps appear here too) | Trash
+//   dock:     apps launcher | (Install Yūrei, on the live ISO) Files Firefox
+//             Terminal Settings Discover Steam Discord (running apps appear
+//             here too) | Trash
 
 var requested = typeof yureiLayout !== "undefined" ? yureiLayout : "";
 
@@ -20,6 +21,8 @@ var STOCK_PANEL = ["org.kde.plasma.digitalclock", "org.kde.plasma.icontasks",
                    "org.kde.plasma.systemtray"];
 
 var DOCK_APPS = [
+    // only exists on the live ISO, where it's the way to install
+    "applications:yurei-install.desktop",
     "preferred://filemanager",
     "preferred://browser",
     "applications:org.kde.konsole.desktop",

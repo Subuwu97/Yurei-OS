@@ -53,3 +53,11 @@ def test_round_trips_file(tmp_path):
     path.write_text(yaml.safe_dump(settings()))
     mod.main(str(path))
     assert "shellprocess@yurei" in yaml.safe_load(path.read_text())["sequence"][1]["exec"]
+
+
+def test_selects_yurei_branding():
+    s = settings()
+    s["branding"] = "cachyos"
+    assert mod.patch(s)["branding"] == "yurei"
+    shipped = SCRIPT.parent.parent.parent / "share/calamares/branding" / mod.BRANDING / "branding.desc"
+    assert shipped.is_file()
