@@ -25,7 +25,7 @@ mkdir -p "$yurei/usr/local/sbin" "$yurei/etc/systemd/system"
 cat > "$yurei/usr/local/sbin/yurei-boot-check" <<'CHECK'
 #!/bin/sh
 # Boot test only (boot-test.sh): reports on the running system, powers off.
-sleep 5  # let the login prompt reach the console first
+sleep 10  # let the login prompt reach the console first
 {
     echo
     echo "YUREI-BOOT-OK"
@@ -65,12 +65,15 @@ mke2fs -q -t ext4 -L yurei -d "$yurei" "$image" 10G
 echo "  ($((SECONDS - start)) s)"
 
 # --- boot ----------------------------------------------------------------
+# The serial console is a plain log here, with no terminal behind it to
+# answer the screen-size queries systemd and agetty send to smarter ones;
+# "dumb" tells them not to ask (a real terminal or VM window answers them).
 accel=(-cpu max)
 [[ -w /dev/kvm ]] && accel=(-enable-kvm -cpu host)
 echo "booting $(basename "$kernel") (${accel[0]})"
 start=$SECONDS
 timeout 900 qemu-system-x86_64 "${accel[@]}" -m 2048 -smp 2 -nographic -no-reboot \
-    -kernel "$kernel" -append "root=/dev/vda rw console=ttyS0" \
+    -kernel "$kernel" -append "root=/dev/vda rw console=ttyS0 systemd.tty.term.ttyS0=dumb" \
     -drive "file=$image,format=raw,if=virtio" -nic user,model=virtio-net-pci \
     < /dev/null | tee "$out/serial.log" || true
 echo "  ($((SECONDS - start)) s)"
