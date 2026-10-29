@@ -14,6 +14,7 @@ test:
 	tests/test_install_target.sh
 	tests/test_theme_defaults.sh
 	tests/test_yurei_install.sh
+	tests/test_release.sh
 	tests/test_bootsplash.sh
 	node tests/test_desktop_layout.js
 	python3 -m pytest -q tests

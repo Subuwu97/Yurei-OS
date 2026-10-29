@@ -1,5 +1,8 @@
 NAME="Yūrei"
-PRETTY_NAME="Yūrei Linux"
+PRETTY_NAME="Yūrei Linux 26.10 (Amabie)"
+VERSION="26.10 (Amabie)"
+VERSION_ID=26.10
+VERSION_CODENAME=amabie
 ID=arch
 BUILD_ID=rolling
 VARIANT="Gaming"

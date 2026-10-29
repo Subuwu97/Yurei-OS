@@ -18,6 +18,8 @@ set -euo pipefail
 here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # shellcheck source=upstream.conf
 source "$here/upstream.conf"
+# shellcheck source=release.conf
+source "$here/release.conf"
 
 work=${WORK_DIR:-$here/work}
 out=${OUT_DIR:-$here/out}
@@ -158,7 +160,8 @@ build_iso() {
     [[ -n $iso ]] || die "buildiso.sh finished but produced no ISO"
     mkdir -p "$out"
     local name
-    name="yurei-$(date +%Y.%m.%d)-x86_64.iso"
+    # e.g. yurei-26.10-amabie-2026.10.29-x86_64.iso: the release, then the build date
+    name="yurei-${RELEASE_VERSION}-${RELEASE_CODENAME,,}-$(date +%Y.%m.%d)-x86_64.iso"
     sudo mv "$iso" "$out/$name"
     sudo chown "$(id -u):$(id -g)" "$out/$name"
     (cd "$out" && sha256sum "$name" > "$name.sha256")

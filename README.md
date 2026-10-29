@@ -140,7 +140,7 @@ On a CachyOS machine (it needs CachyOS's repositories and keys):
 sudo pacman -S --needed archiso mkinitcpio-archiso git squashfs-tools grub base-devel
 git clone https://github.com/subuwu97/Y-rei-Linux && cd Y-rei-Linux
 ./build.sh            # run as your normal user; asks for sudo when building the image
-# → out/yurei-YYYY.MM.DD-x86_64.iso (+ .sha256)
+# → out/yurei-26.10-amabie-YYYY.MM.DD-x86_64.iso (+ .sha256)
 ```
 
 Allow about 30 GB of free disk space and an hour.
@@ -170,10 +170,11 @@ CachyOS profile and the CLI is tested with stubs. **The full ISO has not yet
 been built and booted.** That needs a CachyOS host or the ISO workflow. See
 [docs/ROADMAP.md](docs/ROADMAP.md).
 
-## Experiment: an independent Yūrei
+## Releases
 
-The `experimental/independent` branch explores building Yūrei without any
-distribution underneath; see [docs/INDEPENDENT.md](docs/INDEPENDENT.md).
+Each release has a year.month version and a codename from Japanese folklore,
+in alphabetical order: the first is **26.10 "Amabie"**. Updates keep rolling
+in between. See [docs/CODENAMES.md](docs/CODENAMES.md).
 
 ## Artwork and branding
 

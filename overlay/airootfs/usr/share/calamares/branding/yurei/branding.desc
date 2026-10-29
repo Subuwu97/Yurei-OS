@@ -15,10 +15,10 @@ navigation: widget
 strings:
     productName:         Yūrei
     shortProductName:    Yūrei
-    version:             rolling
-    shortVersion:        rolling
-    versionedName:       Yūrei Linux
-    shortVersionedName:  Yūrei
+    version:             "26.10 (Amabie)"
+    shortVersion:        "26.10"
+    versionedName:       "Yūrei Linux 26.10 (Amabie)"
+    shortVersionedName:  "Yūrei 26.10"
     # boot menu entries and the GRUB distributor: plain ASCII, because
     # firmware and BIOS boot menus can't draw "ū"
     bootloaderEntryName: Yurei

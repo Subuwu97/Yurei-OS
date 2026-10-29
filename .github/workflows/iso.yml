@@ -77,9 +77,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          tag="iso-$(date +%Y.%m.%d)-${GITHUB_RUN_NUMBER}"
+          # shellcheck source=/dev/null
+          source release.conf
+          tag="iso-${RELEASE_VERSION}-$(date +%Y.%m.%d)-${GITHUB_RUN_NUMBER}"
           cat > notes.md <<EOF
-          Yūrei test build from ${GITHUB_SHA::7}. Not yet tested on real hardware.
+          **Yūrei ${RELEASE_VERSION} "${RELEASE_CODENAME}"**, test build from ${GITHUB_SHA::7}, $(date +%Y-%m-%d).
+          Not yet tested on real hardware.
 
           The ISO is split into parts because GitHub limits files to 2 GB. Download **every
           \`.part\` file, the \`.sha256\` file and the join script for your system** into one folder:
@@ -94,5 +97,6 @@ jobs:
           EOF
           cd out
           # shellcheck disable=SC2086 # PARTS is a list of names
-          gh release create "$tag" --prerelease --title "Yūrei test build $(date +%Y-%m-%d)" \
+          gh release create "$tag" --prerelease \
+              --title "Yūrei ${RELEASE_VERSION} ${RELEASE_CODENAME} (test build $(date +%Y-%m-%d))" \
               --notes-file ../notes.md $PARTS "$ISO.sha256" join-windows.bat join-linux-mac.sh
