@@ -1,8 +1,15 @@
 # Experiment: Yūrei as its own operating system
 
-> **Status: planning.** This branch (`experimental/independent`) explores
-> building Yūrei without any other distribution underneath. The released
-> Yūrei stays on CachyOS until this experiment can do everything it does.
+> **Status: stage 1 (toolchain) in progress.** This branch
+> (`experimental/independent`) builds Yūrei without any other distribution
+> underneath. The released Yūrei stays on CachyOS until this experiment can
+> do everything it does.
+
+**The goal:** Yūrei must keep going even if the distribution it's based on
+today stops development or disappears. **Chosen approach: B** (below). Every
+package is built from upstream source by Yūrei, and the tools it uses
+(pacman, makepkg, archiso, Calamares) are open source, so Yūrei builds and
+maintains its own copies of them too.
 
 ## What "its own OS" means
 
@@ -115,10 +122,22 @@ Each stage ends in something testable, built automatically in CI.
 6. **Running a distribution.** Update and security policy, signing keys,
    mirrors, a build queue that rebuilds what depends on an update.
 
-## What this branch will contain
+## Decisions so far
+
+| Decision | Choice | Why |
+|---|---|---|
+| Approach | B: Yūrei's own packages, built with existing open-source tools | Independence without years of reinventing tools |
+| C library | glibc | Steam and most games need it |
+| Target triplet | `x86_64-yurei-linux-gnu` | Yūrei's own; keeps the bootstrap apart from the host |
+| Sources | Official upstream release tarballs only, pinned by SHA-256 in `independent/bootstrap/sources.lock` | Nothing comes from another distribution |
+| Build power | Free GitHub Actions minutes for now | Decide (public repo, own build PC or paid CI) before stage 3 |
+| CPU target | Decided at stage 2 | x86-64-v3 like CachyOS is faster; v2 runs on older PCs |
+
+## What this branch contains
 
 * `docs/INDEPENDENT.md`: this plan, and the decisions as they're made
-* `independent/`: the build system as it grows. It starts with the stage 1
-  toolchain bootstrap once the approach is chosen.
+* `independent/bootstrap/`: stage 1, the cross toolchain (binutils, GCC,
+  Linux headers, glibc, libstdc++), built by the *Independent bootstrap*
+  workflow whenever it changes
 
 None of it touches the released Yūrei on CachyOS.

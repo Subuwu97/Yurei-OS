@@ -1,0 +1,41 @@
+name: Independent bootstrap
+
+# The experiment in docs/INDEPENDENT.md: builds Yūrei's toolchain from
+# upstream source (stage 1). Runs when the bootstrap changes on the
+# experimental branch, so it doesn't spend build minutes otherwise.
+on:
+  workflow_dispatch:
+  push:
+    branches: [experimental/independent]
+    paths: ["independent/**", ".github/workflows/bootstrap.yml"]
+
+jobs:
+  stage1:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    env:
+      YUREI: ${{ github.workspace }}/../yurei-root
+      SOURCES: ${{ github.workspace }}/../yurei-sources
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build tools from the host (only used to build, never shipped)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bison gawk texinfo m4 xz-utils python3
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.SOURCES }}
+          key: yurei-sources-${{ hashFiles('independent/bootstrap/sources.lock') }}
+
+      - name: Fetch and verify upstream sources
+        # TODO: remove ALLOW_UNPINNED once every sum in sources.lock is filled in
+        run: ALLOW_UNPINNED=1 independent/bootstrap/fetch.sh
+
+      - name: Stage 1 - cross toolchain
+        run: independent/bootstrap/stage1.sh
+
+      - name: Size of the result
+        if: always()
+        run: du -sh "$YUREI"/tools "$YUREI"/usr 2>/dev/null || true

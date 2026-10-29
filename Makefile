@@ -1,6 +1,6 @@
 .PHONY: test test-themes assets lint package prepare iso clean
 
-SHELL_SCRIPTS = build.sh tests/*.sh overlay/airootfs/usr/local/bin/yurei-install-target overlay/airootfs/usr/local/bin/yurei-install \
+SHELL_SCRIPTS = build.sh tests/*.sh independent/bootstrap/*.sh overlay/airootfs/usr/local/bin/yurei-install-target overlay/airootfs/usr/local/bin/yurei-install \
                 pkg/yurei-settings/files/usr/lib/yurei/session-select pkg/yurei-settings/files/usr/bin/yurei-return-to-gamemode \
                 pkg/yurei-settings/files/usr/lib/yurei/login-screen pkg/yurei-settings/files/usr/lib/yurei/bootsplash \
                 pkg/yurei-settings/files/usr/lib/yurei/theme-defaults \
