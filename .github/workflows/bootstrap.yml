@@ -1,7 +1,10 @@
 name: Independent bootstrap
 
-# docs/INDEPENDENT.md: builds Yūrei's toolchain from upstream source
-# (stage 1). Runs when the bootstrap changes, and on demand.
+# docs/INDEPENDENT.md: builds Yūrei's toolchain from upstream source.
+# Runs when the bootstrap changes, and on demand.
+#
+# The cross toolchain (stage1.sh, about an hour) is cached, keyed on the
+# script and its sources, so changing a later step doesn't rebuild it.
 on:
   workflow_dispatch:
   push:
@@ -9,9 +12,9 @@ on:
     paths: ["independent/**", ".github/workflows/bootstrap.yml"]
 
 jobs:
-  stage1:
+  toolchain:
     runs-on: ubuntu-24.04
-    timeout-minutes: 150
+    timeout-minutes: 300
     env:
       YUREI: ${{ github.workspace }}/../yurei-root
       SOURCES: ${{ github.workspace }}/../yurei-sources
@@ -27,14 +30,46 @@ jobs:
         with:
           path: ${{ env.SOURCES }}
           key: yurei-sources-${{ hashFiles('independent/bootstrap/sources.lock') }}
+          restore-keys: yurei-sources-
 
       - name: Fetch and verify upstream sources
         # TODO: remove ALLOW_UNPINNED once every sum in sources.lock is filled in
         run: ALLOW_UNPINNED=1 independent/bootstrap/fetch.sh
 
+      - name: Cache key for the cross toolchain
+        id: cross
+        run: |
+          key=$( { cat independent/bootstrap/stage1.sh independent/bootstrap/lib.sh
+                   awk '$5 == "cross"' independent/bootstrap/sources.lock; } | sha256sum | cut -c1-16)
+          echo "key=yurei-cross-$key" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache/restore@v4
+        id: cross-cache
+        with:
+          path: ${{ env.YUREI }}
+          key: ${{ steps.cross.outputs.key }}
+
       - name: Stage 1 - cross toolchain
-        run: independent/bootstrap/stage1.sh
+        if: steps.cross-cache.outputs.cache-hit != 'true'
+        run: |
+          independent/bootstrap/stage1.sh
+          rm -rf "$YUREI/build"
+
+      - uses: actions/cache/save@v4
+        if: steps.cross-cache.outputs.cache-hit != 'true'
+        with:
+          path: ${{ env.YUREI }}
+          key: ${{ steps.cross.outputs.key }}
+
+      - name: Stage 1 check (also on a cached toolchain)
+        if: steps.cross-cache.outputs.cache-hit == 'true'
+        run: independent/bootstrap/stage1.sh check
+
+      - name: Temporary tools
+        run: independent/bootstrap/temptools.sh
 
       - name: Size of the result
         if: always()
-        run: du -sh "$YUREI"/tools "$YUREI"/usr 2>/dev/null || true
+        run: |
+          rm -rf "$YUREI/build"
+          du -sh "$YUREI"/tools "$YUREI"/usr 2>/dev/null || true

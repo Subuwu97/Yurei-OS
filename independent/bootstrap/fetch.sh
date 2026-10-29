@@ -11,7 +11,7 @@ sources=${SOURCES:?set SOURCES to the download directory}
 mkdir -p "$sources"
 
 unpinned=0
-while read -r name version url sum; do
+while read -r name version url sum _step; do
     [[ -z $name || $name == \#* ]] && continue
     file=$sources/${url##*/}
     if [[ ! -f $file ]]; then

@@ -15,30 +15,8 @@
 #   YUREI=/path/to/root SOURCES=/path/to/sources ./stage1.sh
 set -euo pipefail
 
-here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-export YUREI=${YUREI:?set YUREI to the directory to build into}
-sources=${SOURCES:?set SOURCES to the directory fetch.sh downloaded into}
-export YUREI_TGT=x86_64-yurei-linux-gnu
-export LC_ALL=POSIX
-export PATH=$YUREI/tools/bin:$PATH
-export CONFIG_SITE=$YUREI/usr/share/config.site
-jobs=${JOBS:-$(nproc)}
-build=${BUILD_DIR:-$YUREI/build}
-
-version() { awk -v n="$1" '$1 == n {print $2}' "$here/sources.lock"; }
-GCC_VERSION=$(version gcc)
-GLIBC_VERSION=$(version glibc)
-
-msg() { printf '\n\e[1;35m==>\e[0m \e[1m%s\e[0m\n' "$*"; }
-
-# unpack NAME: a fresh source tree for NAME in $build, prints its path
-unpack() {
-    local tarball
-    tarball=$(ls "$sources/$1-$(version "$1")".tar.*)
-    rm -rf "${build:?}/$1-$(version "$1")"
-    tar -xf "$tarball" -C "$build"
-    echo "$build/$1-$(version "$1")"
-}
+# shellcheck source=independent/bootstrap/lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 # the minimal directory layout: /bin, /lib and /sbin point into /usr
 layout() {
@@ -151,15 +129,4 @@ check() {
 }
 
 STEPS=(layout binutils_pass1 gcc_pass1 linux_headers glibc_build libstdcxx check)
-
-main() {
-    local steps=("${@:-${STEPS[@]}}") step start
-    for step in "${steps[@]}"; do
-        [[ " ${STEPS[*]} " == *" $step "* ]] || { echo "unknown step: $step" >&2; exit 2; }
-        start=$SECONDS
-        (layout; "$step")
-        printf '   (%s took %d s)\n' "$step" $((SECONDS - start))
-    done
-}
-
-main "$@"
+run_steps "$@"

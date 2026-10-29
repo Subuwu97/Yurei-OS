@@ -1,13 +1,29 @@
-# Upstream sources for the stage 1 toolchain: name, version, URL, SHA-256.
-# Only official upstream release tarballs; no other distribution's packages.
+# Upstream sources for the bootstrap: name, version, URL, SHA-256, and the
+# step that first uses it (cross = stage1.sh, temp = temptools.sh). Only
+# official upstream release tarballs; no other distribution's packages.
 #
 # A sum of "-" means not yet pinned: fetch.sh downloads it, prints its sum
 # and fails, so the sum can be checked against upstream's signature and
 # filled in here. After that, any change to a tarball is caught.
-binutils  2.45    https://ftp.gnu.org/gnu/binutils/binutils-2.45.tar.xz  -
-gcc       15.2.0  https://ftp.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz  -
-gmp       6.3.0   https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz  -
-mpfr      4.2.2   https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.2.tar.xz  -
-mpc       1.3.1   https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz  -
-glibc     2.42    https://ftp.gnu.org/gnu/glibc/glibc-2.42.tar.xz  -
-linux     6.18    https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.tar.xz  -
+binutils  2.45    https://ftp.gnu.org/gnu/binutils/binutils-2.45.tar.xz  -  cross
+gcc       15.2.0  https://ftp.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz  -  cross
+gmp       6.3.0   https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz  -  cross
+mpfr      4.2.2   https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.2.tar.xz  -  cross
+mpc       1.3.1   https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz  -  cross
+glibc     2.42    https://ftp.gnu.org/gnu/glibc/glibc-2.42.tar.xz  -  cross
+linux     6.18    https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.tar.xz  -  cross
+m4        1.4.20  https://ftp.gnu.org/gnu/m4/m4-1.4.20.tar.xz  -  temp
+ncurses   6.5     https://ftp.gnu.org/gnu/ncurses/ncurses-6.5.tar.gz  -  temp
+bash      5.3     https://ftp.gnu.org/gnu/bash/bash-5.3.tar.gz  -  temp
+coreutils 9.7     https://ftp.gnu.org/gnu/coreutils/coreutils-9.7.tar.xz  -  temp
+diffutils 3.12    https://ftp.gnu.org/gnu/diffutils/diffutils-3.12.tar.xz  -  temp
+file      5.46    https://astron.com/pub/file/file-5.46.tar.gz  -  temp
+findutils 4.10.0  https://ftp.gnu.org/gnu/findutils/findutils-4.10.0.tar.xz  -  temp
+gawk      5.3.2   https://ftp.gnu.org/gnu/gawk/gawk-5.3.2.tar.xz  -  temp
+grep      3.12    https://ftp.gnu.org/gnu/grep/grep-3.12.tar.xz  -  temp
+gzip      1.14    https://ftp.gnu.org/gnu/gzip/gzip-1.14.tar.xz  -  temp
+make      4.4.1   https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz  -  temp
+patch     2.8     https://ftp.gnu.org/gnu/patch/patch-2.8.tar.xz  -  temp
+sed       4.9     https://ftp.gnu.org/gnu/sed/sed-4.9.tar.xz  -  temp
+tar       1.35    https://ftp.gnu.org/gnu/tar/tar-1.35.tar.xz  -  temp
+xz        5.8.1   https://github.com/tukaani-project/xz/releases/download/v5.8.1/xz-5.8.1.tar.xz  -  temp

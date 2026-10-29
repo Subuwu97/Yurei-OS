@@ -135,8 +135,21 @@ Each stage ends in something testable, built automatically in CI.
 ## What this repository contains
 
 * `docs/INDEPENDENT.md`: this plan, and the decisions as they're made
-* `independent/bootstrap/`: stage 1, the cross toolchain (binutils, GCC,
-  Linux headers, glibc, libstdc++), built by the *Independent bootstrap*
-  workflow whenever it changes
+* `independent/bootstrap/`, built by the *Independent bootstrap* workflow
+  whenever it changes:
+  * `stage1.sh`: the cross toolchain (binutils, GCC, Linux headers, glibc,
+    libstdc++)
+  * `temptools.sh`: the basic tools (bash, coreutils, make, sed, tar, xz,
+    …) and a native binutils and GCC, all built for Yūrei with that
+    toolchain. With them, the next step can build Yūrei from inside a
+    chroot, without the host's programs.
+
+## Naming
+
+The system is simply **Yūrei** ("Yūrei Linux" in full), like Debian, Arch
+or Fedora. "Yurei-OS" is only this repository's name. Machine-readable IDs
+use `yurei` (`ID=yurei` in os-release, the `x86_64-yurei-linux-gnu`
+toolchain), and boot menus show "Yurei", because they can't draw "ū".
+Releases are rolling, with dated ISOs (`2026.10.28`).
 
 None of it touches the released Yūrei on CachyOS.
