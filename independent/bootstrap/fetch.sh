@@ -41,13 +41,14 @@ download() {
     return 1
 }
 
-unpinned=0
+unpinned=0 missing=()
 while read -r name version url sum _step; do
     [[ -z $name || $name == \#* ]] && continue
     file=$sources/${url##*/}
     if [[ ! -f $file ]]; then
         echo "fetching $name $version"
-        download "$url" "$file"
+        # keep going, so one run lists every source that can't be had
+        download "$url" "$file" || { missing+=("$name $version"); continue; }
     fi
     actual=$(sha256sum "$file" | cut -d' ' -f1)
     if [[ $sum == - ]]; then
@@ -62,6 +63,10 @@ while read -r name version url sum _step; do
     fi
 done < "$here/sources.lock"
 
+if (( ${#missing[@]} )); then
+    printf "couldn't download: %s\n" "${missing[@]}" >&2
+    exit 1
+fi
 if (( unpinned )); then
     echo "Some sources aren't pinned yet; fill their sums into sources.lock." >&2
     [[ ${ALLOW_UNPINNED:-} == 1 ]] || exit 1

@@ -39,6 +39,10 @@ jobs:
           restore-keys: yurei-sources-
 
       - name: Fetch and verify upstream sources
+        # stage 2b's sources from hosts the dev machine can't reach get their
+        # sums from this run; pin them in sources.lock and drop this again
+        env:
+          ALLOW_UNPINNED: "1"
         run: independent/bootstrap/fetch.sh
 
       - name: Cache key for the cross toolchain
@@ -195,9 +199,49 @@ jobs:
         if: steps.base2-cache.outputs.cache-hit != 'true'
         run: rm -f /home/runner/yurei-base2.tar.zst /home/runner/yurei-base.tar.zst /home/runner/yurei-chroot.tar.zst
 
+      # ... and after part 3.
+      - name: Cache key for the bootable system
+        id: base3
+        run: |
+          key=$( { echo "${{ steps.base2.outputs.key }}"
+                   cd independent/bootstrap
+                   cat base3-inside.sh
+                   awk '$5 == "base3"' sources.lock; } | sha256sum | cut -c1-16)
+          echo "key=yurei-base3-$key" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache/restore@v4
+        id: base3-cache
+        with:
+          path: /home/runner/yurei-base3.tar.zst
+          key: ${{ steps.base3.outputs.key }}
+
+      - name: Unpack the cached bootable system
+        if: steps.base3-cache.outputs.cache-hit == 'true'
+        run: |
+          sudo rm -rf "$YUREI" && sudo mkdir -p "$YUREI"
+          sudo tar --zstd -xpf /home/runner/yurei-base3.tar.zst --numeric-owner -C "$YUREI"
+          rm -f /home/runner/yurei-*.tar.zst
+
       - name: Stage 2a, part 3 - systemd, D-Bus and Yūrei's kernel
+        if: steps.base3-cache.outputs.cache-hit != 'true'
         run: |
           sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh base3-inside.sh
+          sudo rm -rf "$YUREI/build"
+          rm -f /home/runner/yurei-*.tar.zst
+          sudo tar --zstd -cpf /home/runner/yurei-base3.tar.zst --numeric-owner -C "$YUREI" .
+          sudo chown "$(id -u):$(id -g)" /home/runner/yurei-base3.tar.zst
+          ls -lh /home/runner/yurei-base3.tar.zst
+
+      - uses: actions/cache/save@v4
+        if: steps.base3-cache.outputs.cache-hit != 'true'
+        with:
+          path: /home/runner/yurei-base3.tar.zst
+          key: ${{ steps.base3.outputs.key }}
+
+      - name: Stage 2b - pacman, signed packages from Yūrei's own repository
+        run: |
+          rm -f /home/runner/yurei-*.tar.zst
+          sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh pacman-inside.sh
           sudo rm -rf "$YUREI/build"
 
       - name: Boot Yūrei in QEMU

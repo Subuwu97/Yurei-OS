@@ -6,7 +6,7 @@
 > tools, then systemd 257.8 and its own kernel, Linux 6.18.0-yurei), and
 > the result boots in QEMU to `yurei login:` with no failed services and
 > its network configured, in about 14 seconds. No other distribution's
-> packages are involved. Next: stage 2b, pacman.
+> packages are involved. Under way: stage 2b, pacman.
 >
 > Timings: cross toolchain 16 min, temporary tools 18–31 min, chroot step
 > 11 min, stage 2a part 1 27–34 min, part 2 18–26 min, part 3 19 min (the
@@ -176,6 +176,10 @@ Each stage ends in something testable, built automatically in CI.
   * `base3-inside.sh`: stage 2a, part 3, systemd, D-Bus, the final
     procps-ng and util-linux, the basic system settings, and Yūrei's own
     Linux kernel
+  * `pacman-inside.sh`: stage 2b, pacman and makepkg with GnuPG, gpgme,
+    libarchive, curl and fakeroot. Its check builds a package as an
+    ordinary user, signs it, publishes it in a signed repository and
+    installs it with pacman, and makes sure an unsigned one is refused
   * `boot-test.sh`: makes a disk image of the system and boots it in QEMU
     (the stage 2 milestone); a check added to the test image only reports
     what's running once the login prompt is up, and powers off
