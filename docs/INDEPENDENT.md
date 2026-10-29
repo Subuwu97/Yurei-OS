@@ -10,14 +10,16 @@
 > unsigned package is refused. The result boots in QEMU to `yurei login:`
 > with no failed services, in about 14 seconds. No other distribution's
 > packages are involved. Under way: stage 2c, every part of Yūrei as its
-> own signed package. The first ten (the base layout, glibc, the
-> compression libraries, ncurses, readline and Bash) build in 9 minutes
-> into a signed `[yurei]` repository (21 MB), and pacman alone installs a
-> working system with a shell from it.
+> own signed package. Two batches so far, 17 recipes: the base layout,
+> glibc, the compression libraries, ncurses, readline and Bash, then the
+> toolchain (binutils, GMP, MPFR, MPC, libxcrypt, GCC 15.2.0). They build
+> into a signed `[yurei]` repository (124 MB), and pacman alone installs a
+> system from it that compiles and runs C and C++ programs. Unchanged
+> recipes are reused between runs.
 >
 > Timings: cross toolchain 16 min, temporary tools 18–31 min, chroot step
 > 11 min, stage 2a part 1 27–34 min, part 2 18–26 min, part 3 19 min (the
-> kernel 13.5 of them), stage 2b 3–5 min, stage 2c 9 min so far, boot
+> kernel 13.5 of them), stage 2b 3–5 min, stage 2c 33 min from scratch, boot
 > test under 30 s. Each
 > finished stage is cached, so a change only rebuilds from where it takes
 > effect.
