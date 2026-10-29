@@ -35,8 +35,9 @@ p = pwd.getpwnam(sys.argv[1])
 os.setgroups([])
 os.setgid(p.pw_gid)
 os.setuid(p.pw_uid)
-# UTF-8, so the non-ASCII file names in some sources (GCC) unpack
-os.environ.update(HOME=p.pw_dir, USER=p.pw_name, LOGNAME=p.pw_name, LANG="C.UTF-8")
+# UTF-8 (chroot.sh sets LC_ALL=POSIX), so the non-ASCII file names in
+# some sources (GCC) unpack
+os.environ.update(HOME=p.pw_dir, USER=p.pw_name, LOGNAME=p.pw_name, LANG="C.UTF-8", LC_ALL="C.UTF-8")
 os.chdir(p.pw_dir)
 os.execvp(sys.argv[2], sys.argv[2:])' "$user" "$@"
 }

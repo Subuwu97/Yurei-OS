@@ -261,16 +261,28 @@ jobs:
           mkdir -p /home/runner/yurei-repo
           sudo cp "$YUREI"/srv/yurei/repo/* /home/runner/yurei-repo/
           sudo chown -R "$(id -u):$(id -g)" /home/runner/yurei-repo
-          # this run's packages and recipe hashes, for the next run
-          rm -rf /home/runner/yurei-pkgcache && mkdir -p /home/runner/yurei-pkgcache
-          cp /home/runner/yurei-repo/*.pkg.tar.zst /home/runner/yurei-pkgcache/
-          sudo cp -r "$YUREI/srv/yurei/stamps" /home/runner/yurei-pkgcache/
-          sudo chown -R "$(id -u):$(id -g)" /home/runner/yurei-pkgcache
-          # the build's files aren't part of the system that's booted next
-          sudo rm -rf "$YUREI/srv/yurei"
           du -sh /home/runner/yurei-repo
 
+      # This run's packages and recipe hashes, for the next run; also after
+      # a failure, so the packages that did build aren't built again.
+      - name: Keep the packages for the next run
+        id: keep
+        if: always()
+        run: |
+          rm -rf /home/runner/yurei-pkgcache && mkdir -p /home/runner/yurei-pkgcache
+          if sudo test -d "$YUREI/srv/yurei/stamps"; then
+            sudo sh -c 'cp "$1"/srv/yurei/repo/*.pkg.tar.zst "$2"/ 2>/dev/null; cp -r "$1"/srv/yurei/stamps "$2"/' \
+              sh "$YUREI" /home/runner/yurei-pkgcache
+            sudo chown -R "$(id -u):$(id -g)" /home/runner/yurei-pkgcache
+            # only a cache with packages in it replaces the last good one
+            compgen -G '/home/runner/yurei-pkgcache/stamps/*.hash' > /dev/null && echo "save=true" >> "$GITHUB_OUTPUT"
+          fi
+          ls /home/runner/yurei-pkgcache/stamps 2>/dev/null | sed -n 's/\.hash$//p' | tr '\n' ' '
+          # the build's files aren't part of the system that's booted next
+          sudo rm -rf "$YUREI/srv/yurei"
+
       - uses: actions/cache/save@v4
+        if: always() && steps.keep.outputs.save == 'true'
         with:
           path: /home/runner/yurei-pkgcache
           key: yurei-pkgs-${{ github.run_id }}
