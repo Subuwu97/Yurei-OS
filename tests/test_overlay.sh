@@ -68,6 +68,10 @@ else
     echo "ok   nomodeset fallback stays verbose"
 fi
 
+# CachyOS's GPU driver check must not time out while the boot animation runs
+dropin=$here/pkg/yurei-settings/files/usr/lib/systemd/system/drm-module-load.target.d/50-yurei-bootsplash.conf
+expect "$dropin" '^JobTimeoutSec=120s$' "GPU driver check waits for the boot animation"
+
 # the installer's branding and the live desktop's install launcher
 expect "$iso/airootfs/usr/share/calamares/branding/yurei/branding.desc" '^componentName:  yurei$' "installer branding shipped"
 expect "$iso/airootfs/usr/share/applications/yurei-install.desktop" '^Exec=konsole .* -e /usr/local/bin/yurei-install$' \

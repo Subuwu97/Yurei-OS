@@ -204,6 +204,14 @@ Nothing is overwritten without a backup:
   run `sudo yurei login-screen plasma`, then `sudo reboot`. If the `yurei`
   command isn't available, `sudo systemctl enable --force plasmalogin.service`
   does the same thing.
+* **"The current boot has failed! Failed to load your GPU driver(s)":**
+  CachyOS's GPU check waits for the boot animation to finish, but used to
+  give up after 30 seconds, which a slow USB stick or disk can exceed.
+  `yurei-settings` gives it 120 seconds
+  (`/usr/lib/systemd/system/drm-module-load.target.d/50-yurei-bootsplash.conf`).
+  To boot without the animation for once, add `plymouth.enable=0` to the
+  boot entry: press `e` in the boot menu, add it to the end of the options
+  line, then press Enter (or Ctrl+X in GRUB).
 * **The boot animation hides a problem:** press **Esc** during boot to see
   the text log. To skip it for one boot, edit the boot entry in the boot menu
   and delete `splash`. Then run `yurei bootsplash off`.
