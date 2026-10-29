@@ -1,17 +1,22 @@
 # Experiment: Yūrei as its own operating system
 
-> **Status: stage 2a done: Yūrei boots on its own.** On GitHub's runners,
-> Yūrei's toolchain builds from upstream source, Yūrei rebuilds itself
-> inside a chroot (glibc 2.42, binutils 2.45, GCC 15.2.0, then the core
-> tools, then systemd 257.8 and its own kernel, Linux 6.18.0-yurei), and
-> the result boots in QEMU to `yurei login:` with no failed services and
-> its network configured, in about 14 seconds. No other distribution's
-> packages are involved. Under way: stage 2b, pacman.
+> **Status: stage 2b done: Yūrei installs signed packages with pacman.**
+> On GitHub's runners, Yūrei's toolchain builds from upstream source,
+> Yūrei rebuilds itself inside a chroot (glibc 2.42, binutils 2.45, GCC
+> 15.2.0, the core tools, systemd 257.8 and its own kernel, Linux
+> 6.18.0-yurei), then builds pacman 7.0.0 with GnuPG 2.4.8. The check
+> builds a package with makepkg, signs it, publishes it in a signed
+> repository and installs it with pacman trusting only that key; an
+> unsigned package is refused. The result boots in QEMU to `yurei login:`
+> with no failed services, in about 14 seconds. No other distribution's
+> packages are involved. Next: stage 2c, every part of Yūrei as its own
+> signed package.
 >
 > Timings: cross toolchain 16 min, temporary tools 18–31 min, chroot step
 > 11 min, stage 2a part 1 27–34 min, part 2 18–26 min, part 3 19 min (the
-> kernel 13.5 of them), boot test under 30 s. Each finished stage is
-> cached, so a change only rebuilds from where it takes effect.
+> kernel 13.5 of them), stage 2b 3–5 min, boot test under 30 s. Each
+> finished stage is cached, so a change only rebuilds from where it takes
+> effect.
 
 **The goal:** Yūrei must keep going even if the distribution it's based on
 today stops development or disappears. **Chosen approach: B** (below). Every
