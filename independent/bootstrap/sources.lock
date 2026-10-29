@@ -86,4 +86,4 @@ gpgme     1.24.3  https://www.gnupg.org/ftp/gcrypt/gpgme/gpgme-1.24.3.tar.bz2  b
 libarchive 3.8.1  https://github.com/libarchive/libarchive/releases/download/v3.8.1/libarchive-3.8.1.tar.xz  19f917d42d530f98815ac824d90c7eaf648e9d9a50e4f309c812457ffa5496b5  pacman
 curl      8.15.0  https://curl.se/download/curl-8.15.0.tar.xz  6cd0a8a5b126ddfda61c94dc2c3fc53481ba7a35461cf7c5ab66aa9d6775b609  pacman
 fakeroot  1.37.1.1  https://deb.debian.org/debian/pool/main/f/fakeroot/fakeroot_1.37.1.1.orig.tar.gz  86b0b75bf319ca42e525c098675b6ed10a06b76e69ec9ccf20ef5e03883b3a14  pacman
-pacman    7.0.0   https://gitlab.archlinux.org/pacman/pacman/-/releases/v7.0.0/downloads/pacman-7.0.0.tar.xz  -  pacman
+pacman    7.0.0   https://gitlab.archlinux.org/pacman/pacman/-/releases/v7.0.0/downloads/pacman-7.0.0.tar.xz  61cbd445d1381b4b184bc7c4e2791f07a79f0f2807b7c600399d0d08e8cd28cf  pacman
