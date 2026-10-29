@@ -1,12 +1,17 @@
 # Experiment: Yūrei as its own operating system
 
-> **Status: stage 2a, part 3 under way.** On GitHub's runners, Yūrei's
-> toolchain builds from upstream source, then Yūrei rebuilds itself inside
-> a chroot: the final glibc 2.42, binutils 2.45 and GCC 15.2.0 (part 1),
-> then the core tools, Python 3.13 with OpenSSL among them (part 2). Part 3
-> adds systemd and Yūrei's own kernel and boots the result in QEMU.
+> **Status: stage 2a done: Yūrei boots on its own.** On GitHub's runners,
+> Yūrei's toolchain builds from upstream source, Yūrei rebuilds itself
+> inside a chroot (glibc 2.42, binutils 2.45, GCC 15.2.0, then the core
+> tools, then systemd 257.8 and its own kernel, Linux 6.18.0-yurei), and
+> the result boots in QEMU to `yurei login:` with no failed services and
+> its network configured, in about 14 seconds. No other distribution's
+> packages are involved. Next: stage 2b, pacman.
+>
 > Timings: cross toolchain 16 min, temporary tools 18–31 min, chroot step
-> 11 min, stage 2a part 1 27 min, part 2 18 min, each cached between runs.
+> 11 min, stage 2a part 1 27–34 min, part 2 18–26 min, part 3 19 min (the
+> kernel 13.5 of them), boot test under 30 s. Each finished stage is
+> cached, so a change only rebuilds from where it takes effect.
 
 **The goal:** Yūrei must keep going even if the distribution it's based on
 today stops development or disappears. **Chosen approach: B** (below). Every
