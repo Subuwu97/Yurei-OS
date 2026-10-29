@@ -1,11 +1,11 @@
 # Experiment: Yūrei as its own operating system
 
-> **Status: stage 1 (toolchain) in progress.** On GitHub's runners, the
-> cross toolchain builds from upstream source in about 16 minutes (GCC
-> 15.2.0, glibc 2.42), and the temporary tools in 18; the chroot step,
-> where Yūrei first builds by itself, is next. This repository, Yurei-OS,
-> builds Yūrei without any other distribution underneath. The released Yūrei
-> stays on CachyOS until this one can do everything it does.
+> **Status: stage 1 done; stage 2 (base system) next.** On GitHub's
+> runners, Yūrei's toolchain builds from upstream source, then Yūrei builds
+> its own tools inside a chroot, with only the host's kernel left. Timings:
+> cross toolchain 16 min (cached between runs), temporary tools 18–31 min,
+> chroot step 11 min. Built so far: GCC 15.2.0, glibc 2.42, binutils 2.45,
+> bash 5.3, perl 5.42.0, Python 3.13.7 and the basic command-line tools.
 
 **The goal:** Yūrei must keep going even if the distribution it's based on
 today stops development or disappears. **Chosen approach: B** (below). Every
@@ -113,6 +113,14 @@ Each stage ends in something testable, built automatically in CI.
    reproducibly.*
 2. **Base system** (~300 packages). Kernel, systemd, pacman, networking, a
    shell. *Milestone: a Yūrei image boots to a login prompt in QEMU, in CI.*
+   In three steps:
+   * **2a.** Inside the chroot, build the final toolchain and core system
+     directly (glibc, GCC, coreutils, systemd, the kernel and so on).
+   * **2b.** Build pacman and makepkg, with their libraries (libarchive,
+     curl, OpenSSL, GnuPG).
+   * **2c.** Rebuild everything from Yūrei's own recipes (PKGBUILDs) as
+     signed packages in Yūrei's repository. From then on, the system is
+     installed and updated with pacman, from Yūrei's packages only.
 3. **Graphics and desktop.** LLVM, Mesa, Wayland, Qt 6, KDE Plasma. *Milestone:
    the Plasma desktop with the Yūrei theme in a VM.*
 4. **Gaming.** The 32-bit libraries, Vulkan drivers (AMD, Intel, NVIDIA),

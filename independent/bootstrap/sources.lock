@@ -30,9 +30,9 @@ patch     2.8     https://ftp.gnu.org/gnu/patch/patch-2.8.tar.xz  f87cee69eec2b4
 sed       4.9     https://ftp.gnu.org/gnu/sed/sed-4.9.tar.xz  6e226b732e1cd739464ad6862bd1a1aba42d7982922da7a53519631d24975181  temp
 tar       1.35    https://ftp.gnu.org/gnu/tar/tar-1.35.tar.xz  4d62ff37342ec7aed748535323930c7cf94acf71c3591882b26a7ea50f3edc16  temp
 xz        5.8.1   https://github.com/tukaani-project/xz/releases/download/v5.8.1/xz-5.8.1.tar.xz  0b54f79df85912504de0b14aec7971e3f964491af1812d83447005807513cd9e  temp
-gettext   0.26    https://ftp.gnu.org/gnu/gettext/gettext-0.26.tar.xz  -  chroot
-bison     3.8.2   https://ftp.gnu.org/gnu/bison/bison-3.8.2.tar.xz  -  chroot
-perl      5.42.0  https://www.cpan.org/src/5.0/perl-5.42.0.tar.xz  -  chroot
-Python    3.13.7  https://www.python.org/ftp/python/3.13.7/Python-3.13.7.tar.xz  -  chroot
-texinfo   7.2     https://ftp.gnu.org/gnu/texinfo/texinfo-7.2.tar.xz  -  chroot
-util-linux 2.41.1 https://cdn.kernel.org/pub/linux/utils/util-linux/v2.41/util-linux-2.41.1.tar.xz  -  chroot
+gettext   0.26    https://ftp.gnu.org/gnu/gettext/gettext-0.26.tar.xz  d1fb86e260cfe7da6031f94d2e44c0da55903dbae0a2fa0fae78c91ae1b56f00  chroot
+bison     3.8.2   https://ftp.gnu.org/gnu/bison/bison-3.8.2.tar.xz  9bba0214ccf7f1079c5d59210045227bcf619519840ebfa80cd3849cff5a5bf2  chroot
+perl      5.42.0  https://www.cpan.org/src/5.0/perl-5.42.0.tar.xz  73cf6cc1ea2b2b1c110a18c14bbbc73a362073003893ffcedc26d22ebdbdd0c3  chroot
+Python    3.13.7  https://www.python.org/ftp/python/3.13.7/Python-3.13.7.tar.xz  5462f9099dfd30e238def83c71d91897d8caa5ff6ebc7a50f14d4802cdaaa79a  chroot
+texinfo   7.2     https://ftp.gnu.org/gnu/texinfo/texinfo-7.2.tar.xz  0329d7788fbef113fa82cb80889ca197a344ce0df7646fe000974c5d714363a6  chroot
+util-linux 2.41.1  https://cdn.kernel.org/pub/linux/utils/util-linux/v2.41/util-linux-2.41.1.tar.xz  be9ad9a276f4305ab7dd2f5225c8be1ff54352f565ff4dede9628c1aaa7dec57  chroot
