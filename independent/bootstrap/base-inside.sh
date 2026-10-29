@@ -236,9 +236,12 @@ check() {
     echo 'int main(void) { return 0; }' | cc -x c - -v -Wl,--verbose > dummy.log 2>&1
     readelf -l a.out | grep -q 'Requesting program interpreter: /lib64/ld-linux-x86-64.so.2' ||
         { echo "wrong program interpreter" >&2; exit 1; }
-    grep -q '/usr/lib/crt1.o succeeded' dummy.log || { echo "start files not from /usr/lib" >&2; exit 1; }
-    grep -q 'attempt to open /usr/lib/libc.so.6 succeeded' dummy.log ||
+    # GCC reaches /usr/lib through its own directory (…/gcc/<target>/<ver>/../../../../lib),
+    # so match any path into /usr/lib, as Linux From Scratch's check does
+    grep -Eq '/usr/lib.*/S?crt[1in].*succeeded' dummy.log || { echo "start files not from /usr/lib" >&2; exit 1; }
+    grep -Eq 'attempt to open /usr/lib.*/libc\.so\.6 succeeded' dummy.log ||
         { echo "not linked against /usr/lib/libc.so.6" >&2; exit 1; }
+    grep -E '/usr/lib.*/S?crt[1in].*succeeded|libc\.so\.6 succeeded' dummy.log
     printf '#include <zlib.h>\n#include <stdio.h>\nint main(void){ printf("zlib %%s, built by Yūrei\\n", zlibVersion()); return 0; }\n' > z.c
     gcc z.c -lz -o z && ./z
     gcc --version | head -n1
