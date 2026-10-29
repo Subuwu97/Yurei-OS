@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=psmisc
+pkgver=23.7
+pkgrel=1
+pkgdesc="Miscellaneous procfs tools (killall, pstree, fuser)"
+arch=(x86_64)
+url="https://gitlab.com/psmisc/psmisc"
+license=(GPL-2.0-or-later)
+depends=(glibc ncurses)
+source=("https://sourceforge.net/projects/psmisc/files/psmisc/psmisc-$pkgver.tar.xz")
+sha256sums=('58c55d9c1402474065adae669511c191de374b0871eec781239ab400b907c327')
+
+build() {
+    cd psmisc-$pkgver
+    ./configure --prefix=/usr
+    make
+}
+
+package() {
+    cd psmisc-$pkgver
+    make DESTDIR="$pkgdir" install
+}

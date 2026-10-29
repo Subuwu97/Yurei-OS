@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=gettext
+pkgver=0.26
+pkgrel=1
+pkgdesc="GNU internationalization library and tools"
+arch=(x86_64)
+url="https://www.gnu.org/software/gettext/"
+license=(GPL-3.0-or-later LGPL-2.1-or-later)
+depends=(glibc acl attr ncurses gcc-libs)
+source=("https://ftp.gnu.org/gnu/gettext/gettext-$pkgver.tar.xz")
+sha256sums=('d1fb86e260cfe7da6031f94d2e44c0da55903dbae0a2fa0fae78c91ae1b56f00')
+
+build() {
+    cd gettext-$pkgver
+    ./configure --prefix=/usr --disable-static
+    make
+}
+
+package() {
+    cd gettext-$pkgver
+    make DESTDIR="$pkgdir" install
+    chmod 0755 "$pkgdir/usr/lib/preloadable_libintl.so"
+}

@@ -1,0 +1,41 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=shadow
+pkgver=4.18.0
+pkgrel=1
+pkgdesc="Password and account management tool suite"
+arch=(x86_64)
+url="https://github.com/shadow-maint/shadow"
+license=(BSD-3-Clause)
+depends=(acl attr libxcrypt glibc)
+backup=(etc/login.defs etc/default/useradd)
+source=("https://github.com/shadow-maint/shadow/releases/download/$pkgver/shadow-$pkgver.tar.xz")
+sha256sums=('add4604d3bc410344433122a819ee4154b79dd8316a56298c60417e637c07608')
+
+prepare() {
+    cd shadow-$pkgver
+    # coreutils provides groups; strong password hashing; mail in /var/mail
+    sed -i 's/groups$(EXEEXT) //' src/Makefile.in
+    find man -name Makefile.in -exec sed -i 's/groups\.1 / /' {} +
+    sed -e 's:#ENCRYPT_METHOD DES:ENCRYPT_METHOD YESCRYPT:' \
+        -e 's:/var/spool/mail:/var/mail:' \
+        -e '/PATH=/{s@/sbin:@@;s@/bin:@@}' -i etc/login.defs
+}
+
+build() {
+    cd shadow-$pkgver
+    ./configure --sysconfdir=/etc --disable-static --with-bcrypt --with-yescrypt \
+        --without-libbsd --with-group-name-max-length=32
+    make
+}
+
+package() {
+    cd shadow-$pkgver
+    make exec_prefix=/usr DESTDIR="$pkgdir" install
+    # new accounts: group "users", Bash, a home folder from /etc/skel
+    install -d "$pkgdir/etc/default"
+    printf 'GROUP=100\nHOME=/home\nINACTIVE=-1\nEXPIRE=\nSHELL=/usr/bin/bash\nSKEL=/etc/skel\nCREATE_MAIL_SPOOL=no\n' \
+        > "$pkgdir/etc/default/useradd"
+}

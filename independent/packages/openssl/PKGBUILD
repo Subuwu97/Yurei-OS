@@ -1,0 +1,28 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=openssl
+pkgver=3.5.2
+pkgrel=1
+pkgdesc="The Open Source toolkit for Secure Sockets Layer and Transport Layer Security"
+arch=(x86_64)
+url="https://www.openssl.org/"
+license=(Apache-2.0)
+depends=(glibc zlib)
+backup=(etc/ssl/openssl.cnf)
+source=("https://github.com/openssl/openssl/releases/download/openssl-$pkgver/openssl-$pkgver.tar.gz")
+sha256sums=('c53a47e5e441c930c3928cf7bf6fb00e5d129b630e0aa873b08258656e7345ec')
+
+build() {
+    cd openssl-$pkgver
+    ./config --prefix=/usr --openssldir=/etc/ssl --libdir=lib shared zlib-dynamic
+    make
+}
+
+package() {
+    cd openssl-$pkgver
+    # libraries, headers, tools and /etc/ssl; no static libraries or HTML manuals
+    sed -i '/INSTALL_LIBS/s/libcrypto.a libssl.a//' Makefile
+    make DESTDIR="$pkgdir" install_sw install_ssldirs
+}

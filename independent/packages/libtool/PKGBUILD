@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=libtool
+pkgver=2.5.4
+pkgrel=1
+pkgdesc="A generic library support script"
+arch=(x86_64)
+url="https://www.gnu.org/software/libtool/"
+license=(GPL-2.0-or-later)
+depends=(bash glibc)
+source=("https://ftp.gnu.org/gnu/libtool/libtool-$pkgver.tar.xz")
+sha256sums=('f81f5860666b0bc7d84baddefa60d1cb9fa6fceb2398cc3baca6afaa60266675')
+
+build() {
+    cd libtool-$pkgver
+    ./configure --prefix=/usr
+    make
+}
+
+package() {
+    cd libtool-$pkgver
+    make DESTDIR="$pkgdir" install
+}

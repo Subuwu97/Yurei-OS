@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=libffi
+pkgver=3.5.2
+pkgrel=1
+pkgdesc="Portable foreign function interface library"
+arch=(x86_64)
+url="https://sourceware.org/libffi/"
+license=(MIT)
+depends=(glibc)
+source=("https://github.com/libffi/libffi/releases/download/v$pkgver/libffi-$pkgver.tar.gz")
+sha256sums=('f3a3082a23b37c293a4fcd1053147b371f2ff91fa7ea1b2a52e335676bac82dc')
+
+build() {
+    cd libffi-$pkgver
+    ./configure --prefix=/usr --disable-static --with-gcc-arch=x86-64
+    make
+}
+
+package() {
+    cd libffi-$pkgver
+    make DESTDIR="$pkgdir" install
+}

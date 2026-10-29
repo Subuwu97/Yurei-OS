@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=patch
+pkgver=2.8
+pkgrel=1
+pkgdesc="A utility to apply patch files to original sources"
+arch=(x86_64)
+url="https://www.gnu.org/software/patch/"
+license=(GPL-3.0-or-later)
+depends=(glibc attr)
+source=("https://ftp.gnu.org/gnu/patch/patch-$pkgver.tar.xz")
+sha256sums=('f87cee69eec2b4fcbf60a396b030ad6aa3415f192aa5f7ee84cad5e11f7f5ae3')
+
+build() {
+    cd patch-$pkgver
+    ./configure --prefix=/usr
+    make
+}
+
+package() {
+    cd patch-$pkgver
+    make DESTDIR="$pkgdir" install
+}

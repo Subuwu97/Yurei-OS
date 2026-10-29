@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=texinfo
+pkgver=7.2
+pkgrel=1
+pkgdesc="GNU documentation system for on-line information and printed output"
+arch=(x86_64)
+url="https://www.gnu.org/software/texinfo/"
+license=(GPL-3.0-or-later)
+depends=(perl ncurses glibc)
+source=("https://ftp.gnu.org/gnu/texinfo/texinfo-$pkgver.tar.xz")
+sha256sums=('0329d7788fbef113fa82cb80889ca197a344ce0df7646fe000974c5d714363a6')
+
+build() {
+    cd texinfo-$pkgver
+    ./configure --prefix=/usr
+    make
+}
+
+package() {
+    cd texinfo-$pkgver
+    make DESTDIR="$pkgdir" install
+}

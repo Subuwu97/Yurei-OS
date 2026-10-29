@@ -1,0 +1,28 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+_lockname=Python  # its entry in sources.lock
+pkgname=python
+pkgver=3.13.7
+pkgrel=1
+pkgdesc="The Python programming language"
+arch=(x86_64)
+url="https://www.python.org/"
+license=(PSF-2.0)
+depends=(glibc expat libffi openssl zlib bzip2 xz readline ncurses gdbm libxcrypt)
+source=("https://www.python.org/ftp/python/$pkgver/Python-$pkgver.tar.xz")
+sha256sums=('5462f9099dfd30e238def83c71d91897d8caa5ff6ebc7a50f14d4802cdaaa79a')
+
+build() {
+    cd Python-$pkgver
+    ./configure --prefix=/usr --enable-shared --with-system-expat --without-static-libpython
+    make
+}
+
+package() {
+    cd Python-$pkgver
+    # pip comes with it, from the tarball (nothing is downloaded)
+    make DESTDIR="$pkgdir" install
+    ln -s python3 "$pkgdir/usr/bin/python"
+}

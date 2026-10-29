@@ -206,8 +206,13 @@ Each stage ends in something testable, built automatically in CI.
   glibc, the compression libraries, ncurses, readline and Bash. Second:
   the toolchain (binutils, GMP, MPFR, MPC, libxcrypt, GCC and its runtime
   libraries as `gcc-libs`), which the new system must use to build and
-  run C and C++ programs. A recipe that hasn't changed isn't rebuilt: the
-  last run's package is reused. Packages are signed with a
+  run C and C++ programs. Third: the core tools (coreutils, sed, grep,
+  gawk, findutils, diffutils, tar, gzip, file, less, make, patch, …),
+  Perl, Python, OpenSSL, shadow, util-linux and e2fsprogs. The check
+  (`repo-check.sh`) installs every package into an empty directory, uses
+  the tools there, and finds a library for every program and library, so
+  a recipe whose dependencies are incomplete fails it. A recipe that
+  hasn't changed isn't rebuilt: the last run's package is reused. Packages are signed with a
   throwaway key per run until Yūrei's own signing key is set up
 
 ## Naming

@@ -1,0 +1,32 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=util-linux
+pkgver=2.41.1
+pkgrel=1
+pkgdesc="Miscellaneous system utilities for Linux"
+arch=(x86_64)
+url="https://github.com/util-linux/util-linux"
+license=(GPL-2.0-or-later)
+depends=(glibc ncurses readline zlib libcap libxcrypt)
+source=("https://cdn.kernel.org/pub/linux/utils/util-linux/v2.41/util-linux-$pkgver.tar.xz")
+sha256sums=('be9ad9a276f4305ab7dd2f5225c8be1ff54352f565ff4dede9628c1aaa7dec57')
+
+build() {
+    cd util-linux-$pkgver
+    # login, nologin, su and chfn/chsh come from shadow; systemd support
+    # comes once systemd is a Yūrei package
+    ./configure --bindir=/usr/bin --libdir=/usr/lib --runstatedir=/run --sbindir=/usr/sbin \
+        --disable-chfn-chsh --disable-login --disable-nologin --disable-su --disable-setpriv \
+        --disable-runuser --disable-pylibmount --disable-liblastlog2 --disable-static \
+        --without-python --without-systemd --without-udev \
+        ADJTIME_PATH=/var/lib/hwclock/adjtime
+    make
+}
+
+package() {
+    cd util-linux-$pkgver
+    make DESTDIR="$pkgdir" install
+    install -d "$pkgdir/var/lib/hwclock"
+}

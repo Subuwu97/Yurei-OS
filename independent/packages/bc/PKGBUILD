@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=bc
+pkgver=7.0.3
+pkgrel=1
+pkgdesc="An arbitrary precision calculator language"
+arch=(x86_64)
+url="https://git.gavinhoward.com/gavin/bc"
+license=(BSD-2-Clause)
+depends=(glibc readline ncurses)
+source=("https://github.com/gavinhoward/bc/releases/download/$pkgver/bc-$pkgver.tar.xz")
+sha256sums=('91eb74caed0ee6655b669711a4f350c25579778694df248e28363318e03c7fc4')
+
+build() {
+    cd bc-$pkgver
+    CC="gcc -std=c99" ./configure --prefix=/usr -G -O3 -r
+    make
+}
+
+package() {
+    cd bc-$pkgver
+    make DESTDIR="$pkgdir" install
+}

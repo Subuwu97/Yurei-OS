@@ -1,0 +1,29 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=libcap
+pkgver=2.76
+pkgrel=1
+pkgdesc="POSIX 1003.1e capabilities"
+arch=(x86_64)
+url="https://sites.google.com/site/fullycapable/"
+license=(BSD-3-Clause GPL-2.0-only)
+depends=(glibc)
+source=("https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-$pkgver.tar.xz")
+sha256sums=('629da4ab29900d0f7fcc36227073743119925fd711c99a1689bbf5c9b40c8e6f')
+
+prepare() {
+    cd libcap-$pkgver
+    sed -i '/install -m.*STA/d' libcap/Makefile  # no static library
+}
+
+build() {
+    cd libcap-$pkgver
+    make prefix=/usr lib=lib
+}
+
+package() {
+    cd libcap-$pkgver
+    make prefix=/usr lib=lib DESTDIR="$pkgdir" install
+}

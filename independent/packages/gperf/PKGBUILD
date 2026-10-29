@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=gperf
+pkgver=3.3
+pkgrel=1
+pkgdesc="Perfect hash function generator"
+arch=(x86_64)
+url="https://www.gnu.org/software/gperf/"
+license=(GPL-3.0-or-later)
+depends=(glibc gcc-libs)
+source=("https://ftp.gnu.org/gnu/gperf/gperf-$pkgver.tar.gz")
+sha256sums=('fd87e0aba7e43ae054837afd6cd4db03a3f2693deb3619085e6ed9d8d9604ad8')
+
+build() {
+    cd gperf-$pkgver
+    ./configure --prefix=/usr
+    make
+}
+
+package() {
+    cd gperf-$pkgver
+    make DESTDIR="$pkgdir" install
+}

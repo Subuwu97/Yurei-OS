@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=tar
+pkgver=1.35
+pkgrel=1
+pkgdesc="Utility used to store, backup, and transport files"
+arch=(x86_64)
+url="https://www.gnu.org/software/tar/"
+license=(GPL-3.0-or-later)
+depends=(glibc acl attr)
+source=("https://ftp.gnu.org/gnu/tar/tar-$pkgver.tar.xz")
+sha256sums=('4d62ff37342ec7aed748535323930c7cf94acf71c3591882b26a7ea50f3edc16')
+
+build() {
+    cd tar-$pkgver
+    FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/usr
+    make
+}
+
+package() {
+    cd tar-$pkgver
+    make DESTDIR="$pkgdir" install
+}

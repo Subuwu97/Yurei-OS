@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=m4
+pkgver=1.4.20
+pkgrel=1
+pkgdesc="The GNU macro processor"
+arch=(x86_64)
+url="https://www.gnu.org/software/m4/"
+license=(GPL-3.0-or-later)
+depends=(glibc)
+source=("https://ftp.gnu.org/gnu/m4/m4-$pkgver.tar.xz")
+sha256sums=('e236ea3a1ccf5f6c270b1c4bb60726f371fa49459a8eaaebc90b216b328daf2b')
+
+build() {
+    cd m4-$pkgver
+    ./configure --prefix=/usr
+    make
+}
+
+package() {
+    cd m4-$pkgver
+    make DESTDIR="$pkgdir" install
+}

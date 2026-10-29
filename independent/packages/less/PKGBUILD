@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=less
+pkgver=679
+pkgrel=1
+pkgdesc="A terminal based program for viewing text files"
+arch=(x86_64)
+url="https://www.greenwoodsoftware.com/less/"
+license=(GPL-3.0-or-later)
+depends=(glibc ncurses)
+source=("https://www.greenwoodsoftware.com/less/less-$pkgver.tar.gz")
+sha256sums=('9b68820c34fa8a0af6b0e01b74f0298bcdd40a0489c61649b47058908a153d78')
+
+build() {
+    cd less-$pkgver
+    ./configure --prefix=/usr --sysconfdir=/etc
+    make
+}
+
+package() {
+    cd less-$pkgver
+    make DESTDIR="$pkgdir" install
+}

@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=gawk
+pkgver=5.3.2
+pkgrel=1
+pkgdesc="GNU version of awk"
+arch=(x86_64)
+url="https://www.gnu.org/software/gawk/"
+license=(GPL-3.0-or-later)
+depends=(glibc readline mpfr gmp)
+source=("https://ftp.gnu.org/gnu/gawk/gawk-$pkgver.tar.xz")
+sha256sums=('f8c3486509de705192138b00ef2c00bbbdd0e84c30d5c07d23fc73a9dc4cc9cc')
+
+build() {
+    cd gawk-$pkgver
+    sed -i 's/extras//' Makefile.in  # no extra example scripts
+    ./configure --prefix=/usr
+    make
+}
+
+package() {
+    cd gawk-$pkgver
+    make DESTDIR="$pkgdir" install
+}

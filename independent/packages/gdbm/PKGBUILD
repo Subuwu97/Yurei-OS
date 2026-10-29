@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=gdbm
+pkgver=1.26
+pkgrel=1
+pkgdesc="GNU database library"
+arch=(x86_64)
+url="https://www.gnu.org/software/gdbm/"
+license=(GPL-3.0-or-later)
+depends=(glibc readline ncurses)
+source=("https://ftp.gnu.org/gnu/gdbm/gdbm-$pkgver.tar.gz")
+sha256sums=('6a24504a14de4a744103dcb936be976df6fbe88ccff26065e54c1c47946f4a5e')
+
+build() {
+    cd gdbm-$pkgver
+    ./configure --prefix=/usr --disable-static --enable-libgdbm-compat
+    make
+}
+
+package() {
+    cd gdbm-$pkgver
+    make DESTDIR="$pkgdir" install
+}

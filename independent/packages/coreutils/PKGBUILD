@@ -1,0 +1,28 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=coreutils
+pkgver=9.7
+pkgrel=1
+pkgdesc="The basic file, shell and text manipulation utilities of the GNU operating system"
+arch=(x86_64)
+url="https://www.gnu.org/software/coreutils/"
+license=(GPL-3.0-or-later)
+depends=(glibc acl attr libcap gmp openssl)
+source=("https://ftp.gnu.org/gnu/coreutils/coreutils-$pkgver.tar.xz")
+sha256sums=('e8bb26ad0293f9b5a1fc43fb42ba970e312c66ce92c1b0b16713d7500db251bf')
+
+build() {
+    cd coreutils-$pkgver
+    # kill and uptime come from procps-ng
+    FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/usr --enable-no-install-program=kill,uptime
+    make
+}
+
+package() {
+    cd coreutils-$pkgver
+    make DESTDIR="$pkgdir" install
+    install -d "$pkgdir/usr/sbin"
+    mv "$pkgdir/usr/bin/chroot" "$pkgdir/usr/sbin/"
+}

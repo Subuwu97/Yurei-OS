@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=make
+pkgver=4.4.1
+pkgrel=1
+pkgdesc="GNU make utility to maintain groups of programs"
+arch=(x86_64)
+url="https://www.gnu.org/software/make/"
+license=(GPL-3.0-or-later)
+depends=(glibc)
+source=("https://ftp.gnu.org/gnu/make/make-$pkgver.tar.gz")
+sha256sums=('dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3')
+
+build() {
+    cd make-$pkgver
+    ./configure --prefix=/usr
+    make
+}
+
+package() {
+    cd make-$pkgver
+    make DESTDIR="$pkgdir" install
+}

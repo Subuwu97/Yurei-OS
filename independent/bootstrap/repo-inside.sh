@@ -149,22 +149,18 @@ CONF
     pacman-key --config "$srv/pacman.conf" --gpgdir "$gnupg" --lsign-key "$fpr"
     local p=(pacman --config "$srv/pacman.conf" --root "$root" --dbpath "$root/var/lib/pacman"
              --gpgdir "$gnupg" --noconfirm)
-    "${p[@]}" -Sy bash gcc
-    echo "installed:"
-    "${p[@]}" -Q
-    # inside the new system, with only what pacman put there: a shell, and a
-    # compiler that builds and runs C and C++ programs
+    # everything in the repository, so every package's dependencies are tested
+    local all
+    "${p[@]}" -Sy
+    mapfile -t all < <("${p[@]}" -Slq yurei)
+    "${p[@]}" -S "${all[@]}"
+    echo "installed $("${p[@]}" -Qq | wc -l) packages"
     mount --bind /dev "$root/dev"
     mount -t proc proc "$root/proc"
-    # shellcheck disable=SC2016 # expanded by the new system's bash
-    chroot "$root" /usr/bin/bash -euc '. /etc/os-release
-        echo "Bash $BASH_VERSION running in $PRETTY_NAME, installed by pacman"
-        cd /tmp
-        printf "#include <stdio.h>\nint main(void) { puts(\"C works\"); return 0; }\n" > c.c
-        printf "#include <iostream>\nint main() { std::cout << \"C++ works\" << std::endl; }\n" > cxx.cc
-        gcc -o c c.c && ./c
-        g++ -o cxx cxx.cc && ./cxx
-        gcc --version | { read -r line; echo "$line"; }' || { umount "$root/proc" "$root/dev"; exit 1; }
+    if ! chroot "$root" /usr/bin/bash -eu < /bootstrap/repo-check.sh; then
+        umount "$root/proc" "$root/dev"
+        exit 1
+    fi
     umount "$root/proc" "$root/dev"
     gpgconf --homedir "$gnupg" --kill all
     as_user gpgconf --kill all

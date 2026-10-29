@@ -1,0 +1,28 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+_lockname=elfutils  # its entry in sources.lock
+pkgname=libelf
+pkgver=0.193
+pkgrel=1
+pkgdesc="Library to read and write ELF files (from elfutils)"
+arch=(x86_64)
+url="https://sourceware.org/elfutils/"
+license=(LGPL-3.0-or-later GPL-2.0-or-later)
+depends=(glibc zlib xz bzip2 zstd)
+source=("https://sourceware.org/elfutils/ftp/$pkgver/elfutils-$pkgver.tar.bz2")
+sha256sums=('7857f44b624f4d8d421df851aaae7b1402cfe6bcdd2d8049f15fc07d3dde7635')
+
+build() {
+    cd elfutils-$pkgver
+    ./configure --prefix=/usr --disable-debuginfod --enable-libdebuginfod=dummy
+    make
+}
+
+package() {
+    cd elfutils-$pkgver
+    # only libelf: the kernel and systemd need it, the rest isn't needed yet
+    make -C libelf DESTDIR="$pkgdir" install
+    install -Dm644 config/libelf.pc "$pkgdir/usr/lib/pkgconfig/libelf.pc"
+}

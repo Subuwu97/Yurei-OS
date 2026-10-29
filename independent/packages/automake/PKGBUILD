@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=automake
+pkgver=1.18.1
+pkgrel=1
+pkgdesc="A GNU tool for automatically creating Makefiles"
+arch=(x86_64)
+url="https://www.gnu.org/software/automake/"
+license=(GPL-2.0-or-later)
+depends=(perl bash autoconf)
+source=("https://ftp.gnu.org/gnu/automake/automake-$pkgver.tar.xz")
+sha256sums=('168aa363278351b89af56684448f525a5bce5079d0b6842bd910fdd3f1646887')
+
+build() {
+    cd automake-$pkgver
+    ./configure --prefix=/usr
+    make
+}
+
+package() {
+    cd automake-$pkgver
+    make DESTDIR="$pkgdir" install
+}

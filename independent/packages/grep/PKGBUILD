@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=grep
+pkgver=3.12
+pkgrel=1
+pkgdesc="A string search utility"
+arch=(x86_64)
+url="https://www.gnu.org/software/grep/"
+license=(GPL-3.0-or-later)
+depends=(glibc)
+source=("https://ftp.gnu.org/gnu/grep/grep-$pkgver.tar.xz")
+sha256sums=('2649b27c0e90e632eadcd757be06c6e9a4f48d941de51e7c0f83ff76408a07b9')
+
+build() {
+    cd grep-$pkgver
+    sed -i "s/echo/#echo/" src/egrep.sh  # no "egrep is obsolescent" warning
+    ./configure --prefix=/usr
+    make
+}
+
+package() {
+    cd grep-$pkgver
+    make DESTDIR="$pkgdir" install
+}

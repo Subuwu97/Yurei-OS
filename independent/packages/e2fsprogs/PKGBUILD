@@ -1,0 +1,29 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=e2fsprogs
+pkgver=1.47.3
+pkgrel=1
+pkgdesc="Ext2/3/4 filesystem utilities"
+arch=(x86_64)
+url="https://e2fsprogs.sourceforge.net/"
+license=(GPL-2.0-only LGPL-2.0-only)
+depends=(util-linux glibc)
+backup=(etc/mke2fs.conf)
+source=("https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v$pkgver/e2fsprogs-$pkgver.tar.gz")
+sha256sums=('2f5164e64dd7d91eadd1e0e8a77d92c06dd7837bb19f1d9189ce1939b363d2b4')
+
+build() {
+    mkdir -p e2fsprogs-$pkgver/build
+    cd e2fsprogs-$pkgver/build
+    # libblkid, libuuid and fsck come from util-linux
+    ../configure --prefix=/usr --sysconfdir=/etc --enable-elf-shlibs \
+        --disable-libblkid --disable-libuuid --disable-uuidd --disable-fsck
+    make
+}
+
+package() {
+    cd e2fsprogs-$pkgver/build
+    make DESTDIR="$pkgdir" install
+}

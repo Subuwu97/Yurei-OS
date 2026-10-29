@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=attr
+pkgver=2.5.2
+pkgrel=1
+pkgdesc="Extended attribute support library for ACL support"
+arch=(x86_64)
+url="https://savannah.nongnu.org/projects/attr"
+license=(LGPL-2.1-or-later GPL-2.0-or-later)
+depends=(glibc)
+backup=(etc/xattr.conf)
+source=("https://download.savannah.nongnu.org/releases/attr/attr-$pkgver.tar.gz")
+sha256sums=('39bf67452fa41d0948c2197601053f48b3d78a029389734332a6309a680c6c87')
+
+build() {
+    cd attr-$pkgver
+    ./configure --prefix=/usr --disable-static --sysconfdir=/etc
+    make
+}
+
+package() {
+    cd attr-$pkgver
+    make DESTDIR="$pkgdir" install
+}

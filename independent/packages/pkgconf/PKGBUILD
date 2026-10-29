@@ -1,0 +1,27 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=pkgconf
+pkgver=2.5.1
+pkgrel=1
+pkgdesc="Package compiler and linker metadata toolkit"
+arch=(x86_64)
+url="https://github.com/pkgconf/pkgconf"
+license=(ISC)
+depends=(glibc)
+provides=(pkg-config)
+source=("https://distfiles.ariadne.space/pkgconf/pkgconf-$pkgver.tar.xz")
+sha256sums=('cd05c9589b9f86ecf044c10a2269822bc9eb001eced2582cfffd658b0a50c243')
+
+build() {
+    cd pkgconf-$pkgver
+    ./configure --prefix=/usr --disable-static
+    make
+}
+
+package() {
+    cd pkgconf-$pkgver
+    make DESTDIR="$pkgdir" install
+    ln -s pkgconf "$pkgdir/usr/bin/pkg-config"
+}
