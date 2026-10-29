@@ -10,14 +10,44 @@ here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 sources=${SOURCES:?set SOURCES to the download directory}
 mkdir -p "$sources"
 
+# Places to try for a URL. ftp.gnu.org itself is often slow, so GNU files
+# come from GNU's mirror redirector or kernel.org's GNU mirror first; the
+# checksum check makes every mirror as good as the original.
+mirrors() {
+    local url=$1
+    case $url in
+        https://ftp.gnu.org/gnu/*)
+            echo "https://ftpmirror.gnu.org/gnu/${url#https://ftp.gnu.org/gnu/}"
+            echo "https://mirrors.kernel.org/gnu/${url#https://ftp.gnu.org/gnu/}"
+            ;;
+    esac
+    echo "$url"
+}
+
+# download URL FILE: tries each mirror; gives up on a stalled transfer
+# (under 10 kB/s for a minute) instead of waiting for a timeout
+download() {
+    local url=$1 file=$2 try
+    while read -r try; do
+        if curl -fL --connect-timeout 30 --speed-limit 10000 --speed-time 60 \
+                --retry 2 --retry-delay 5 --retry-all-errors -o "$file.part" "$try"; then
+            mv "$file.part" "$file"
+            return 0
+        fi
+        echo "  ($try didn't work, trying the next source)" >&2
+    done < <(mirrors "$url")
+    rm -f "$file.part"
+    echo "couldn't download $url" >&2
+    return 1
+}
+
 unpinned=0
 while read -r name version url sum _step; do
     [[ -z $name || $name == \#* ]] && continue
     file=$sources/${url##*/}
     if [[ ! -f $file ]]; then
         echo "fetching $name $version"
-        curl -fL --retry 4 --retry-delay 5 -o "$file.part" "$url"
-        mv "$file.part" "$file"
+        download "$url" "$file"
     fi
     actual=$(sha256sum "$file" | cut -d' ' -f1)
     if [[ $sum == - ]]; then

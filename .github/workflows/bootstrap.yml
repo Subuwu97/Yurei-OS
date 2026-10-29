@@ -68,6 +68,10 @@ jobs:
       - name: Temporary tools
         run: independent/bootstrap/temptools.sh
 
+      - name: Source checksums (to pin in sources.lock)
+        if: always()
+        run: cd "$SOURCES" && sha256sum -- * 2>/dev/null || true
+
       - name: Size of the result
         if: always()
         run: |

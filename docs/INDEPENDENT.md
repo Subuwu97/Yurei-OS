@@ -1,6 +1,8 @@
 # Experiment: Yūrei as its own operating system
 
-> **Status: stage 1 (toolchain) in progress.** This repository, Yurei-OS,
+> **Status: stage 1 (toolchain) in progress.** The cross toolchain builds
+> from upstream source in about 23 minutes on GitHub's runners (GCC 15.2.0,
+> glibc 2.42); the temporary tools are next. This repository, Yurei-OS,
 > builds Yūrei without any other distribution underneath. The released Yūrei
 > stays on CachyOS until this one can do everything it does.
 
