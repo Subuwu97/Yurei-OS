@@ -8,7 +8,10 @@
 # tools the full system build needs (gettext, bison, perl, Python, texinfo,
 # util-linux). Follows Linux From Scratch's method; needs root.
 #
-#   sudo YUREI=/path/to/root SOURCES=/path/to/sources ./chroot.sh [STEP...]
+#   sudo YUREI=/path/to/root SOURCES=/path/to/sources ./chroot.sh [SCRIPT] [STEP...]
+#
+# SCRIPT is the script to run inside (default chroot-inside.sh), e.g.
+# base-inside.sh for the base system.
 set -euo pipefail
 
 here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -45,7 +48,14 @@ mnt /run -t tmpfs tmpfs
 mnt /sources --bind -o ro "$SOURCES"
 mnt /bootstrap --bind -o ro "$here"
 
+inside=chroot-inside.sh
+if [[ ${1:-} == *.sh ]]; then
+    inside=$1
+    shift
+fi
+[[ -f $here/$inside ]] || { echo "no such script: $inside" >&2; exit 1; }
+
 chroot "$YUREI" /usr/bin/env -i \
     HOME=/root TERM="${TERM:-dumb}" PATH=/usr/bin:/usr/sbin \
     MAKEFLAGS="-j$(nproc)" LC_ALL=POSIX \
-    /bin/bash /bootstrap/chroot-inside.sh "$@"
+    /bin/bash "/bootstrap/$inside" "$@"

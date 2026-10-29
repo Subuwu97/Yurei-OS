@@ -162,6 +162,8 @@ Each stage ends in something testable, built automatically in CI.
   * `chroot.sh` (with `chroot-inside.sh`): enters the new system and builds
     gettext, bison, perl, Python, texinfo and util-linux inside it, with
     Yūrei's own compiler; the host provides only the kernel
+  * `base-inside.sh` (run by `chroot.sh base-inside.sh`): stage 2a, part 1,
+    the final glibc, GCC and binutils and the core libraries
 
 ## Naming
 

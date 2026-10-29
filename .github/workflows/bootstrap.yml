@@ -34,7 +34,8 @@ jobs:
           restore-keys: yurei-sources-
 
       - name: Fetch and verify upstream sources
-        run: independent/bootstrap/fetch.sh
+        # TODO: drop ALLOW_UNPINNED once the base system's sources are pinned
+        run: ALLOW_UNPINNED=1 independent/bootstrap/fetch.sh
 
       - name: Cache key for the cross toolchain
         id: cross
@@ -65,11 +66,48 @@ jobs:
         if: steps.cross-cache.outputs.cache-hit == 'true'
         run: independent/bootstrap/stage1.sh check
 
+      # The system after the chroot step is cached too (as an archive, since
+      # its files belong to root), so work on the base system starts there.
+      - name: Cache key for the chroot system
+        id: chroot
+        run: |
+          key=$( { cd independent/bootstrap
+                   cat stage1.sh lib.sh temptools.sh chroot.sh chroot-inside.sh inside-lib.sh
+                   awk '$5 == "cross" || $5 == "temp" || $5 == "chroot"' sources.lock; } | sha256sum | cut -c1-16)
+          echo "key=yurei-chroot-$key" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache/restore@v4
+        id: chroot-cache
+        with:
+          path: /home/runner/yurei-chroot.tar.zst
+          key: ${{ steps.chroot.outputs.key }}
+
+      - name: Unpack the cached chroot system
+        if: steps.chroot-cache.outputs.cache-hit == 'true'
+        run: |
+          sudo rm -rf "$YUREI" && sudo mkdir -p "$YUREI"
+          sudo tar --zstd -xpf /home/runner/yurei-chroot.tar.zst --numeric-owner -C "$YUREI"
+
       - name: Temporary tools
+        if: steps.chroot-cache.outputs.cache-hit != 'true'
         run: independent/bootstrap/temptools.sh
 
       - name: Chroot - Yūrei builds by itself
-        run: sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh
+        if: steps.chroot-cache.outputs.cache-hit != 'true'
+        run: |
+          sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh
+          sudo tar --zstd -cpf /home/runner/yurei-chroot.tar.zst --numeric-owner -C "$YUREI" .
+          sudo chown "$(id -u):$(id -g)" /home/runner/yurei-chroot.tar.zst
+          ls -lh /home/runner/yurei-chroot.tar.zst
+
+      - uses: actions/cache/save@v4
+        if: steps.chroot-cache.outputs.cache-hit != 'true'
+        with:
+          path: /home/runner/yurei-chroot.tar.zst
+          key: ${{ steps.chroot.outputs.key }}
+
+      - name: Stage 2a - final toolchain and core libraries
+        run: sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh base-inside.sh
 
       - name: Source checksums (to pin in sources.lock)
         if: always()

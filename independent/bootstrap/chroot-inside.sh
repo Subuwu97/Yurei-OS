@@ -4,18 +4,8 @@
 # by Yūrei's own compiler, from /sources, with /bootstrap's recipes.
 set -euo pipefail
 
-build=/build
-mkdir -p "$build"
-
-version() { awk -v n="$1" '$1 == n {print $2}' /bootstrap/sources.lock; }
-msg() { printf '\n\e[1;35m==>\e[0m \e[1m%s\e[0m\n' "$*"; }
-unpack() {
-    local tarball
-    tarball=$(ls "/sources/$1-$(version "$1")".tar.*)
-    rm -rf "${build:?}/$1-$(version "$1")"
-    tar -xf "$tarball" -C "$build"
-    echo "$build/$1-$(version "$1")"
-}
+# shellcheck source=independent/bootstrap/inside-lib.sh
+source /bootstrap/inside-lib.sh
 
 # the directory tree and the files every Linux system expects
 basics() {
@@ -172,10 +162,4 @@ cleanup() {
 }
 
 STEPS=(basics gettext_ bison_ perl_ python_ texinfo_ util_linux check cleanup)
-steps=("${@:-${STEPS[@]}}")
-for step in "${steps[@]}"; do
-    [[ " ${STEPS[*]} " == *" $step "* ]] || { echo "unknown step: $step" >&2; exit 2; }
-    start=$SECONDS
-    (cd "$build" 2>/dev/null || cd /; "$step")
-    printf '   (%s took %d s)\n' "$step" $((SECONDS - start))
-done
+run_steps "$@"
