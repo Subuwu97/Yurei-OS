@@ -1,6 +1,7 @@
 # Upstream sources for the bootstrap: name, version, URL, SHA-256, and the
-# step that first uses it (cross = stage1.sh, temp = temptools.sh). Only
-# official upstream release tarballs; no other distribution's packages.
+# step that first uses it (cross = stage1.sh, temp = temptools.sh,
+# chroot = chroot.sh). Only official upstream release tarballs; no other
+# distribution's packages.
 #
 # A sum of "-" means not yet pinned: fetch.sh downloads it, prints its sum
 # and fails, so the sum can be filled in here. After that, any change to a
@@ -29,3 +30,9 @@ patch     2.8     https://ftp.gnu.org/gnu/patch/patch-2.8.tar.xz  f87cee69eec2b4
 sed       4.9     https://ftp.gnu.org/gnu/sed/sed-4.9.tar.xz  6e226b732e1cd739464ad6862bd1a1aba42d7982922da7a53519631d24975181  temp
 tar       1.35    https://ftp.gnu.org/gnu/tar/tar-1.35.tar.xz  4d62ff37342ec7aed748535323930c7cf94acf71c3591882b26a7ea50f3edc16  temp
 xz        5.8.1   https://github.com/tukaani-project/xz/releases/download/v5.8.1/xz-5.8.1.tar.xz  0b54f79df85912504de0b14aec7971e3f964491af1812d83447005807513cd9e  temp
+gettext   0.26    https://ftp.gnu.org/gnu/gettext/gettext-0.26.tar.xz  -  chroot
+bison     3.8.2   https://ftp.gnu.org/gnu/bison/bison-3.8.2.tar.xz  -  chroot
+perl      5.42.0  https://www.cpan.org/src/5.0/perl-5.42.0.tar.xz  -  chroot
+Python    3.13.7  https://www.python.org/ftp/python/3.13.7/Python-3.13.7.tar.xz  -  chroot
+texinfo   7.2     https://ftp.gnu.org/gnu/texinfo/texinfo-7.2.tar.xz  -  chroot
+util-linux 2.41.1 https://cdn.kernel.org/pub/linux/utils/util-linux/v2.41/util-linux-2.41.1.tar.xz  -  chroot

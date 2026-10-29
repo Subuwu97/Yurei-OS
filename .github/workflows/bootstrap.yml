@@ -34,7 +34,8 @@ jobs:
           restore-keys: yurei-sources-
 
       - name: Fetch and verify upstream sources
-        run: independent/bootstrap/fetch.sh
+        # TODO: drop ALLOW_UNPINNED once the chroot step's sources are pinned
+        run: ALLOW_UNPINNED=1 independent/bootstrap/fetch.sh
 
       - name: Cache key for the cross toolchain
         id: cross
@@ -68,6 +69,9 @@ jobs:
       - name: Temporary tools
         run: independent/bootstrap/temptools.sh
 
+      - name: Chroot - Yūrei builds by itself
+        run: sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh
+
       - name: Source checksums (to pin in sources.lock)
         if: always()
         run: cd "$SOURCES" && sha256sum -- * 2>/dev/null || true
@@ -75,5 +79,5 @@ jobs:
       - name: Size of the result
         if: always()
         run: |
-          rm -rf "$YUREI/build"
-          du -sh "$YUREI"/tools "$YUREI"/usr 2>/dev/null || true
+          sudo rm -rf "$YUREI/build"
+          sudo du -sh "$YUREI"/tools "$YUREI"/usr 2>/dev/null || true

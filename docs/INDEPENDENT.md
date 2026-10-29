@@ -1,8 +1,9 @@
 # Experiment: Yūrei as its own operating system
 
-> **Status: stage 1 (toolchain) in progress.** The cross toolchain builds
-> from upstream source in about 23 minutes on GitHub's runners (GCC 15.2.0,
-> glibc 2.42); the temporary tools are next. This repository, Yurei-OS,
+> **Status: stage 1 (toolchain) in progress.** On GitHub's runners, the
+> cross toolchain builds from upstream source in about 16 minutes (GCC
+> 15.2.0, glibc 2.42), and the temporary tools in 18; the chroot step,
+> where Yūrei first builds by itself, is next. This repository, Yurei-OS,
 > builds Yūrei without any other distribution underneath. The released Yūrei
 > stays on CachyOS until this one can do everything it does.
 
@@ -149,8 +150,10 @@ Each stage ends in something testable, built automatically in CI.
     libstdc++)
   * `temptools.sh`: the basic tools (bash, coreutils, make, sed, tar, xz,
     …) and a native binutils and GCC, all built for Yūrei with that
-    toolchain. With them, the next step can build Yūrei from inside a
-    chroot, without the host's programs.
+    toolchain
+  * `chroot.sh` (with `chroot-inside.sh`): enters the new system and builds
+    gettext, bison, perl, Python, texinfo and util-linux inside it, with
+    Yūrei's own compiler; the host provides only the kernel
 
 ## Naming
 

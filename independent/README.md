@@ -16,6 +16,7 @@ export YUREI=$HOME/yurei-root SOURCES=$HOME/yurei-sources
 bootstrap/fetch.sh     # downloads and checks the tarballs in sources.lock
 bootstrap/stage1.sh    # about an hour on 2 cores; or name steps, e.g. stage1.sh glibc_build check
 bootstrap/temptools.sh # bash, coreutils, make, … and a native GCC, built for Yūrei
+sudo --preserve-env=YUREI,SOURCES bootstrap/chroot.sh   # Yūrei builds the rest by itself
 ```
 
 It ends by compiling a C and a C++ program with the new toolchain, and
