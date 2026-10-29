@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Yūrei Linux environments
+Comment=Sets up the Linux environments picked during installation
+Exec=yurei box setup
+Icon=yurei
+NoDisplay=true
+X-KDE-autostart-phase=2

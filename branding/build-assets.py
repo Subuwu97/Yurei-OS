@@ -400,7 +400,51 @@ def build_calamares() -> None:
     canvas = Image.new("RGB", (1380, 600), tuple(int(c) for c in BG))
     canvas.paste(mascot, (1380 - mascot.width - 40, 15))
     canvas.save(CALAMARES / "slide-wave.jpg", quality=88, optimize=True, progressive=True)
-    log("installer branding: icon, logo, welcome, 3 slide backgrounds")
+    for name, command, title in EXTRAS:
+        extras_card(command, title).save(CALAMARES / f"extras-{name}.png", optimize=True)
+    log(f"installer branding: icon, logo, welcome, 3 slide backgrounds, {len(EXTRAS)} extras cards")
+
+
+# The installer's "Apps" page (packagechooser_yureiextras.conf): one card per
+# choice. Drawn in Yūrei's colours with the command each one brings, not the
+# distributions' logos, which are their trademarks.
+EXTRAS = [
+    ("flatpak", "flatpak", "Apps from Flathub"),
+    ("ubuntu", "apt-get", "Ubuntu environment"),
+    ("fedora", "dnf", "Fedora environment"),
+    ("arch", "pacman", "Arch environment"),
+]
+
+
+def extras_card(command: str, title: str) -> Image.Image:
+    from PySide6.QtCore import QRectF, Qt
+    from PySide6.QtGui import QColor, QFont, QGuiApplication, QImage, QLinearGradient, QPainter, QPen
+    _app = QGuiApplication.instance() or QGuiApplication(["build-assets", "-platform", "offscreen"])
+    w, h = 640, 360
+    img = QImage(w, h, QImage.Format.Format_RGBA8888)
+    painter = QPainter(img)
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+    sky = QLinearGradient(0, 0, 0, h)
+    sky.setColorAt(0, QColor("#141b3d"))
+    sky.setColorAt(1, QColor("#0e1430"))
+    painter.fillRect(0, 0, w, h, sky)
+    painter.drawImage(QRectF(24, 20, 56, 56), QImage(str(CALAMARES / "icon.png")))
+    # the environment as a box, with its command inside
+    box = QRectF(110, 96, 420, 120)
+    painter.setPen(QPen(QColor("#b9aaff"), 3))
+    painter.setBrush(QColor(185, 170, 255, 28))
+    painter.drawRoundedRect(box, 22, 22)
+    mono = QFont("monospace", 40, QFont.Weight.Bold)
+    mono.setStyleHint(QFont.StyleHint.Monospace)
+    painter.setFont(mono)
+    painter.setPen(QColor("#e9e4ff"))
+    painter.drawText(box, Qt.AlignmentFlag.AlignCenter, command)
+    sans = QFont("sans-serif", 22)
+    painter.setFont(sans)
+    painter.setPen(QColor("#b9aaff"))
+    painter.drawText(QRectF(0, 240, w, 50), Qt.AlignmentFlag.AlignCenter, title)
+    painter.end()
+    return Image.frombytes("RGBA", (w, h), bytes(img.constBits())).convert("RGB")
 
 
 STEPS = ["plymouth", "logo", "login", "boot-splash", "wallpaper", "plasma-theme", "calamares"]

@@ -63,7 +63,7 @@ drivers() {  # drivers FIXTURE [INSTALLED]: the driver install command for that 
     : > "$tmp/chroot-calls"
     printf '%s' "${2:-}" > "$tmp/installed"
     PATH="$tmp/bin:$PATH" YUREI_LSPCI_FIXTURE="$tmp/lspci-$1" YUREI_PKG_DIR="$tmp/pkgs" \
-        YUREI_SIGNING_KEY_FILE="$tmp/nokey" "$script" "$tmp/root" >/dev/null
+        YUREI_SIGNING_KEY_FILE="$tmp/nokey" "$script" "$tmp/root" "" >/dev/null  # no extras
     grep '^pacman -S ' "$tmp/chroot-calls" || true
 }
 d=$(drivers amd-intel)
@@ -101,5 +101,29 @@ check "signed repo configured" 'grep -qx "SigLevel = Required DatabaseRequired" 
 check "temporary key removed" '[[ ! -e $tmp/root/tmp/yurei.asc ]]'
 PATH="$tmp/bin:$PATH" YUREI_PKG_DIR="$tmp/pkgs" YUREI_SIGNING_KEY_FILE="$tmp/yurei.asc" "$script" "$tmp/root"
 check "repo added only once" '[[ $(grep -c "^\[yurei\]" "$tmp/root/etc/pacman.conf") -eq 1 ]]'
+extras() {  # extras [ARG...]: runs with these Apps-page choices, on a fresh /etc/yurei
+    : > "$tmp/chroot-calls"
+    rm -rf "$tmp/root/etc/yurei" "$tmp/root/etc/subuid"
+    PATH="$tmp/bin:$PATH" YUREI_PKG_DIR="$tmp/pkgs" YUREI_SIGNING_KEY_FILE="$tmp/nokey" \
+        "$script" "$tmp/root" "$@" >/dev/null
+}
+extras
+check "no Apps page: Flathub" 'grep -q "^flatpak remote-add --if-not-exists flathub" "$tmp/chroot-calls"'
+check "no Apps page: no environments" '[[ ! -e $tmp/root/etc/yurei/boxes ]] && ! grep -q distrobox "$tmp/chroot-calls"'
+extras '${gs[packagechooser_yureiextras]}'
+check "unexpanded choice: Flathub alone" 'grep -q "^flatpak remote-add" "$tmp/chroot-calls" && [[ ! -e $tmp/root/etc/yurei/boxes ]]'
+extras ""
+check "nothing picked: no Flathub, no environments" '! grep -q "flatpak remote-add\|distrobox" "$tmp/chroot-calls" && [[ ! -e $tmp/root/etc/yurei/boxes ]]'
+extras "flatpak,ubuntu,fedora"
+check "environments listed for the first login" '[[ $(cat "$tmp/root/etc/yurei/boxes") == $'"'"'ubuntu\nfedora'"'"' ]]'
+check "Distrobox and Podman installed" 'grep -qx "pacman -S --noconfirm --needed distrobox podman" "$tmp/chroot-calls"'
+check "accounts get ID ranges for containers" 'grep -qx "usermod --add-subuids 165536-231071 --add-subgids 165536-231071 ana" "$tmp/chroot-calls"'
+check "system accounts don't" '! grep -q "add-subuids.*\(root\|nobody\)" "$tmp/chroot-calls"'
+printf 'ana:100000:65536\n' > "$tmp/root/etc/subuid"
+: > "$tmp/chroot-calls"
+PATH="$tmp/bin:$PATH" YUREI_PKG_DIR="$tmp/pkgs" YUREI_SIGNING_KEY_FILE="$tmp/nokey" "$script" "$tmp/root" arch >/dev/null
+check "existing ID ranges kept" '! grep -q add-subuids "$tmp/chroot-calls" && [[ $(cat "$tmp/root/etc/yurei/boxes") == arch ]]'
+extras "fedora;rm -rf /"
+check "odd choices ignored" '[[ ! -e $tmp/root/etc/yurei/boxes ]]'
 check "refuses a non-system root" '! PATH="$tmp/bin:$PATH" YUREI_PKG_DIR="$tmp/pkgs" "$script" "$tmp/pkgs" 2>/dev/null'
 exit $fail

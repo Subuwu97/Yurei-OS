@@ -66,5 +66,37 @@ else
     check "theme applies the Yūrei global theme" 'grep -qx "plasma-apply-lookandfeel --apply org.yurei.desktop" "$tmp/calls"'
 fi
 check "theme rejects unknown themes" '! "$yurei" theme plaid 2>/dev/null'
+# Linux environments, with distrobox replaced by a stub that has "ubuntu" already
+cat > "$tmp/bin/distrobox" <<STUB
+#!/bin/sh
+echo "distrobox \$*" >> "$tmp/calls"
+[ "\$1" = list ] && printf 'ID           | NAME   | STATUS | IMAGE\nabc123       | ubuntu | Up     | ubuntu:latest\n'
+# a real create reads its terminal; this one would eat the list it's given
+[ "\$1" = create ] && cat > /dev/null
+exit 0
+STUB
+for cmd in podman notify-send; do printf '#!/bin/sh\necho "%s $*" >> "%s/calls"\n' "$cmd" "$tmp" > "$tmp/bin/$cmd"; done
+chmod +x "$tmp/bin/distrobox" "$tmp/bin/podman" "$tmp/bin/notify-send"
+check "box rejects unknown environments" '! "$yurei" box add plan9 2>/dev/null'
+if [[ $EUID -eq 0 ]]; then
+    check "box refuses to run as root" '! "$yurei" box add fedora 2>/dev/null'
+else
+    : > "$tmp/calls"
+    "$yurei" box add fedora >/dev/null
+    check "box add creates and sets up the environment" 'grep -qx "distrobox create --yes --name fedora --image registry.fedoraproject.org/fedora:latest" "$tmp/calls" &&
+        grep -qx "distrobox enter fedora -- true" "$tmp/calls"'
+    check "box add needs no packages when Distrobox is there" '! grep -q "^pacman" "$tmp/calls"'
+    : > "$tmp/calls"
+    "$yurei" box add ubuntu >/dev/null
+    check "box add leaves an existing environment alone" '! grep -q "distrobox create" "$tmp/calls"'
+    printf 'ubuntu\nfedora\nnope\narch\n' > "$tmp/boxes"
+    : > "$tmp/calls"
+    YUREI_BOXES_FILE=$tmp/boxes "$yurei" box setup
+    check "login setup creates the missing environments, in order" '[[ $(grep "distrobox create" "$tmp/calls" | grep -o "name [a-z]*") == $'"'"'name fedora\nname arch'"'"' ]]'
+    check "login setup tells the user" 'grep -q "^notify-send .*Arch (pacman) is ready" "$tmp/calls"'
+    : > "$tmp/calls"
+    YUREI_BOXES_FILE=$tmp/none "$yurei" box setup
+    check "login setup does nothing without a list" '[[ ! -s $tmp/calls ]]'
+fi
 check "version prints" '[[ $("$yurei" version) =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]'
 exit $fail

@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
 # Called by the installer with the mount point of the freshly installed
-# system. Installs the Yūrei packages shipped on the ISO into it.
+# system. Installs the Yūrei packages shipped on the ISO into it, and the
+# extras picked on the installer's Apps page.
+#
+#   yurei-install-target ROOT [EXTRAS]
+#
+# EXTRAS is a comma-separated list from packagechooser_yureiextras.conf
+# ("flatpak,ubuntu,fedora,arch"; empty if nothing was picked). Left out, or
+# unexpanded because this installer has no Apps page: Flathub alone.
 set -euo pipefail
 
-root=${1:?usage: yurei-install-target ROOT}
+root=${1:?usage: yurei-install-target ROOT [EXTRAS]}
+extras=${2-flatpak}
+[[ $extras =~ ^[a-z,]*$ ]] || extras=flatpak
 pkg_src=${YUREI_PKG_DIR:-/opt/yurei/packages}
 signing_key=${YUREI_SIGNING_KEY_FILE:-/opt/yurei/yurei.asc}
 repo_url=https://github.com/subuwu97/Y-rei-Linux/releases/download/repo
@@ -86,6 +95,41 @@ for conf in "$root"/{boot,efi,boot/efi}/limine.conf; do
         sed -i 's|^wallpaper: boot():/.*|wallpaper: boot():/yurei-splash.png|' "$conf"
     fi
 done
+
+# Extras from the Apps page. Linux environments are Distrobox containers,
+# each with its own package manager (apt, dnf or pacman) and apps that show
+# up in the menu, without touching Yūrei itself. They're downloaded and
+# belong to the user, so "yurei box setup" creates them at the first login
+# (started by /etc/xdg/autostart/yurei-boxes.desktop; listed in /etc/yurei/boxes).
+flathub=false boxes=()
+IFS=, read -ra picked <<< "$extras"
+for item in "${picked[@]}"; do
+    case $item in
+        flatpak) flathub=true ;;
+        ubuntu|fedora|arch) boxes+=("$item") ;;
+    esac
+done
+if $flathub; then
+    arch-chroot "$root" pacman -S --noconfirm --needed flatpak
+    arch-chroot "$root" flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo ||
+        echo "yurei-install-target: couldn't add Flathub; \"yurei doctor --fix\" adds it later" >&2
+fi
+if (( ${#boxes[@]} )); then
+    arch-chroot "$root" pacman -S --noconfirm --needed distrobox podman
+    install -d "$root/etc/yurei"
+    printf '%s\n' "${boxes[@]}" > "$root/etc/yurei/boxes"
+    # rootless containers map their users onto a range of IDs of the
+    # account's own; give each account that has none its own range
+    n=0
+    while IFS=: read -r name _ uid _; do
+        (( uid >= 1000 && uid < 60000 )) || continue
+        n=$((n + 1))
+        if ! grep -q "^$name:" "$root/etc/subuid" 2>/dev/null; then
+            first=$((100000 + 65536 * n)) last=$((100000 + 65536 * n + 65535))
+            arch-chroot "$root" usermod --add-subuids "$first-$last" --add-subgids "$first-$last" "$name"
+        fi
+    done < "$root/etc/passwd"
+fi
 
 # GameMode needs its group to raise game priority
 if arch-chroot "$root" getent group gamemode >/dev/null; then

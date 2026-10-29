@@ -7,23 +7,56 @@ The step runs just before the target is unmounted, once everything else
 (packages, bootloader, users) is in place. The branding
 (/usr/share/calamares/branding/yurei) gives the installer Yūrei's look and
 slides, and names the new system's boot entries.
+
+It also adds the "Apps" page (packagechooser_yureiextras.conf), where each
+person picks Flathub and Linux environments (Ubuntu, Fedora, Arch), just
+before the summary. Only if this Calamares has the package chooser module:
+without the page, the install step falls back to Flathub alone.
 """
 
+import os
 import sys
+from pathlib import Path
 
 import yaml
 
 INSTANCE = {"id": "yurei", "module": "shellprocess", "config": "shellprocess_yurei.conf"}
 STEP = "shellprocess@yurei"
 BRANDING = "yurei"
+EXTRAS = {"id": "yureiextras", "module": "packagechooser", "config": "packagechooser_yureiextras.conf"}
+EXTRAS_PAGE = "packagechooser@yureiextras"
+MODULE_DIRS = [Path(d) for d in os.environ.get(
+    "YUREI_CALAMARES_MODULES", "/usr/lib/calamares/modules:/usr/lib64/calamares/modules").split(":")]
 
 
-def patch(settings: dict) -> dict:
-    settings["branding"] = BRANDING
+def has_module(name: str) -> bool:
+    return any((d / name / "module.desc").is_file() for d in MODULE_DIRS)
+
+
+def add_instance(settings: dict, instance: dict) -> None:
     instances = settings.get("instances") or []
-    if not any(i.get("id") == "yurei" and i.get("module") == "shellprocess" for i in instances):
-        instances.append(dict(INSTANCE))
+    if not any(i.get("id") == instance["id"] and i.get("module") == instance["module"] for i in instances):
+        instances.append(dict(instance))
     settings["instances"] = instances
+
+
+def add_extras_page(settings: dict) -> None:
+    """The Apps page goes just before the summary, so the summary lists it."""
+    for phase in settings.get("sequence") or []:
+        pages = phase.get("show") if isinstance(phase, dict) else None
+        if pages is None or "summary" not in pages:
+            continue
+        if EXTRAS_PAGE not in pages:
+            pages.insert(pages.index("summary"), EXTRAS_PAGE)
+        add_instance(settings, EXTRAS)
+        return
+
+
+def patch(settings: dict, extras: bool | None = None) -> dict:
+    settings["branding"] = BRANDING
+    add_instance(settings, INSTANCE)
+    if has_module("packagechooser") if extras is None else extras:
+        add_extras_page(settings)
 
     for phase in settings.get("sequence") or []:
         steps = phase.get("exec") if isinstance(phase, dict) else None

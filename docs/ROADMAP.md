@@ -35,6 +35,8 @@
 - [x] Installed system: "Yurei" boot menu entry (Limine, GRUB), Yūrei Limine wallpaper, no CachyOS Hello autostart
 
 ## 0.5 — polish
+- [x] Installer "Apps" page: Flathub, and Ubuntu (apt), Fedora (dnf/RPM) or Arch environments
+      through Distrobox, set up at the first login; `yurei box` to add more later
 - [ ] Yūrei welcome app (GUI for bundles, doctor and drivers)
 - [ ] Btrfs snapshots before every update, bootable from the boot menu
 - [ ] Handheld support (Legion Go, ROG Ally, Steam Deck): controller, TDP and orientation fixes

@@ -2,8 +2,9 @@
 # yurei - one command for keeping a Yūrei system fast, updated and game-ready.
 set -euo pipefail
 
-VERSION="0.3.0"
+VERSION="0.5.0"
 BUNDLE_DIR="${YUREI_BUNDLE_DIR:-/usr/share/yurei/bundles}"
+BOXES_FILE="${YUREI_BOXES_FILE:-/etc/yurei/boxes}"
 MIN_MAP_COUNT=1048576
 
 if [[ -t 1 ]]; then
@@ -39,6 +40,9 @@ ${bold}yurei${reset} $VERSION - manage your Yūrei system
   yurei bootsplash X      on or off: the animated Yūrei boot screen
   yurei layout X          dock (top bar and macOS-style dock) or classic (one bottom panel)
   yurei theme X           yurei (navy and lavender) or breeze (Plasma's Breeze Dark)
+  yurei box               Linux environments for software made for other distributions:
+                          yurei box add ubuntu|fedora|arch   (apt, dnf or pacman inside)
+                          yurei box enter NAME | list | remove NAME
   yurei version           Print the version
 EOF
 }
@@ -349,6 +353,100 @@ cmd_theme() {
     say "Desktop theme: $1"
 }
 
+# ------------------------------------------------------------------ Linux environments
+
+# Each is a Distrobox container: a whole other distribution with its own
+# package manager, sharing your home folder, whose apps can be added to the
+# app menu (distrobox-export). Yūrei itself is never touched by them.
+box_image() {
+    case $1 in
+        ubuntu) echo docker.io/library/ubuntu:latest ;;   # the latest LTS
+        fedora) echo registry.fedoraproject.org/fedora:latest ;;
+        arch) echo docker.io/library/archlinux:latest ;;
+        *) return 1 ;;
+    esac
+}
+
+box_label() {
+    case $1 in
+        ubuntu) echo "Ubuntu (apt)" ;;
+        fedora) echo "Fedora (dnf)" ;;
+        arch) echo "Arch (pacman)" ;;
+    esac
+}
+
+notify() {
+    have notify-send && notify-send --app-name=Yūrei --icon=yurei "$@" 2>/dev/null || true
+}
+
+box_exists() {
+    distrobox list --no-color 2>/dev/null | awk -F'|' 'NR > 1 {gsub(/ /, "", $2); print $2}' | grep -qx "$1"
+}
+
+# box_create NAME: downloads the image, creates the container and runs its
+# first-time setup, so the first "enter" is quick
+box_create() {
+    local name=$1 image
+    image=$(box_image "$name") || die "unknown environment '$name' - use ubuntu, fedora or arch"
+    distrobox create --yes --name "$name" --image "$image"
+    distrobox enter "$name" -- true
+}
+
+cmd_box() {
+    local action=${1:-list}
+    shift || true
+    case $action in
+        add|enter|remove|rm|setup)
+            [[ $EUID -ne 0 ]] || die "run this as yourself (not with sudo): environments belong to your account"
+            ;;
+    esac
+    case $action in
+        list)
+            have distrobox || { say "No Linux environments yet. Add one with: yurei box add ubuntu|fedora|arch"; return; }
+            distrobox list
+            ;;
+        add)
+            local name=${1:-}
+            box_image "$name" >/dev/null || die "use: yurei box add ubuntu|fedora|arch"
+            if ! have distrobox || ! have podman; then
+                as_root pacman -S --needed distrobox podman
+            fi
+            box_exists "$name" && { say "$(box_label "$name") is already set up: yurei box enter $name"; return; }
+            say "${bold}Setting up $(box_label "$name")${reset} (downloads it the first time)"
+            box_create "$name"
+            say "${green}Ready.${reset} Open it with: ${bold}yurei box enter $name${reset}"
+            say "Inside, install software with its own package manager; add an app to your menu with: distrobox-export --app NAME"
+            ;;
+        enter)
+            [[ -n ${1:-} ]] || die "use: yurei box enter NAME"
+            exec distrobox enter "$1"
+            ;;
+        remove|rm)
+            [[ -n ${1:-} ]] || die "use: yurei box remove NAME"
+            distrobox rm --force "$1"
+            ;;
+        setup)
+            # at login: the environments picked in the installer that this
+            # account doesn't have yet. One that fails (no network, say) is
+            # tried again at the next login.
+            [[ -r $BOXES_FILE ]] && have distrobox || return 0
+            local name label
+            while read -r name; do
+                box_image "$name" >/dev/null || continue
+                box_exists "$name" && continue
+                label=$(box_label "$name")
+                notify "Setting up $label" "Downloading it in the background. You can keep using your PC."
+                if box_create "$name" < /dev/null; then
+                    notify "$label is ready" "Open it from a terminal with: yurei box enter $name"
+                else
+                    notify "Couldn't set up $label" "It'll try again when you next log in, or run: yurei box add $name"
+                fi
+            done < "$BOXES_FILE"
+            ;;
+        *) die "use: yurei box add|enter|list|remove" ;;
+    esac
+}
+
 # ------------------------------------------------------------------ main
 
 main() {
@@ -366,6 +464,7 @@ main() {
         bootsplash|boot-splash) cmd_bootsplash "$@" ;;
         layout) cmd_layout "$@" ;;
         theme) cmd_theme "$@" ;;
+        box|boxes) cmd_box "$@" ;;
         version|--version) say "$VERSION" ;;
         help|-h|--help) usage ;;
         *) usage >&2; exit 2 ;;

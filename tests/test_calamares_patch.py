@@ -61,3 +61,33 @@ def test_selects_yurei_branding():
     assert mod.patch(s)["branding"] == "yurei"
     shipped = SCRIPT.parent.parent.parent / "share/calamares/branding" / mod.BRANDING / "branding.desc"
     assert shipped.is_file()
+
+
+def test_adds_apps_page_before_summary():
+    s = mod.patch(mod.patch(settings(), extras=True), extras=True)
+    assert s["sequence"][0]["show"] == ["welcome", "partition", "users", "packagechooser@yureiextras", "summary"]
+    assert sum(i["id"] == "yureiextras" for i in s["instances"]) == 1
+    assert mod.EXTRAS in s["instances"]
+
+
+def test_no_apps_page_without_the_module(tmp_path, monkeypatch):
+    monkeypatch.setattr(mod, "MODULE_DIRS", [tmp_path])
+    assert "packagechooser@yureiextras" not in mod.patch(settings())["sequence"][0]["show"]
+    (tmp_path / "packagechooser").mkdir()
+    (tmp_path / "packagechooser" / "module.desc").write_text("type: view\n")
+    assert "packagechooser@yureiextras" in mod.patch(settings())["sequence"][0]["show"]
+
+
+def test_apps_page_config_matches_install_step():
+    import yaml
+    modules = SCRIPT.parent.parent.parent.parent / "etc/calamares/modules"
+    page = yaml.safe_load((modules / mod.EXTRAS["config"]).read_text())
+    assert page["mode"] == "optionalmultiple" and page["method"] == "legacy"
+    ids = [item["id"] for item in page["items"]]
+    assert ids == ["flatpak", "ubuntu", "fedora", "arch"]
+    branding = SCRIPT.parent.parent.parent / "share/calamares/branding/yurei"
+    for item in page["items"]:
+        assert (branding / Path(item["screenshot"]).name).is_file(), item["screenshot"]
+    # the legacy method stores the choice as packagechooser_<instance id>
+    step = yaml.safe_load((modules / "shellprocess_yurei.conf").read_text())
+    assert f"${{gs[packagechooser_{mod.EXTRAS['id']}]}}" in step["script"][0]

@@ -58,6 +58,14 @@ running well.
   the AUR through `paru`.
 - Updates to Yūrei's own packages come from a signed `[yurei]` pacman repository
   (see [docs/REPOSITORY.md](docs/REPOSITORY.md)).
+- **Your choice of package system for extra software.** Yūrei itself uses pacman.
+  The installer's Apps page also offers Flathub (on by default) and Linux
+  environments: an **Ubuntu** environment with `apt-get`, a **Fedora** environment
+  with `dnf`/RPM, or an **Arch** one. Each is a [Distrobox](https://distrobox.it)
+  container that shares your home folder and can put its apps in your app menu,
+  so software made for those systems runs on Yūrei without touching Yūrei
+  itself. They're downloaded in the background at your first login. Add one
+  any time with `yurei box add ubuntu|fedora|arch`.
 - Optional app bundles, one command each:
 
 | Bundle | What's in it |
@@ -85,6 +93,8 @@ yurei login-screen X    yurei (the Yūrei login screen) or plasma (CachyOS's def
 yurei bootsplash X      on or off: the animated boot screen (with backups and full rollback)
 yurei layout X          dock (top bar and macOS-style dock) or classic (one bottom panel)
 yurei theme X           yurei (navy and lavender) or breeze (Plasma's Breeze Dark)
+yurei box add NAME      A Linux environment: ubuntu (apt), fedora (dnf) or arch (pacman)
+yurei box enter NAME    Open it in the terminal (also: yurei box list, yurei box remove NAME)
 ```
 
 ## How it's built
