@@ -190,15 +190,15 @@ Each stage ends in something testable, built automatically in CI.
     publishes them in a signed `[yurei]` repository (kept as the
     `yurei-repo` artifact of each run), then installs a new system from
     it into an empty directory with pacman alone and runs a shell in it
+  * `boot-test.sh`: makes a disk image of the system and boots it in QEMU
+    (the stage 2 milestone); a check added to the test image only reports
+    what's running once the login prompt is up, and powers off
 * `independent/packages/`: Yūrei's package recipes (PKGBUILDs), built in
   the order of `ORDER`. Each takes its source from the same address, with
   the same SHA-256, as `sources.lock`; `check-recipes.py` makes sure of it.
   First batch: the base layout (`yurei-filesystem`), glibc, the compression
   libraries, ncurses, readline and Bash. Packages are signed with a
   throwaway key per run until Yūrei's own signing key is set up
-  * `boot-test.sh`: makes a disk image of the system and boots it in QEMU
-    (the stage 2 milestone); a check added to the test image only reports
-    what's running once the login prompt is up, and powers off
 
 ## Naming
 

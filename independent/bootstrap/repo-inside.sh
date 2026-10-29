@@ -43,8 +43,11 @@ setup() {
     getent passwd "$user" >/dev/null || useradd -m "$user"
     as_user gpg --batch --quiet --passphrase '' \
         --quick-gen-key "Yūrei build (throwaway) <build@yurei.invalid>" ed25519 sign never
-    rm -rf "$repo"
-    install -d -o "$user" "$repo"
+    rm -rf "$repo" "$srv/sources"
+    install -d -o "$user" "$repo" "$srv/sources"
+    # makepkg wants a download folder it can write to; /sources is mounted
+    # read-only, so it gets one with links to the verified files
+    ln -s /sources/* "$srv/sources/"
     # Yūrei's build settings, on top of pacman's defaults
     cat > "$srv/makepkg.conf" <<CONF
 source /etc/makepkg.conf
@@ -72,7 +75,7 @@ packages() {
         as_user mkdir -p build
         cp -r "$recipes/$name" "$(home)/build/"
         chown -R "$user:" "$(home)/build/$name"
-        as_user sh -c "cd build/$name && MAKEPKG_CONF=$srv/makepkg.conf SRCDEST=/sources \
+        as_user sh -c "cd build/$name && MAKEPKG_CONF=$srv/makepkg.conf SRCDEST=$srv/sources \
             PKGDEST=$repo makepkg --nodeps --sign --key $fpr --noconfirm --noprogressbar"
         rm -rf "$(home)/build/$name"
         printf '   (%s took %d s)\n' "$name" $((SECONDS - start))
@@ -119,7 +122,7 @@ CONF
         ldd /usr/bin/bash'
     gpgconf --homedir "$gnupg" --kill all
     as_user gpgconf --kill all
-    rm -rf "$root" "$gnupg" "$srv/cache" "$srv/pacman.conf"
+    rm -rf "$root" "$gnupg" "$srv/cache" "$srv/pacman.conf" "$srv/sources"
     echo "repository OK"
 }
 
