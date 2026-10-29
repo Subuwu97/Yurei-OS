@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=procps-ng
+pkgver=4.0.5
+pkgrel=1
+pkgdesc="Utilities for monitoring your system and its processes"
+arch=(x86_64)
+url="https://gitlab.com/procps-ng/procps"
+license=(GPL-2.0-or-later LGPL-2.1-or-later)
+depends=(glibc ncurses systemd)
+source=("https://sourceforge.net/projects/procps-ng/files/Production/procps-ng-$pkgver.tar.xz")
+sha256sums=('c2e6d193cc78f84cd6ddb72aaf6d5c6a9162f0470e5992092057f5ff518562fa')
+
+build() {
+    cd procps-ng-$pkgver
+    # kill comes from util-linux
+    ./configure --prefix=/usr --disable-static --disable-kill --enable-watch8bit --with-systemd
+    make src_w_LDADD='$(LDADD) -lsystemd'
+}
+
+package() {
+    cd procps-ng-$pkgver
+    make DESTDIR="$pkgdir" install
+}

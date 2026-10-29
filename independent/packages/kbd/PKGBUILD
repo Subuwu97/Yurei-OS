@@ -1,0 +1,32 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=kbd
+pkgver=2.8.0
+pkgrel=1
+pkgdesc="Keytable files and keyboard utilities"
+arch=(x86_64)
+url="https://kbd-project.org/"
+license=(GPL-2.0-or-later)
+depends=(glibc)
+source=("https://www.kernel.org/pub/linux/utils/kbd/kbd-$pkgver.tar.xz")
+sha256sums=('01f5806da7d1d34f594b7b2a6ae1ab23215344cf1064e8edcd3a90fef9776a11')
+
+prepare() {
+    cd kbd-$pkgver
+    # resizecons needs svgalib, which is long gone
+    sed -i '/RESIZECONS_PROGS=/s/yes/no/' configure
+    [[ ! -f docs/man/man8/Makefile.in ]] || sed -i 's/resizecons.8 //' docs/man/man8/Makefile.in
+}
+
+build() {
+    cd kbd-$pkgver
+    ./configure --prefix=/usr --disable-vlock
+    make
+}
+
+package() {
+    cd kbd-$pkgver
+    make DESTDIR="$pkgdir" install
+}

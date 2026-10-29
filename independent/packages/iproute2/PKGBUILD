@@ -1,0 +1,31 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=iproute2
+pkgver=6.16.0
+pkgrel=1
+pkgdesc="IP routing utilities"
+arch=(x86_64)
+url="https://wiki.linuxfoundation.org/networking/iproute2"
+license=(GPL-2.0-or-later)
+depends=(glibc libelf libcap)
+source=("https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-$pkgver.tar.xz")
+sha256sums=('5900ccc15f9ac3bf7b7eae81deb5937123df35e99347a7f11a22818482f0a8d0')
+
+prepare() {
+    cd iproute2-$pkgver
+    # arpd needs Berkeley DB, which Yūrei doesn't have
+    sed -i /ARPD/d Makefile
+    rm -f man/man8/arpd.8
+}
+
+build() {
+    cd iproute2-$pkgver
+    make NETNS_RUN_DIR=/run/netns
+}
+
+package() {
+    cd iproute2-$pkgver
+    make DESTDIR="$pkgdir" SBINDIR=/usr/sbin install
+}

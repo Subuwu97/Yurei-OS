@@ -1,0 +1,28 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=dbus
+pkgver=1.16.2
+pkgrel=1
+pkgdesc="Freedesktop.org message bus system"
+arch=(x86_64)
+url="https://www.freedesktop.org/wiki/Software/dbus/"
+license=(AFL-2.1 GPL-2.0-or-later)
+depends=(glibc expat systemd)
+source=("https://dbus.freedesktop.org/releases/dbus/dbus-$pkgver.tar.xz")
+sha256sums=('0ba2a1a4b16afe7bceb2c07e9ce99a8c2c3508e5dec290dbb643384bd6beb7e2')
+
+build() {
+    mkdir -p dbus-$pkgver/build
+    cd dbus-$pkgver/build
+    meson setup .. --prefix=/usr --buildtype=release --wrap-mode=nofallback
+    ninja
+}
+
+package() {
+    cd dbus-$pkgver/build
+    DESTDIR="$pkgdir" ninja install
+    install -d "$pkgdir/var/lib/dbus"
+    ln -sf /etc/machine-id "$pkgdir/var/lib/dbus/machine-id"
+}

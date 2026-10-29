@@ -1,0 +1,60 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=linux
+pkgver=6.18
+pkgrel=1
+pkgdesc="Yūrei's Linux kernel and modules"
+arch=(x86_64)
+url="https://www.kernel.org/"
+license=(GPL-2.0-only)
+depends=(kmod)
+options=(!strip)
+source=("https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-$pkgver.tar.xz")
+sha256sums=('9106a4605da9e31ff17659d958782b815f9591ab308d03b0ee21aad6c7dced4b')
+
+build() {
+    cd linux-$pkgver
+    make mrproper
+    # The kernel's own x86-64 defaults, what virtual machines need, what
+    # systemd needs, and what real PCs and a live ISO need. Disks, USB,
+    # file systems and the boot display are built in, so the kernel
+    # starts from any of them without modules; graphics, network and
+    # sound drivers are modules, loaded for the hardware found.
+    make defconfig
+    make kvm_guest.config
+    scripts/config \
+        -e DEVTMPFS -e DEVTMPFS_MOUNT -e CGROUPS -e MEMCG -e FHANDLE -e AUTOFS_FS \
+        -e TMPFS_POSIX_ACL -e TMPFS_XATTR -e SECCOMP -e BPF_SYSCALL -e CGROUP_BPF -e PSI \
+        -e DMIID -e INOTIFY_USER -d UEVENT_HELPER -d SYSFS_DEPRECATED \
+        -e EFI -e EFI_STUB -e EFIVAR_FS -e EFI_PARTITION \
+        -e BLK_DEV_NVME -e ATA -e SATA_AHCI -e BLK_DEV_LOOP -e BLK_DEV_SD -e BLK_DEV_SR \
+        -e MMC -e MMC_BLOCK -e MMC_SDHCI -e MMC_SDHCI_PCI \
+        -e USB_SUPPORT -e USB_XHCI_HCD -e USB_EHCI_HCD -e USB_OHCI_HCD -e USB_STORAGE -e USB_UAS \
+        -e HID -e HID_GENERIC -e USB_HID -e INPUT_EVDEV \
+        -e EXT4_FS -e VFAT_FS -e FAT_FS -e NLS_CODEPAGE_437 -e NLS_ISO8859_1 -e NLS_UTF8 \
+        -e ISO9660_FS -e JOLIET -e ZISOFS -e SQUASHFS -e SQUASHFS_XZ -e SQUASHFS_ZSTD \
+        -e OVERLAY_FS -e TMPFS \
+        -e DRM -e DRM_SIMPLEDRM -e SYSFB_SIMPLEFB -e DRM_FBDEV_EMULATION -e FRAMEBUFFER_CONSOLE \
+        -m DRM_I915 -m DRM_AMDGPU -m DRM_NOUVEAU -m DRM_VIRTIO_GPU \
+        -m E1000E -m IGB -m R8169 -m CFG80211 -m MAC80211 -m IWLWIFI -m IWLMVM \
+        -m SND_HDA_INTEL -m SND_HDA_CODEC_REALTEK -m SND_HDA_CODEC_HDMI \
+        -e VIRTIO_BLK -e VIRTIO_NET -e SERIAL_8250_CONSOLE \
+        --set-str LOCALVERSION -yurei -d LOCALVERSION_AUTO
+    make olddefconfig
+    make
+}
+
+package() {
+    cd linux-$pkgver
+    local release
+    release=$(make -s kernelrelease)
+    make INSTALL_MOD_PATH="$pkgdir/usr" INSTALL_MOD_STRIP=1 DEPMOD=/bin/true modules_install
+    rm -f "$pkgdir/usr/lib/modules/$release/build"
+    install -Dm644 arch/x86/boot/bzImage "$pkgdir/boot/vmlinuz-yurei"
+    install -Dm644 arch/x86/boot/bzImage "$pkgdir/usr/lib/modules/$release/vmlinuz"
+    install -Dm644 .config "$pkgdir/usr/lib/modules/$release/config"
+    # the module index, made now rather than when installing
+    depmod -b "$pkgdir/usr" "$release"
+}

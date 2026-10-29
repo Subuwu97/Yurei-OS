@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=kmod
+pkgver=34.2
+pkgrel=1
+pkgdesc="Linux kernel module management tools and library"
+arch=(x86_64)
+url="https://git.kernel.org/pub/scm/utils/kernel/kmod/kmod.git"
+license=(GPL-2.0-or-later LGPL-2.1-or-later)
+depends=(glibc zlib xz zstd openssl)
+source=("https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-$pkgver.tar.xz")
+sha256sums=('5a5d5073070cc7e0c7a7a3c6ec2a0e1780850c8b47b3e3892226b93ffcb9cb54')
+
+build() {
+    cd kmod-$pkgver
+    # manual pages need scdoc, which Yūrei doesn't have yet
+    meson setup --prefix=/usr --buildtype=release -D manpages=false build
+    ninja -C build
+}
+
+package() {
+    cd kmod-$pkgver
+    DESTDIR="$pkgdir" ninja -C build install
+}

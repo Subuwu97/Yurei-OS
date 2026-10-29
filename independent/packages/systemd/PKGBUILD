@@ -1,0 +1,50 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=systemd
+pkgver=257.8
+pkgrel=1
+pkgdesc="System and service manager, with udev"
+arch=(x86_64)
+url="https://systemd.io/"
+license=(LGPL-2.1-or-later GPL-2.0-or-later)
+depends=(glibc gcc-libs acl libcap libxcrypt kmod util-linux xz zstd lz4 openssl bash)
+install=systemd.install
+backup=(etc/systemd/network/20-wired.network)
+source=("https://github.com/systemd/systemd/archive/v$pkgver/systemd-$pkgver.tar.gz")
+sha256sums=('f280278161446fe3838bedb970c7b3998043ad107f7627735a81483218c6f6f9')
+
+build() {
+    mkdir -p systemd-$pkgver/build
+    cd systemd-$pkgver/build
+    # firstboot off: it would stop the boot to ask questions on the
+    # console. No home directories service, update service or boot
+    # loader yet (Yūrei boots through the kernel's EFI stub for now).
+    meson setup .. --prefix=/usr --buildtype=release -D mode=release \
+        -D default-dnssec=no -D firstboot=false -D install-tests=false -D tests=false \
+        -D ldconfig=false -D rpmmacrosdir=no -D homed=disabled -D userdb=false \
+        -D man=disabled -D pamconfdir=no -D dev-kvm-mode=0660 -D nobody-group=nobody \
+        -D sysupdate=disabled -D ukify=disabled -D bootloader=disabled \
+        -D docdir=/usr/share/doc/systemd
+    ninja
+}
+
+package() {
+    cd systemd-$pkgver/build
+    DESTDIR="$pkgdir" ninja install
+    # the kernel starts /sbin/init
+    ln -sf ../lib/systemd/systemd "$pkgdir/usr/sbin/init"
+    # empty: each installed system makes its own machine ID at first boot
+    install -d "$pkgdir/etc"
+    : > "$pkgdir/etc/machine-id"
+    # wired networks get an address by DHCP; names resolve through resolved
+    install -Dm644 /dev/stdin "$pkgdir/etc/systemd/network/20-wired.network" <<'NET'
+[Match]
+Type=ether
+
+[Network]
+DHCP=yes
+NET
+    ln -sf ../run/systemd/resolve/stub-resolv.conf "$pkgdir/etc/resolv.conf"
+}

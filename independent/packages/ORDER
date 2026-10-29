@@ -56,3 +56,11 @@ tar
 texinfo
 util-linux
 e2fsprogs
+# Fourth batch: what boots a PC.
+kmod
+systemd
+dbus
+procps-ng
+kbd
+iproute2
+linux

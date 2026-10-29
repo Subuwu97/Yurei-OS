@@ -1,0 +1,9 @@
+# Runs when pacman installs or upgrades systemd.
+post_install() {
+    # services start as upstream's presets say (networkd, resolved, getty, …)
+    systemctl preset-all
+}
+
+post_upgrade() {
+    systemctl daemon-reexec 2>/dev/null || true
+}
