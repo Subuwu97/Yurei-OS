@@ -34,8 +34,7 @@ jobs:
           restore-keys: yurei-sources-
 
       - name: Fetch and verify upstream sources
-        # TODO: drop ALLOW_UNPINNED once the base system's sources are pinned
-        run: ALLOW_UNPINNED=1 independent/bootstrap/fetch.sh
+        run: independent/bootstrap/fetch.sh
 
       - name: Cache key for the cross toolchain
         id: cross

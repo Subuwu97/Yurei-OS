@@ -20,8 +20,11 @@ SOURCES=${SOURCES:?set SOURCES to the directory fetch.sh downloaded into}
 [[ $EUID -eq 0 ]] || { echo "chroot.sh needs root (sudo)" >&2; exit 1; }
 [[ -x $YUREI/usr/bin/bash && -x $YUREI/usr/bin/gcc ]] || { echo "run temptools.sh first" >&2; exit 1; }
 
-# everything in the new system belongs to root from now on
-chown -R root:root "$YUREI"/{usr,var,etc,tools,lib64}
+# everything in the new system belongs to root from now on (/tools is gone
+# once the chroot step has cleaned up)
+for dir in usr var etc tools lib64; do
+    [[ -e $YUREI/$dir ]] && chown -R root:root "$YUREI/$dir"
+done
 chown -h root:root "$YUREI"/{bin,lib,sbin}
 
 mounted=()
