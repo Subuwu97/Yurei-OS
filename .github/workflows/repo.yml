@@ -5,10 +5,9 @@ name: Publish package repository
 #   https://github.com/subuwu97/Y-rei-Linux/releases/download/repo
 # Needs the YUREI_SIGNING_KEY secret; see docs/REPOSITORY.md.
 on:
+  # on demand only here: the signed [yurei] repository is published from
+  # the CachyOS-based Y-rei-Linux for now
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths: ["pkg/**"]
 
 permissions:
   contents: write

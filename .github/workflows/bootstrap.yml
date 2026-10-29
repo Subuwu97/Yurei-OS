@@ -1,12 +1,11 @@
 name: Independent bootstrap
 
-# The experiment in docs/INDEPENDENT.md: builds Yūrei's toolchain from
-# upstream source (stage 1). Runs when the bootstrap changes on the
-# experimental branch, so it doesn't spend build minutes otherwise.
+# docs/INDEPENDENT.md: builds Yūrei's toolchain from upstream source
+# (stage 1). Runs when the bootstrap changes, and on demand.
 on:
   workflow_dispatch:
   push:
-    branches: [experimental/independent]
+    branches: [main]
     paths: ["independent/**", ".github/workflows/bootstrap.yml"]
 
 jobs:

@@ -1,3 +1,21 @@
+# Yurei-OS
+
+**Yūrei as its own Linux operating system.**
+
+Yūrei (幽霊, "ghost") is a gaming-first desktop. It started as a layer on
+CachyOS. This repository is where it becomes independent: every package
+built by Yūrei from the original source code, into Yūrei's own repositories,
+so it keeps going whatever happens to any other distribution.
+
+* **The plan, the decisions and the progress:** [docs/INDEPENDENT.md](docs/INDEPENDENT.md)
+* **The independent build:** [independent/](independent/). Stage 1, the compiler
+  toolchain, is in progress.
+* **Everything below** is the Yūrei desktop as it is today, built on CachyOS:
+  the themes, the `yurei` command, Steam Game Mode and the installer step.
+  It all carries over to the independent system.
+
+---
+
 # Yūrei 幽霊
 
 **A gaming-first desktop Linux built on CachyOS, ready for everything else too.**

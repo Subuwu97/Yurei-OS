@@ -1,9 +1,8 @@
 # Experiment: Yūrei as its own operating system
 
-> **Status: stage 1 (toolchain) in progress.** This branch
-> (`experimental/independent`) builds Yūrei without any other distribution
-> underneath. The released Yūrei stays on CachyOS until this experiment can
-> do everything it does.
+> **Status: stage 1 (toolchain) in progress.** This repository, Yurei-OS,
+> builds Yūrei without any other distribution underneath. The released Yūrei
+> stays on CachyOS until this one can do everything it does.
 
 **The goal:** Yūrei must keep going even if the distribution it's based on
 today stops development or disappears. **Chosen approach: B** (below). Every
@@ -130,10 +129,10 @@ Each stage ends in something testable, built automatically in CI.
 | C library | glibc | Steam and most games need it |
 | Target triplet | `x86_64-yurei-linux-gnu` | Yūrei's own; keeps the bootstrap apart from the host |
 | Sources | Official upstream release tarballs only, pinned by SHA-256 in `independent/bootstrap/sources.lock` | Nothing comes from another distribution |
-| Build power | Free GitHub Actions minutes for now | Decide (public repo, own build PC or paid CI) before stage 3 |
+| Build power | GitHub Actions in this public repository | Unlimited free minutes on standard runners (6 hours per job); bigger jobs may later need a larger runner or a build PC |
 | CPU target | Decided at stage 2 | x86-64-v3 like CachyOS is faster; v2 runs on older PCs |
 
-## What this branch contains
+## What this repository contains
 
 * `docs/INDEPENDENT.md`: this plan, and the decisions as they're made
 * `independent/bootstrap/`: stage 1, the cross toolchain (binutils, GCC,
