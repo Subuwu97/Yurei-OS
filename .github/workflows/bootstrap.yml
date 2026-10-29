@@ -34,6 +34,10 @@ jobs:
           restore-keys: yurei-sources-
 
       - name: Fetch and verify upstream sources
+        # part 2's sources from hosts the dev machine can't reach get their
+        # sums from this run; pin them in sources.lock and drop this again
+        env:
+          ALLOW_UNPINNED: "1"
         run: independent/bootstrap/fetch.sh
 
       - name: Cache key for the cross toolchain
@@ -105,8 +109,49 @@ jobs:
           path: /home/runner/yurei-chroot.tar.zst
           key: ${{ steps.chroot.outputs.key }}
 
-      - name: Stage 2a - final toolchain and core libraries
-        run: sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh base-inside.sh
+      # The system after part 1 of stage 2a is cached the same way.
+      - name: Cache key for the base toolchain
+        id: base
+        run: |
+          key=$( { echo "${{ steps.chroot.outputs.key }}"
+                   cd independent/bootstrap
+                   cat base-inside.sh
+                   awk '$5 == "base"' sources.lock; } | sha256sum | cut -c1-16)
+          echo "key=yurei-base-$key" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache/restore@v4
+        id: base-cache
+        with:
+          path: /home/runner/yurei-base.tar.zst
+          key: ${{ steps.base.outputs.key }}
+
+      - name: Unpack the cached base toolchain
+        if: steps.base-cache.outputs.cache-hit == 'true'
+        run: |
+          sudo rm -rf "$YUREI" && sudo mkdir -p "$YUREI"
+          sudo tar --zstd -xpf /home/runner/yurei-base.tar.zst --numeric-owner -C "$YUREI"
+
+      - name: Stage 2a, part 1 - final toolchain and core libraries
+        if: steps.base-cache.outputs.cache-hit != 'true'
+        run: |
+          sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh base-inside.sh
+          sudo rm -rf "$YUREI/build"
+          sudo tar --zstd -cpf /home/runner/yurei-base.tar.zst --numeric-owner -C "$YUREI" .
+          sudo chown "$(id -u):$(id -g)" /home/runner/yurei-base.tar.zst
+          ls -lh /home/runner/yurei-base.tar.zst
+
+      - uses: actions/cache/save@v4
+        if: steps.base-cache.outputs.cache-hit != 'true'
+        with:
+          path: /home/runner/yurei-base.tar.zst
+          key: ${{ steps.base.outputs.key }}
+
+      - name: Base toolchain check (also on a cached one)
+        if: steps.base-cache.outputs.cache-hit == 'true'
+        run: sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh base-inside.sh check
+
+      - name: Stage 2a, part 2 - core tools
+        run: sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh base2-inside.sh
 
       - name: Source checksums (to pin in sources.lock)
         if: always()

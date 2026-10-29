@@ -1,7 +1,7 @@
 # Upstream sources for the bootstrap: name, version, URL, SHA-256, and the
 # step that first uses it (cross = stage1.sh, temp = temptools.sh,
-# chroot = chroot.sh, base = base-inside.sh). Only official upstream
-# release tarballs; no other distribution's packages.
+# chroot = chroot.sh, base = base-inside.sh, base2 = base2-inside.sh).
+# Only official upstream release tarballs; no other distribution's packages.
 #
 # A sum of "-" means not yet pinned: fetch.sh downloads it, prints its sum
 # and fails, so the sum can be filled in here. After that, any change to a
@@ -49,3 +49,26 @@ acl       2.3.2   https://download.savannah.nongnu.org/releases/acl/acl-2.3.2.ta
 libcap    2.76    https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.76.tar.xz  629da4ab29900d0f7fcc36227073743119925fd711c99a1689bbf5c9b40c8e6f  base
 libxcrypt 4.4.38  https://github.com/besser82/libxcrypt/releases/download/v4.4.38/libxcrypt-4.4.38.tar.xz  80304b9c306ea799327f01d9a7549bdb28317789182631f1b54f4511b4206dd6  base
 shadow    4.18.0  https://github.com/shadow-maint/shadow/releases/download/4.18.0/shadow-4.18.0.tar.xz  add4604d3bc410344433122a819ee4154b79dd8316a56298c60417e637c07608  base
+psmisc    23.7    https://sourceforge.net/projects/psmisc/files/psmisc/psmisc-23.7.tar.xz  58c55d9c1402474065adae669511c191de374b0871eec781239ab400b907c327  base2
+libtool   2.5.4   https://ftp.gnu.org/gnu/libtool/libtool-2.5.4.tar.xz  -  base2
+gdbm      1.26    https://ftp.gnu.org/gnu/gdbm/gdbm-1.26.tar.gz  -  base2
+gperf     3.3     https://ftp.gnu.org/gnu/gperf/gperf-3.3.tar.gz  -  base2
+expat     2.7.1   https://github.com/libexpat/libexpat/releases/download/R_2_7_1/expat-2.7.1.tar.xz  354552544b8f99012e5062f7d570ec77f14b412a3ff5c7d8d0dae62c0d217c30  base2
+less      679     https://www.greenwoodsoftware.com/less/less-679.tar.gz  -  base2
+autoconf  2.72    https://ftp.gnu.org/gnu/autoconf/autoconf-2.72.tar.xz  -  base2
+automake  1.18.1  https://ftp.gnu.org/gnu/automake/automake-1.18.1.tar.xz  -  base2
+openssl   3.5.2   https://github.com/openssl/openssl/releases/download/openssl-3.5.2/openssl-3.5.2.tar.gz  c53a47e5e441c930c3928cf7bf6fb00e5d129b630e0aa873b08258656e7345ec  base2
+elfutils  0.193   https://sourceware.org/elfutils/ftp/0.193/elfutils-0.193.tar.bz2  -  base2
+libffi    3.5.2   https://github.com/libffi/libffi/releases/download/v3.5.2/libffi-3.5.2.tar.gz  f3a3082a23b37c293a4fcd1053147b371f2ff91fa7ea1b2a52e335676bac82dc  base2
+flit_core 3.12.0  https://files.pythonhosted.org/packages/source/f/flit_core/flit_core-3.12.0.tar.gz  18f63100d6f94385c6ed57a72073443e1a71a4acb4339491615d0f16d6ff01b2  base2
+wheel     0.46.1  https://files.pythonhosted.org/packages/source/w/wheel/wheel-0.46.1.tar.gz  fd477efb5da0f7df1d3c76c73c14394002c844451bd63229d8570f376f5e6a38  base2
+setuptools 80.9.0 https://files.pythonhosted.org/packages/source/s/setuptools/setuptools-80.9.0.tar.gz  f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c  base2
+markupsafe 3.0.2  https://files.pythonhosted.org/packages/source/m/markupsafe/markupsafe-3.0.2.tar.gz  ee55d3edf80167e48ea11a923c7386f4669df67d7994554387f84e7d8b0a2bf0  base2
+jinja2    3.1.6   https://files.pythonhosted.org/packages/source/j/jinja2/jinja2-3.1.6.tar.gz  0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d  base2
+ninja     1.13.1  https://github.com/ninja-build/ninja/archive/v1.13.1/ninja-1.13.1.tar.gz  -  base2
+meson     1.8.3   https://github.com/mesonbuild/meson/releases/download/1.8.3/meson-1.8.3.tar.gz  f118aa910fc0a137cc2dd0122232dbf82153d9a12fb5b0f5bb64896f6a157abf  base2
+kmod      34.2    https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-34.2.tar.xz  -  base2
+iproute2  6.16.0  https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-6.16.0.tar.xz  -  base2
+kbd       2.8.0   https://www.kernel.org/pub/linux/utils/kbd/kbd-2.8.0.tar.xz  -  base2
+procps-ng 4.0.5   https://sourceforge.net/projects/procps-ng/files/Production/procps-ng-4.0.5.tar.xz  -  base3
+e2fsprogs 1.47.3  https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v1.47.3/e2fsprogs-1.47.3.tar.gz  2f5164e64dd7d91eadd1e0e8a77d92c06dd7837bb19f1d9189ce1939b363d2b4  base2

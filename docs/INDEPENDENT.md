@@ -1,11 +1,12 @@
 # Experiment: Yūrei as its own operating system
 
-> **Status: stage 1 done; stage 2 (base system) next.** On GitHub's
-> runners, Yūrei's toolchain builds from upstream source, then Yūrei builds
-> its own tools inside a chroot, with only the host's kernel left. Timings:
-> cross toolchain 16 min (cached between runs), temporary tools 18–31 min,
-> chroot step 11 min. Built so far: GCC 15.2.0, glibc 2.42, binutils 2.45,
-> bash 5.3, perl 5.42.0, Python 3.13.7 and the basic command-line tools.
+> **Status: stage 2a under way.** On GitHub's runners, Yūrei's toolchain
+> builds from upstream source, then Yūrei builds its own tools inside a
+> chroot, with only the host's kernel left. Part 1 of stage 2a (the final
+> glibc 2.42, binutils 2.45 and GCC 15.2.0, rebuilt by Yūrei itself) passes;
+> part 2 (the core tools) is being built. Timings: cross toolchain 16 min,
+> temporary tools 18–31 min, chroot step 11 min, stage 2a part 1 27 min,
+> each cached between runs.
 
 **The goal:** Yūrei must keep going even if the distribution it's based on
 today stops development or disappears. **Chosen approach: B** (below). Every
@@ -164,6 +165,9 @@ Each stage ends in something testable, built automatically in CI.
     Yūrei's own compiler; the host provides only the kernel
   * `base-inside.sh` (run by `chroot.sh base-inside.sh`): stage 2a, part 1,
     the final glibc, GCC and binutils and the core libraries
+  * `base2-inside.sh`: stage 2a, part 2, the core tools (bash, perl,
+    Python, OpenSSL, autotools, meson and ninja, coreutils, iproute2,
+    kbd, e2fsprogs, …). Part 3 is systemd, the kernel and booting in QEMU
 
 ## Naming
 
