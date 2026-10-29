@@ -152,6 +152,11 @@ CachyOS profile and the CLI is tested with stubs. **The full ISO has not yet
 been built and booted.** That needs a CachyOS host or the ISO workflow. See
 [docs/ROADMAP.md](docs/ROADMAP.md).
 
+## Experiment: an independent Yūrei
+
+The `experimental/independent` branch explores building Yūrei without any
+distribution underneath; see [docs/INDEPENDENT.md](docs/INDEPENDENT.md).
+
 ## Artwork and branding
 
 The mascot and artwork were made with ChatGPT and adapted for Yūrei. See
