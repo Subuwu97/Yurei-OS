@@ -78,8 +78,14 @@ pacman_() {
     ninja install
     # pacman's database and package cache
     install -d /var/lib/pacman /var/cache/pacman/pkg
-    # pacman sets up its (empty) local database the first time root runs it
-    pacman -Q > /dev/null
+    # pacman sets up its (empty) local database the first time root runs
+    # it; with nothing installed yet, it says so with a non-zero status
+    pacman -Q > /dev/null 2>&1 || true
+    # the format version pacman 7 expects, in case it didn't write it
+    [[ -f /var/lib/pacman/local/ALPM_DB_VERSION ]] || {
+        install -d /var/lib/pacman/local
+        echo 9 > /var/lib/pacman/local/ALPM_DB_VERSION
+    }
     # Yūrei's packages are compressed with zstd (makepkg's own default is gzip)
     sed -i -e "s/^PKGEXT=.*/PKGEXT='.pkg.tar.zst'/" -e "s/^SRCEXT=.*/SRCEXT='.src.tar.zst'/" /etc/makepkg.conf
     grep -qx "PKGEXT='.pkg.tar.zst'" /etc/makepkg.conf
