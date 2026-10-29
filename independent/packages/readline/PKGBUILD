@@ -1,0 +1,33 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=readline
+pkgver=8.3
+pkgrel=1
+pkgdesc="GNU readline library"
+arch=(x86_64)
+url="https://tiswww.case.edu/php/chet/readline/rltop.html"
+license=(GPL-3.0-or-later)
+depends=(glibc ncurses)
+source=("https://ftp.gnu.org/gnu/readline/readline-$pkgver.tar.gz")
+sha256sums=('fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc')
+
+prepare() {
+    cd readline-$pkgver
+    # no .old copies on reinstall, and no hard-coded library paths
+    sed -i '/MV.*old/d' Makefile.in
+    sed -i '/{OLDSUFF}/c:' support/shlib-install
+    sed -i 's/-Wl,-rpath,[^ ]*//' support/shobj-conf
+}
+
+build() {
+    cd readline-$pkgver
+    ./configure --prefix=/usr --disable-static --with-curses --docdir=/usr/share/doc/readline
+    make SHLIB_LIBS="-lncursesw"
+}
+
+package() {
+    cd readline-$pkgver
+    make DESTDIR="$pkgdir" install
+}

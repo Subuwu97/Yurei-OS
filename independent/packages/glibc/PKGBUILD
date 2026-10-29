@@ -1,0 +1,60 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=glibc
+pkgver=2.42
+pkgrel=1
+pkgdesc="GNU C Library"
+arch=(x86_64)
+url="https://www.gnu.org/software/libc/"
+license=(LGPL-2.1-or-later GPL-2.0-or-later)
+depends=(yurei-filesystem)
+backup=(etc/ld.so.conf etc/nsswitch.conf)
+# unstripped: stripping the dynamic loader and libc breaks debuggers and sanitizers
+options=(!strip staticlibs !lto)
+source=("https://ftp.gnu.org/gnu/glibc/glibc-$pkgver.tar.xz")
+sha256sums=('d1775e32e4628e64ef930f435b67bb63af7599acb6be2b335b9f19f16509f17f')
+
+prepare() {
+    cd glibc-$pkgver
+    # its install step runs the test suite, which Yūrei builds don't
+    sed '/test-installation/s@$(PERL)@echo not running@' -i Makefile
+}
+
+build() {
+    # glibc picks its own flags; the linker ones for programs break it
+    unset LDFLAGS
+    mkdir -p glibc-$pkgver/build
+    cd glibc-$pkgver/build
+    echo "rootsbindir=/usr/sbin" > configparms
+    ../configure --prefix=/usr --disable-werror --disable-nscd \
+        libc_cv_slibdir=/usr/lib --enable-stack-protector=strong --enable-kernel=5.4
+    make
+}
+
+package() {
+    cd glibc-$pkgver/build
+    make install_root="$pkgdir" install
+    sed '/RTLDLIST=/s@/usr@@g' -i "$pkgdir/usr/bin/ldd"
+    rm -f "$pkgdir/etc/ld.so.cache"
+
+    # the C.UTF-8 and en_US.UTF-8 locales
+    install -d "$pkgdir/usr/lib/locale"
+    I18NPATH="$srcdir/glibc-$pkgver/localedata" localedef --prefix="$pkgdir" -i C -f UTF-8 C.UTF-8
+    I18NPATH="$srcdir/glibc-$pkgver/localedata" localedef --prefix="$pkgdir" -i en_US -f UTF-8 en_US.UTF-8
+
+    install -d "$pkgdir/etc/ld.so.conf.d"
+    printf '/usr/local/lib\ninclude /etc/ld.so.conf.d/*.conf\n' > "$pkgdir/etc/ld.so.conf"
+    cat > "$pkgdir/etc/nsswitch.conf" <<'NSS'
+passwd: files systemd
+group: files systemd
+shadow: files systemd
+hosts: files resolve [!UNAVAIL=return] dns myhostname
+networks: files
+protocols: files
+services: files
+ethers: files
+rpc: files
+NSS
+}

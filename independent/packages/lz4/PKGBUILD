@@ -1,0 +1,24 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=lz4
+pkgver=1.10.0
+pkgrel=1
+pkgdesc="Extremely fast compression algorithm"
+arch=(x86_64)
+url="https://lz4.org/"
+license=(BSD-2-Clause GPL-2.0-or-later)
+depends=(glibc)
+source=("https://github.com/lz4/lz4/releases/download/v$pkgver/lz4-$pkgver.tar.gz")
+sha256sums=('537512904744b35e232912055ccf8ec66d768639ff3abe5788d90d792ec5f48b')
+
+build() {
+    cd lz4-$pkgver
+    make BUILD_STATIC=no PREFIX=/usr
+}
+
+package() {
+    cd lz4-$pkgver
+    make BUILD_STATIC=no PREFIX=/usr DESTDIR="$pkgdir" install
+}

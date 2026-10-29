@@ -1,0 +1,88 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md): the directory layout,
+# the system accounts and the files every Yūrei system starts with.
+pkgname=yurei-filesystem
+pkgver=2026.10
+pkgrel=1
+pkgdesc="Yūrei's base directory layout, system accounts and files"
+arch=(any)
+url="https://github.com/Subuwu97/Yurei-OS"
+license=(GPL-3.0-or-later)
+backup=(etc/fstab etc/group etc/gshadow etc/hostname etc/hosts etc/locale.conf etc/passwd
+        etc/shadow etc/shells etc/vconsole.conf)
+
+package() {
+    cd "$pkgdir"
+    # one tree under /usr; the old top-level names point into it
+    install -d usr/{bin,include,lib,sbin,share,src} usr/local/{bin,include,lib,sbin,share,src}
+    ln -s usr/bin bin
+    ln -s usr/sbin sbin
+    ln -s usr/lib lib
+    ln -s usr/lib lib64
+    ln -s lib usr/lib64
+    install -d boot dev etc/{opt,skel} home mnt opt proc run srv sys usr/lib/locale \
+        usr/share/{doc,info,locale,man/man{1..8},misc,terminfo,zoneinfo} \
+        var/{cache,lib/misc,local,log,mail,opt,spool}
+    install -d -m 0750 root
+    install -d -m 1777 tmp var/tmp
+    ln -s ../run var/run
+    ln -s ../run/lock var/lock
+    ln -s ../proc/self/mounts etc/mtab
+
+    # the system accounts; people's accounts are added by the installer
+    cat > etc/passwd <<'PASSWD'
+root:x:0:0:root:/root:/usr/bin/bash
+bin:x:1:1:bin:/:/usr/bin/false
+daemon:x:2:2:daemon:/:/usr/bin/false
+nobody:x:65534:65534:Nobody:/:/usr/bin/false
+PASSWD
+    cat > etc/group <<'GROUP'
+root:x:0:root
+bin:x:1:root,bin,daemon
+daemon:x:2:root,bin,daemon
+sys:x:3:root,bin
+adm:x:4:root,daemon
+tty:x:5:
+disk:x:6:root
+lp:x:7:daemon
+mem:x:8:
+kmem:x:9:
+wheel:x:10:root
+ftp:x:11:
+mail:x:12:
+uucp:x:14:
+log:x:19:root
+utmp:x:20:
+locate:x:21:
+rfkill:x:24:
+smmsp:x:25:
+proc:x:26:
+http:x:33:
+games:x:50:
+lock:x:54:
+users:x:100:
+nobody:x:65534:
+GROUP
+    # locked: root gets a password from the installer
+    sed 's/^\([^:]*\):.*/\1:!*:20000::::::/' etc/passwd > etc/shadow
+    sed 's/^\([^:]*\):.*/\1:!*::/' etc/group > etc/gshadow
+    chmod 600 etc/shadow etc/gshadow
+
+    cat > etc/hosts <<'HOSTS'
+127.0.0.1  localhost
+::1        localhost
+HOSTS
+    printf '/bin/sh\n/bin/bash\n/usr/bin/sh\n/usr/bin/bash\n' > etc/shells
+    printf '# file system  mount point  type  options  dump  fsck\n' > etc/fstab
+    echo yurei > etc/hostname
+    echo LANG=C.UTF-8 > etc/locale.conf
+    echo KEYMAP=us > etc/vconsole.conf
+    cat > usr/lib/os-release <<'OS'
+NAME="Yūrei Linux"
+PRETTY_NAME="Yūrei Linux (independent preview)"
+ID=yurei
+ANSI_COLOR="38;2;185;170;255"
+HOME_URL="https://github.com/Subuwu97/Yurei-OS"
+OS
+    ln -s ../usr/lib/os-release etc/os-release
+}

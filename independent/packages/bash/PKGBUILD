@@ -1,0 +1,28 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=bash
+pkgver=5.3
+pkgrel=1
+pkgdesc="The GNU Bourne Again shell"
+arch=(x86_64)
+url="https://www.gnu.org/software/bash/"
+license=(GPL-3.0-or-later)
+depends=(glibc ncurses readline)
+provides=(sh)
+source=("https://ftp.gnu.org/gnu/bash/bash-$pkgver.tar.gz")
+sha256sums=('0d5cd86965f869a26cf64f4b71be7b96f90a3ba8b3d74e27e8e9d9d5550f31ba')
+
+build() {
+    cd bash-$pkgver
+    ./configure --prefix=/usr --without-bash-malloc --with-installed-readline \
+        --docdir=/usr/share/doc/bash
+    make
+}
+
+package() {
+    cd bash-$pkgver
+    make DESTDIR="$pkgdir" install
+    ln -s bash "$pkgdir/usr/bin/sh"
+}

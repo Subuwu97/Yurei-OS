@@ -39,7 +39,9 @@ jobs:
           restore-keys: yurei-sources-
 
       - name: Fetch and verify upstream sources
-        run: independent/bootstrap/fetch.sh
+        run: |
+          independent/bootstrap/fetch.sh
+          independent/packages/check-recipes.py
 
       - name: Cache key for the cross toolchain
         id: cross
@@ -239,6 +241,25 @@ jobs:
           rm -f /home/runner/yurei-*.tar.zst
           sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh pacman-inside.sh
           sudo rm -rf "$YUREI/build"
+
+      - name: Stage 2c - Yūrei's own packages and the [yurei] repository
+        run: |
+          sudo rm -rf "$YUREI/srv/yurei" && sudo mkdir -p "$YUREI/srv/yurei"
+          sudo cp -r independent/packages "$YUREI/srv/yurei/recipes"
+          sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh repo-inside.sh
+          sudo rm -rf "$YUREI/build"
+          mkdir -p /home/runner/yurei-repo
+          sudo cp "$YUREI"/srv/yurei/repo/* /home/runner/yurei-repo/
+          sudo chown -R "$(id -u):$(id -g)" /home/runner/yurei-repo
+          # the build's files aren't part of the system that's booted next
+          sudo rm -rf "$YUREI/srv/yurei"
+          du -sh /home/runner/yurei-repo
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yurei-repo
+          path: /home/runner/yurei-repo
+          retention-days: 14
 
       - name: Boot Yūrei in QEMU
         run: |

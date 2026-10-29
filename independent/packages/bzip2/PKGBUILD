@@ -1,0 +1,39 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=bzip2
+pkgver=1.0.8
+pkgrel=1
+pkgdesc="A high-quality data compression program"
+arch=(x86_64)
+url="https://sourceware.org/bzip2/"
+license=(bzip2-1.0.6)
+depends=(glibc)
+source=("https://sourceware.org/pub/bzip2/bzip2-$pkgver.tar.gz")
+sha256sums=('ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269')
+
+prepare() {
+    cd bzip2-$pkgver
+    # relative symlinks, and manual pages in /usr/share/man
+    sed -i 's@\(ln -s -f \)$(PREFIX)/bin/@\1@' Makefile
+    sed -i 's@(PREFIX)/man@(PREFIX)/share/man@g' Makefile
+}
+
+build() {
+    cd bzip2-$pkgver
+    make -f Makefile-libbz2_so
+    make clean
+    make
+}
+
+package() {
+    cd bzip2-$pkgver
+    make PREFIX="$pkgdir/usr" install
+    cp -a libbz2.so.* "$pkgdir/usr/lib/"
+    ln -sf libbz2.so.$pkgver "$pkgdir/usr/lib/libbz2.so"
+    cp bzip2-shared "$pkgdir/usr/bin/bzip2"
+    ln -sf bzip2 "$pkgdir/usr/bin/bzcat"
+    ln -sf bzip2 "$pkgdir/usr/bin/bunzip2"
+    rm -f "$pkgdir/usr/lib/libbz2.a"
+}

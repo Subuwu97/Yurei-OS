@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=xz
+pkgver=5.8.1
+pkgrel=1
+pkgdesc="Library and command line tools for XZ and LZMA compressed files"
+arch=(x86_64)
+url="https://tukaani.org/xz/"
+license=(0BSD GPL-2.0-or-later LGPL-2.1-or-later)
+depends=(glibc)
+source=("https://github.com/tukaani-project/xz/releases/download/v$pkgver/xz-$pkgver.tar.xz")
+sha256sums=('0b54f79df85912504de0b14aec7971e3f964491af1812d83447005807513cd9e')
+
+build() {
+    cd xz-$pkgver
+    ./configure --prefix=/usr --disable-static --docdir=/usr/share/doc/xz
+    make
+}
+
+package() {
+    cd xz-$pkgver
+    make DESTDIR="$pkgdir" install
+}

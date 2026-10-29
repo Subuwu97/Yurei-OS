@@ -9,8 +9,8 @@
 > repository and installs it with pacman trusting only that key; an
 > unsigned package is refused. The result boots in QEMU to `yurei login:`
 > with no failed services, in about 14 seconds. No other distribution's
-> packages are involved. Next: stage 2c, every part of Yūrei as its own
-> signed package.
+> packages are involved. Under way: stage 2c, every part of Yūrei as its
+> own signed package, starting with the base system's first ten.
 >
 > Timings: cross toolchain 16 min, temporary tools 18–31 min, chroot step
 > 11 min, stage 2a part 1 27–34 min, part 2 18–26 min, part 3 19 min (the
@@ -185,6 +185,17 @@ Each stage ends in something testable, built automatically in CI.
     libarchive, curl and fakeroot. Its check builds a package as an
     ordinary user, signs it, publishes it in a signed repository and
     installs it with pacman, and makes sure an unsigned one is refused
+  * `repo-inside.sh`: stage 2c, Yūrei's own packages. Builds every recipe
+    in `independent/packages` with makepkg, signs the packages and
+    publishes them in a signed `[yurei]` repository (kept as the
+    `yurei-repo` artifact of each run), then installs a new system from
+    it into an empty directory with pacman alone and runs a shell in it
+* `independent/packages/`: Yūrei's package recipes (PKGBUILDs), built in
+  the order of `ORDER`. Each takes its source from the same address, with
+  the same SHA-256, as `sources.lock`; `check-recipes.py` makes sure of it.
+  First batch: the base layout (`yurei-filesystem`), glibc, the compression
+  libraries, ncurses, readline and Bash. Packages are signed with a
+  throwaway key per run until Yūrei's own signing key is set up
   * `boot-test.sh`: makes a disk image of the system and boots it in QEMU
     (the stage 2 milestone); a check added to the test image only reports
     what's running once the login prompt is up, and powers off

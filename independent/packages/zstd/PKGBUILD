@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=zstd
+pkgver=1.5.7
+pkgrel=1
+pkgdesc="Zstandard, fast real-time compression"
+arch=(x86_64)
+url="https://facebook.github.io/zstd/"
+license=(BSD-3-Clause GPL-2.0-only)
+depends=(glibc zlib xz lz4)
+source=("https://github.com/facebook/zstd/releases/download/v$pkgver/zstd-$pkgver.tar.gz")
+sha256sums=('eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3')
+
+build() {
+    cd zstd-$pkgver
+    make prefix=/usr
+}
+
+package() {
+    cd zstd-$pkgver
+    make prefix=/usr DESTDIR="$pkgdir" install
+    rm -f "$pkgdir/usr/lib/libzstd.a"
+}
