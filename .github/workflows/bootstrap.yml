@@ -39,10 +39,6 @@ jobs:
           restore-keys: yurei-sources-
 
       - name: Fetch and verify upstream sources
-        # part 3's sources from hosts the dev machine can't reach get their
-        # sums from this run; pin them in sources.lock and drop this again
-        env:
-          ALLOW_UNPINNED: "1"
         run: independent/bootstrap/fetch.sh
 
       - name: Cache key for the cross toolchain

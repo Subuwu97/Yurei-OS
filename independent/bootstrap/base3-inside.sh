@@ -150,7 +150,10 @@ check() {
     compgen -G '/boot/vmlinuz-*' >/dev/null || { echo "no kernel in /boot" >&2; exit 1; }
     systemctl is-enabled systemd-networkd.service getty@tty1.service
     local missing
-    missing=$(find /usr/bin /usr/sbin /usr/lib /usr/lib/systemd -maxdepth 1 -type f -perm -u+x -exec ldd {} + 2>/dev/null |
+    # systemd's own libraries in /usr/lib/systemd are found through the
+    # programs that load them (their RUNPATH), not on their own
+    missing=$(find /usr/bin /usr/sbin /usr/lib /usr/lib/systemd -maxdepth 1 -type f -perm -u+x \
+        ! -path '/usr/lib/systemd/lib*.so' -exec ldd {} + 2>/dev/null |
         grep 'not found' | sort -u || true)
     [[ -z $missing ]] || { echo "missing libraries:"$'\n'"$missing" >&2; exit 1; }
     echo "bootable system OK"
