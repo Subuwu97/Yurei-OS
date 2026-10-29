@@ -1,6 +1,7 @@
 # Upstream sources for the bootstrap: name, version, URL, SHA-256, and the
 # step that first uses it (cross = stage1.sh, temp = temptools.sh,
-# chroot = chroot.sh, base = base-inside.sh, base2 = base2-inside.sh).
+# chroot = chroot.sh, base = base-inside.sh, base2 = base2-inside.sh,
+# base3 = base3-inside.sh).
 # Only official upstream release tarballs; no other distribution's packages.
 #
 # A sum of "-" means not yet pinned: fetch.sh downloads it, prints its sum
@@ -73,3 +74,5 @@ iproute2  6.16.0  https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-6
 kbd       2.8.0   https://www.kernel.org/pub/linux/utils/kbd/kbd-2.8.0.tar.xz  01f5806da7d1d34f594b7b2a6ae1ab23215344cf1064e8edcd3a90fef9776a11  base2
 procps-ng 4.0.5   https://sourceforge.net/projects/procps-ng/files/Production/procps-ng-4.0.5.tar.xz  c2e6d193cc78f84cd6ddb72aaf6d5c6a9162f0470e5992092057f5ff518562fa  base3
 e2fsprogs 1.47.3  https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v1.47.3/e2fsprogs-1.47.3.tar.gz  2f5164e64dd7d91eadd1e0e8a77d92c06dd7837bb19f1d9189ce1939b363d2b4  base2
+systemd   257.8   https://github.com/systemd/systemd/archive/v257.8/systemd-257.8.tar.gz  -  base3
+dbus      1.16.2  https://dbus.freedesktop.org/releases/dbus/dbus-1.16.2.tar.xz  -  base3

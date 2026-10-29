@@ -25,7 +25,12 @@ jobs:
       - name: Build tools from the host (only used to build, never shipped)
         run: |
           sudo apt-get update
-          sudo apt-get install -y bison gawk texinfo m4 xz-utils python3
+          sudo apt-get install -y bison gawk texinfo m4 xz-utils python3 qemu-system-x86 e2fsprogs
+
+      - name: Make room (the system, its archives and a disk image need about 20 GB)
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
 
       - uses: actions/cache@v4
         with:
@@ -34,6 +39,10 @@ jobs:
           restore-keys: yurei-sources-
 
       - name: Fetch and verify upstream sources
+        # part 3's sources from hosts the dev machine can't reach get their
+        # sums from this run; pin them in sources.lock and drop this again
+        env:
+          ALLOW_UNPINNED: "1"
         run: independent/bootstrap/fetch.sh
 
       - name: Cache key for the cross toolchain
@@ -86,6 +95,7 @@ jobs:
         run: |
           sudo rm -rf "$YUREI" && sudo mkdir -p "$YUREI"
           sudo tar --zstd -xpf /home/runner/yurei-chroot.tar.zst --numeric-owner -C "$YUREI"
+          rm -f /home/runner/yurei-chroot.tar.zst
 
       - name: Temporary tools
         if: steps.chroot-cache.outputs.cache-hit != 'true'
@@ -126,6 +136,7 @@ jobs:
         run: |
           sudo rm -rf "$YUREI" && sudo mkdir -p "$YUREI"
           sudo tar --zstd -xpf /home/runner/yurei-base.tar.zst --numeric-owner -C "$YUREI"
+          rm -f /home/runner/yurei-base.tar.zst
 
       - name: Stage 2a, part 1 - final toolchain and core libraries
         if: steps.base-cache.outputs.cache-hit != 'true'
@@ -146,8 +157,65 @@ jobs:
         if: steps.base-cache.outputs.cache-hit == 'true'
         run: sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh base-inside.sh check
 
+      # ... and after part 2.
+      - name: Cache key for the core tools
+        id: base2
+        run: |
+          key=$( { echo "${{ steps.base.outputs.key }}"
+                   cd independent/bootstrap
+                   cat base2-inside.sh
+                   awk '$5 == "base2"' sources.lock; } | sha256sum | cut -c1-16)
+          echo "key=yurei-base2-$key" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache/restore@v4
+        id: base2-cache
+        with:
+          path: /home/runner/yurei-base2.tar.zst
+          key: ${{ steps.base2.outputs.key }}
+
+      - name: Unpack the cached core tools
+        if: steps.base2-cache.outputs.cache-hit == 'true'
+        run: |
+          sudo rm -rf "$YUREI" && sudo mkdir -p "$YUREI"
+          sudo tar --zstd -xpf /home/runner/yurei-base2.tar.zst --numeric-owner -C "$YUREI"
+          rm -f /home/runner/yurei-base2.tar.zst /home/runner/yurei-base.tar.zst /home/runner/yurei-chroot.tar.zst
+
       - name: Stage 2a, part 2 - core tools
-        run: sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh base2-inside.sh
+        if: steps.base2-cache.outputs.cache-hit != 'true'
+        run: |
+          sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh base2-inside.sh
+          sudo rm -rf "$YUREI/build"
+          sudo tar --zstd -cpf /home/runner/yurei-base2.tar.zst --numeric-owner -C "$YUREI" .
+          sudo chown "$(id -u):$(id -g)" /home/runner/yurei-base2.tar.zst
+          ls -lh /home/runner/yurei-base2.tar.zst
+
+      - uses: actions/cache/save@v4
+        if: steps.base2-cache.outputs.cache-hit != 'true'
+        with:
+          path: /home/runner/yurei-base2.tar.zst
+          key: ${{ steps.base2.outputs.key }}
+
+      - name: Free the archive's space
+        if: steps.base2-cache.outputs.cache-hit != 'true'
+        run: rm -f /home/runner/yurei-base2.tar.zst /home/runner/yurei-base.tar.zst /home/runner/yurei-chroot.tar.zst
+
+      - name: Stage 2a, part 3 - systemd, D-Bus and Yūrei's kernel
+        run: |
+          sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh base3-inside.sh
+          sudo rm -rf "$YUREI/build"
+
+      - name: Boot Yūrei in QEMU
+        run: |
+          # GitHub's runners have KVM; it makes the boot take seconds, not minutes
+          ls -l /dev/kvm || true
+          sudo YUREI="$YUREI" OUT=/home/runner/yurei-boot independent/bootstrap/boot-test.sh
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: boot-log
+          path: /home/runner/yurei-boot/serial.log
+          if-no-files-found: ignore
 
       - name: Source checksums (to pin in sources.lock)
         if: always()

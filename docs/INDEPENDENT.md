@@ -1,12 +1,12 @@
 # Experiment: Yūrei as its own operating system
 
-> **Status: stage 2a under way.** On GitHub's runners, Yūrei's toolchain
-> builds from upstream source, then Yūrei builds its own tools inside a
-> chroot, with only the host's kernel left. Part 1 of stage 2a (the final
-> glibc 2.42, binutils 2.45 and GCC 15.2.0, rebuilt by Yūrei itself) passes;
-> part 2 (the core tools) is being built. Timings: cross toolchain 16 min,
-> temporary tools 18–31 min, chroot step 11 min, stage 2a part 1 27 min,
-> each cached between runs.
+> **Status: stage 2a, part 3 under way.** On GitHub's runners, Yūrei's
+> toolchain builds from upstream source, then Yūrei rebuilds itself inside
+> a chroot: the final glibc 2.42, binutils 2.45 and GCC 15.2.0 (part 1),
+> then the core tools, Python 3.13 with OpenSSL among them (part 2). Part 3
+> adds systemd and Yūrei's own kernel and boots the result in QEMU.
+> Timings: cross toolchain 16 min, temporary tools 18–31 min, chroot step
+> 11 min, stage 2a part 1 27 min, part 2 18 min, each cached between runs.
 
 **The goal:** Yūrei must keep going even if the distribution it's based on
 today stops development or disappears. **Chosen approach: B** (below). Every
@@ -167,7 +167,13 @@ Each stage ends in something testable, built automatically in CI.
     the final glibc, GCC and binutils and the core libraries
   * `base2-inside.sh`: stage 2a, part 2, the core tools (bash, perl,
     Python, OpenSSL, autotools, meson and ninja, coreutils, iproute2,
-    kbd, e2fsprogs, …). Part 3 is systemd, the kernel and booting in QEMU
+    kbd, e2fsprogs, …)
+  * `base3-inside.sh`: stage 2a, part 3, systemd, D-Bus, the final
+    procps-ng and util-linux, the basic system settings, and Yūrei's own
+    Linux kernel
+  * `boot-test.sh`: makes a disk image of the system and boots it in QEMU
+    (the stage 2 milestone); a check added to the test image only reports
+    what's running once the login prompt is up, and powers off
 
 ## Naming
 
