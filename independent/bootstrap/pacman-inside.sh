@@ -77,7 +77,7 @@ pacman_() {
     ninja
     ninja install
     # pacman's database and package cache
-    install -d /var/lib/pacman /var/cache/pacman/pkg
+    install -d /var/lib/pacman/local /var/cache/pacman/pkg
     # Yūrei's packages are compressed with zstd (makepkg's own default is gzip)
     sed -i -e "s/^PKGEXT=.*/PKGEXT='.pkg.tar.zst'/" -e "s/^SRCEXT=.*/SRCEXT='.src.tar.zst'/" /etc/makepkg.conf
     grep -qx "PKGEXT='.pkg.tar.zst'" /etc/makepkg.conf
