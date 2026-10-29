@@ -134,6 +134,12 @@ Each stage ends in something testable, built automatically in CI.
 | Build power | GitHub Actions in this public repository | Unlimited free minutes on standard runners (6 hours per job); bigger jobs may later need a larger runner or a build PC |
 | CPU target | Decided at stage 2 | x86-64-v3 like CachyOS is faster; v2 runs on older PCs |
 
+## To do
+
+* Check the pinned source checksums against upstream's GPG signatures
+  (`.sig` files for GNU, `.sign` for kernel.org), and do so automatically
+  for new sources.
+
 ## What this repository contains
 
 * `docs/INDEPENDENT.md`: this plan, and the decisions as they're made

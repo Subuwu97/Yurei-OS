@@ -24,12 +24,15 @@ ncurses() {
     local src
     src=$(unpack ncurses)
     cd "$src"
+    # No C++ binding: the temporary tools don't need it, and ncurses 6.5's
+    # configure can't detect C++'s bool when cross-compiling with GCC 15
+    # (C23), so the binding fails to compile. The final ncurses has it.
     # tic has to run on the host while building, so build one for it first
     mkdir build
     (cd build && ../configure AWK=gawk && make -C include && make -C progs tic)
     ./configure --prefix=/usr --host="$YUREI_TGT" --build="$(./config.guess)" \
         --mandir=/usr/share/man --with-manpage-format=normal --with-shared \
-        --without-normal --with-cxx-shared --without-debug --without-ada \
+        --without-normal --without-cxx-binding --without-debug --without-ada \
         --disable-stripping AWK=gawk
     make -j"$jobs"
     make DESTDIR="$YUREI" TIC_PATH="$(pwd)/build/progs/tic" install

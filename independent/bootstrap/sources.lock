@@ -3,27 +3,29 @@
 # official upstream release tarballs; no other distribution's packages.
 #
 # A sum of "-" means not yet pinned: fetch.sh downloads it, prints its sum
-# and fails, so the sum can be checked against upstream's signature and
-# filled in here. After that, any change to a tarball is caught.
-binutils  2.45    https://ftp.gnu.org/gnu/binutils/binutils-2.45.tar.xz  -  cross
-gcc       15.2.0  https://ftp.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz  -  cross
-gmp       6.3.0   https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz  -  cross
-mpfr      4.2.2   https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.2.tar.xz  -  cross
-mpc       1.3.1   https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz  -  cross
-glibc     2.42    https://ftp.gnu.org/gnu/glibc/glibc-2.42.tar.xz  -  cross
-linux     6.18    https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.tar.xz  -  cross
-m4        1.4.20  https://ftp.gnu.org/gnu/m4/m4-1.4.20.tar.xz  -  temp
-ncurses   6.5     https://ftp.gnu.org/gnu/ncurses/ncurses-6.5.tar.gz  -  temp
-bash      5.3     https://ftp.gnu.org/gnu/bash/bash-5.3.tar.gz  -  temp
-coreutils 9.7     https://ftp.gnu.org/gnu/coreutils/coreutils-9.7.tar.xz  -  temp
-diffutils 3.12    https://ftp.gnu.org/gnu/diffutils/diffutils-3.12.tar.xz  -  temp
-file      5.46    https://astron.com/pub/file/file-5.46.tar.gz  -  temp
-findutils 4.10.0  https://ftp.gnu.org/gnu/findutils/findutils-4.10.0.tar.xz  -  temp
-gawk      5.3.2   https://ftp.gnu.org/gnu/gawk/gawk-5.3.2.tar.xz  -  temp
-grep      3.12    https://ftp.gnu.org/gnu/grep/grep-3.12.tar.xz  -  temp
-gzip      1.14    https://ftp.gnu.org/gnu/gzip/gzip-1.14.tar.xz  -  temp
-make      4.4.1   https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz  -  temp
-patch     2.8     https://ftp.gnu.org/gnu/patch/patch-2.8.tar.xz  -  temp
-sed       4.9     https://ftp.gnu.org/gnu/sed/sed-4.9.tar.xz  -  temp
-tar       1.35    https://ftp.gnu.org/gnu/tar/tar-1.35.tar.xz  -  temp
-xz        5.8.1   https://github.com/tukaani-project/xz/releases/download/v5.8.1/xz-5.8.1.tar.xz  -  temp
+# and fails, so the sum can be filled in here. After that, any change to a
+# tarball is caught. The current sums were recorded from the first download
+# (2026-10-29); checking them against upstream's GPG signatures is on the
+# to-do list in docs/INDEPENDENT.md.
+binutils  2.45    https://ftp.gnu.org/gnu/binutils/binutils-2.45.tar.xz  c50c0e7f9cb188980e2cc97e4537626b1672441815587f1eab69d2a1bfbef5d2  cross
+gcc       15.2.0  https://ftp.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz  438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e  cross
+gmp       6.3.0   https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz  a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898  cross
+mpfr      4.2.2   https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.2.tar.xz  b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01  cross
+mpc       1.3.1   https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz  ab642492f5cf882b74aa0cb730cd410a81edcdbec895183ce930e706c1c759b8  cross
+glibc     2.42    https://ftp.gnu.org/gnu/glibc/glibc-2.42.tar.xz  d1775e32e4628e64ef930f435b67bb63af7599acb6be2b335b9f19f16509f17f  cross
+linux     6.18    https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.tar.xz  9106a4605da9e31ff17659d958782b815f9591ab308d03b0ee21aad6c7dced4b  cross
+m4        1.4.20  https://ftp.gnu.org/gnu/m4/m4-1.4.20.tar.xz  e236ea3a1ccf5f6c270b1c4bb60726f371fa49459a8eaaebc90b216b328daf2b  temp
+ncurses   6.5     https://ftp.gnu.org/gnu/ncurses/ncurses-6.5.tar.gz  136d91bc269a9a5785e5f9e980bc76ab57428f604ce3e5a5a90cebc767971cc6  temp
+bash      5.3     https://ftp.gnu.org/gnu/bash/bash-5.3.tar.gz  0d5cd86965f869a26cf64f4b71be7b96f90a3ba8b3d74e27e8e9d9d5550f31ba  temp
+coreutils 9.7     https://ftp.gnu.org/gnu/coreutils/coreutils-9.7.tar.xz  e8bb26ad0293f9b5a1fc43fb42ba970e312c66ce92c1b0b16713d7500db251bf  temp
+diffutils 3.12    https://ftp.gnu.org/gnu/diffutils/diffutils-3.12.tar.xz  7c8b7f9fc8609141fdea9cece85249d308624391ff61dedaf528fcb337727dfd  temp
+file      5.46    https://astron.com/pub/file/file-5.46.tar.gz  c9cc77c7c560c543135edc555af609d5619dbef011997e988ce40a3d75d86088  temp
+findutils 4.10.0  https://ftp.gnu.org/gnu/findutils/findutils-4.10.0.tar.xz  1387e0b67ff247d2abde998f90dfbf70c1491391a59ddfecb8ae698789f0a4f5  temp
+gawk      5.3.2   https://ftp.gnu.org/gnu/gawk/gawk-5.3.2.tar.xz  f8c3486509de705192138b00ef2c00bbbdd0e84c30d5c07d23fc73a9dc4cc9cc  temp
+grep      3.12    https://ftp.gnu.org/gnu/grep/grep-3.12.tar.xz  2649b27c0e90e632eadcd757be06c6e9a4f48d941de51e7c0f83ff76408a07b9  temp
+gzip      1.14    https://ftp.gnu.org/gnu/gzip/gzip-1.14.tar.xz  01a7b881bd220bfdf615f97b8718f80bdfd3f6add385b993dcf6efd14e8c0ac6  temp
+make      4.4.1   https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz  dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3  temp
+patch     2.8     https://ftp.gnu.org/gnu/patch/patch-2.8.tar.xz  f87cee69eec2b4fcbf60a396b030ad6aa3415f192aa5f7ee84cad5e11f7f5ae3  temp
+sed       4.9     https://ftp.gnu.org/gnu/sed/sed-4.9.tar.xz  6e226b732e1cd739464ad6862bd1a1aba42d7982922da7a53519631d24975181  temp
+tar       1.35    https://ftp.gnu.org/gnu/tar/tar-1.35.tar.xz  4d62ff37342ec7aed748535323930c7cf94acf71c3591882b26a7ea50f3edc16  temp
+xz        5.8.1   https://github.com/tukaani-project/xz/releases/download/v5.8.1/xz-5.8.1.tar.xz  0b54f79df85912504de0b14aec7971e3f964491af1812d83447005807513cd9e  temp

@@ -16,8 +16,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 300
     env:
-      YUREI: ${{ github.workspace }}/../yurei-root
-      SOURCES: ${{ github.workspace }}/../yurei-sources
+      # outside the checkout, and without "..": the cache refuses such paths
+      YUREI: /home/runner/yurei-root
+      SOURCES: /home/runner/yurei-sources
     steps:
       - uses: actions/checkout@v4
 
@@ -33,8 +34,7 @@ jobs:
           restore-keys: yurei-sources-
 
       - name: Fetch and verify upstream sources
-        # TODO: remove ALLOW_UNPINNED once every sum in sources.lock is filled in
-        run: ALLOW_UNPINNED=1 independent/bootstrap/fetch.sh
+        run: independent/bootstrap/fetch.sh
 
       - name: Cache key for the cross toolchain
         id: cross
