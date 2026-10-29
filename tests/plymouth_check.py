@@ -150,8 +150,13 @@ def main() -> int:
         # --- boot: animation, background, messages, password -----------------
         d = Daemon(out)
         first = grab(out / "boot-1.png")
-        time.sleep(1.2)
-        second = grab(out / "boot-2.png")
+        # on a busy runner one frame can stay up for a while, so give the
+        # animation a few chances to move instead of comparing two grabs
+        for _ in range(8):
+            time.sleep(0.6)
+            second = grab(out / "boot-2.png")
+            if ImageChops.difference(first, second).getbbox() is not None:
+                break
         check("background is the theme colour", first.getpixel((5, 5)) == BG, str(first.getpixel((5, 5))))
         check("animation moves", ImageChops.difference(first, second).getbbox() is not None)
         check("no visible frame edge", uniform_row(second, 120) and uniform_row(second, 1000))

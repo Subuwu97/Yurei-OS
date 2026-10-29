@@ -149,6 +149,7 @@ python_package() {
 }
 
 flit_core() { python_package flit_core; }
+packaging() { python_package packaging; }  # wheel needs it
 wheel_() { python_package wheel; }
 setuptools() { python_package setuptools; }
 markupsafe() { python_package markupsafe; }
@@ -268,7 +269,7 @@ check() {
     openssl version
     echo "meson $(meson --version), ninja $(ninja --version)"
     kmod --version | head -n1
-    ls --version | head -n1
+    cp --version | head -n1
     ip -V
     mke2fs -V 2>&1 | head -n1
     # OpenSSL must work end to end, not only load
@@ -283,7 +284,7 @@ check() {
 }
 
 STEPS=(ncurses_ sed_ psmisc_ gettext_ bison_ grep_ bash_ libtool_ gdbm gperf_ expat less_
-       perl_ autoconf_ automake_ openssl_ elfutils libffi python_ flit_core wheel_ setuptools
+       perl_ autoconf_ automake_ openssl_ elfutils libffi python_ flit_core packaging wheel_ setuptools
        markupsafe jinja2 ninja_ meson_ kmod_ coreutils_ diffutils_ gawk_ findutils_ gzip_
        iproute2_ kbd_ make_ patch_ tar_ texinfo_ e2fsprogs_ check)
 run_steps "$@"
