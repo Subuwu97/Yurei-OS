@@ -15,7 +15,7 @@ for line in (here.parent / "bootstrap" / "sources.lock").read_text().splitlines(
         lock[fields[0]] = {"version": fields[1], "url": fields[2], "sum": fields[3]}
 
 def field(text, name):
-    m = re.search(rf"^{name}=\(?['\"]?([^'\")\n]*)", text, re.M)
+    m = re.search(rf"^{name}=\(?['\"]?([^'\")\s]*)", text, re.M)
     return m[1] if m else None
 
 errors = []
@@ -30,7 +30,8 @@ for name in order:
     if source is None:  # Yūrei's own files, nothing from upstream
         continue
     pkgver = field(text, "pkgver")
-    entry = lock.get(field(text, "pkgname"))
+    # a recipe's sources.lock entry: _lockname, else pkgbase, else pkgname
+    entry = lock.get(field(text, "_lockname") or field(text, "pkgbase") or field(text, "pkgname"))
     if entry is None:
         errors.append(f"{name}: not in sources.lock")
         continue

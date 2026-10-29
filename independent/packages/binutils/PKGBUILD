@@ -1,0 +1,30 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=binutils
+pkgver=2.45
+pkgrel=1
+pkgdesc="A set of programs to assemble and manipulate binary and object files"
+arch=(x86_64)
+url="https://www.gnu.org/software/binutils/"
+license=(GPL-3.0-or-later)
+depends=(glibc zlib zstd)
+options=(staticlibs)
+source=("https://ftp.gnu.org/gnu/binutils/binutils-$pkgver.tar.xz")
+sha256sums=('c50c0e7f9cb188980e2cc97e4537626b1672441815587f1eab69d2a1bfbef5d2')
+
+build() {
+    mkdir -p binutils-$pkgver/build
+    cd binutils-$pkgver/build
+    ../configure --prefix=/usr --sysconfdir=/etc --enable-ld=default --enable-plugins \
+        --enable-shared --disable-werror --enable-64-bit-bfd --enable-new-dtags \
+        --with-system-zlib --enable-default-hash-style=gnu
+    make tooldir=/usr
+}
+
+package() {
+    cd binutils-$pkgver/build
+    make tooldir=/usr DESTDIR="$pkgdir" install
+    rm -f "$pkgdir"/usr/lib/lib{bfd,ctf,ctf-nobfd,gprofng,opcodes,sframe}.a
+}

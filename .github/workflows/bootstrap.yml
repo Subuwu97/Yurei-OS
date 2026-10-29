@@ -242,18 +242,38 @@ jobs:
           sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh pacman-inside.sh
           sudo rm -rf "$YUREI/build"
 
+      # The last run's packages: a recipe that hasn't changed isn't rebuilt.
+      - uses: actions/cache/restore@v4
+        with:
+          path: /home/runner/yurei-pkgcache
+          key: yurei-pkgs-${{ github.run_id }}
+          restore-keys: yurei-pkgs-
+
       - name: Stage 2c - Yūrei's own packages and the [yurei] repository
         run: |
-          sudo rm -rf "$YUREI/srv/yurei" && sudo mkdir -p "$YUREI/srv/yurei"
+          sudo rm -rf "$YUREI/srv/yurei" && sudo mkdir -p "$YUREI/srv/yurei/previous/stamps"
           sudo cp -r independent/packages "$YUREI/srv/yurei/recipes"
+          if [[ -d /home/runner/yurei-pkgcache ]]; then
+            sudo cp -r /home/runner/yurei-pkgcache/. "$YUREI/srv/yurei/previous/"
+          fi
           sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh repo-inside.sh
           sudo rm -rf "$YUREI/build"
           mkdir -p /home/runner/yurei-repo
           sudo cp "$YUREI"/srv/yurei/repo/* /home/runner/yurei-repo/
           sudo chown -R "$(id -u):$(id -g)" /home/runner/yurei-repo
+          # this run's packages and recipe hashes, for the next run
+          rm -rf /home/runner/yurei-pkgcache && mkdir -p /home/runner/yurei-pkgcache
+          cp /home/runner/yurei-repo/*.pkg.tar.zst /home/runner/yurei-pkgcache/
+          sudo cp -r "$YUREI/srv/yurei/stamps" /home/runner/yurei-pkgcache/
+          sudo chown -R "$(id -u):$(id -g)" /home/runner/yurei-pkgcache
           # the build's files aren't part of the system that's booted next
           sudo rm -rf "$YUREI/srv/yurei"
           du -sh /home/runner/yurei-repo
+
+      - uses: actions/cache/save@v4
+        with:
+          path: /home/runner/yurei-pkgcache
+          key: yurei-pkgs-${{ github.run_id }}
 
       - uses: actions/upload-artifact@v4
         with:

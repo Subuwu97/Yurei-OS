@@ -1,0 +1,29 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+_lockname=linux  # its entry in sources.lock
+pkgname=linux-api-headers
+pkgver=6.18
+pkgrel=1
+pkgdesc="Linux kernel headers for programs (the kernel's interface to them)"
+arch=(x86_64)
+url="https://www.kernel.org/"
+license=(GPL-2.0-only)
+depends=()
+source=("https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-$pkgver.tar.xz")
+sha256sums=('9106a4605da9e31ff17659d958782b815f9591ab308d03b0ee21aad6c7dced4b')
+
+build() {
+    cd linux-$pkgver
+    make mrproper
+    make headers
+    # only the headers themselves
+    find usr/include -type f ! -name '*.h' -delete
+}
+
+package() {
+    cd linux-$pkgver
+    install -d "$pkgdir/usr"
+    cp -r usr/include "$pkgdir/usr/"
+}

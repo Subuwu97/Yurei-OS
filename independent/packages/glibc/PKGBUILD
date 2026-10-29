@@ -9,7 +9,7 @@ pkgdesc="GNU C Library"
 arch=(x86_64)
 url="https://www.gnu.org/software/libc/"
 license=(LGPL-2.1-or-later GPL-2.0-or-later)
-depends=(yurei-filesystem)
+depends=(yurei-filesystem linux-api-headers)
 backup=(etc/ld.so.conf etc/nsswitch.conf)
 # unstripped: stripping the dynamic loader and libc breaks debuggers and sanitizers
 options=(!strip staticlibs !lto)

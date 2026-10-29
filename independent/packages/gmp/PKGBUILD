@@ -1,0 +1,33 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=gmp
+pkgver=6.3.0
+pkgrel=1
+pkgdesc="A free library for arbitrary precision arithmetic"
+arch=(x86_64)
+url="https://gmplib.org/"
+license=(LGPL-3.0-or-later GPL-2.0-or-later)
+depends=(gcc-libs glibc)
+source=("https://ftp.gnu.org/gnu/gmp/gmp-$pkgver.tar.xz")
+sha256sums=('a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898')
+
+prepare() {
+    cd gmp-$pkgver
+    # GCC 15 (C23) rejects an old-style declaration in one configure check
+    sed -i '/long long t1;/,+1s/()/(...)/' configure
+}
+
+build() {
+    cd gmp-$pkgver
+    # --host=none-linux-gnu: generic code that runs on any x86-64 CPU,
+    # not tuned for the build machine's
+    ./configure --prefix=/usr --enable-cxx --disable-static --host=none-linux-gnu
+    make
+}
+
+package() {
+    cd gmp-$pkgver
+    make DESTDIR="$pkgdir" install
+}

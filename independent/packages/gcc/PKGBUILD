@@ -1,0 +1,75 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgbase=gcc
+pkgname=(gcc-libs gcc)
+pkgver=15.2.0
+pkgrel=1
+pkgdesc="The GNU Compiler Collection"
+arch=(x86_64)
+url="https://gcc.gnu.org/"
+license=(GPL-3.0-or-later LGPL-3.0-or-later)
+source=("https://ftp.gnu.org/gnu/gcc/gcc-$pkgver/gcc-$pkgver.tar.xz")
+sha256sums=('438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e')
+
+# The libraries programs need at run time, packaged on their own so they
+# can be installed without the compiler.
+_runtime=(libgcc_s libstdc++ libatomic libgomp libitm libquadmath libasan liblsan libtsan
+          libubsan libhwasan)
+
+prepare() {
+    cd gcc-$pkgver
+    # 64-bit libraries in /usr/lib
+    sed -e '/m64=/s/lib64/lib/' -i gcc/config/i386/t-linux64
+}
+
+build() {
+    mkdir -p gcc-$pkgver/build
+    cd gcc-$pkgver/build
+    # 64-bit only for now; Steam's 32-bit libraries need a multilib GCC,
+    # which comes with the gaming packages
+    ../configure --prefix=/usr LD=ld --enable-languages=c,c++ \
+        --enable-default-pie --enable-default-ssp --enable-host-pie \
+        --disable-multilib --disable-bootstrap --disable-fixincludes --with-system-zlib
+    make
+}
+
+# One full installation, which the two packages are made from; done in
+# package() so it happens under fakeroot and the files belong to root.
+_install() {
+    [[ -d $srcdir/root ]] || make -C "$srcdir/gcc-$pkgver/build" DESTDIR="$srcdir/root" install
+}
+
+package_gcc-libs() {
+    pkgdesc="Runtime libraries shipped by GCC"
+    depends=(glibc)
+    options=(!emptydirs)
+    _install
+    install -d "$pkgdir/usr/lib"
+    local lib
+    for lib in "${_runtime[@]}"; do
+        cp -a "$srcdir"/root/usr/lib/$lib.so.* "$pkgdir/usr/lib/" 2>/dev/null || true
+    done
+    # gdb's helpers for libstdc++ belong with the compiler
+    rm -f "$pkgdir"/usr/lib/*-gdb.py
+}
+
+package_gcc() {
+    depends=("gcc-libs=$pkgver" binutils glibc gmp mpfr mpc zlib zstd linux-api-headers)
+    options=(staticlibs)
+    _install
+    cp -a "$srcdir"/root/. "$pkgdir/"
+    local lib target
+    for lib in "${_runtime[@]}"; do
+        rm -f "$pkgdir"/usr/lib/$lib.so.*
+    done
+    target=$(gcc -dumpmachine)
+    # what cc, cpp and the linker's LTO plugin are expected to be
+    ln -s gcc "$pkgdir/usr/bin/cc"
+    ln -s ../bin/cpp "$pkgdir/usr/lib/cpp"
+    install -d "$pkgdir/usr/lib/bfd-plugins"
+    ln -s ../../libexec/gcc/$target/$pkgver/liblto_plugin.so "$pkgdir/usr/lib/bfd-plugins/"
+    # the libraries' info pages and gdb helpers stay; the libtool archives don't
+    find "$pkgdir" -name '*.la' -delete
+}

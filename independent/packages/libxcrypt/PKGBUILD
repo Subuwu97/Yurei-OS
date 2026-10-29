@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=libxcrypt
+pkgver=4.4.38
+pkgrel=1
+pkgdesc="Modern library for one-way hashing of passwords"
+arch=(x86_64)
+url="https://github.com/besser82/libxcrypt"
+license=(LGPL-2.1-or-later)
+depends=(glibc)
+source=("https://github.com/besser82/libxcrypt/releases/download/v$pkgver/libxcrypt-$pkgver.tar.xz")
+sha256sums=('80304b9c306ea799327f01d9a7549bdb28317789182631f1b54f4511b4206dd6')
+
+build() {
+    cd libxcrypt-$pkgver
+    ./configure --prefix=/usr --enable-hashes=strong,glibc --enable-obsolete-api=no \
+        --disable-static --disable-failure-tokens
+    make
+}
+
+package() {
+    cd libxcrypt-$pkgver
+    make DESTDIR="$pkgdir" install
+}

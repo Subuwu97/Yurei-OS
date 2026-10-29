@@ -1,6 +1,7 @@
 # The order Yūrei's packages are built in: each after what it needs to build.
-# Stage 2c, first batch: enough for a system installed by pacman to run a shell.
+# First batch: enough for a system installed by pacman to run a shell.
 yurei-filesystem
+linux-api-headers
 glibc
 zlib
 bzip2
@@ -10,3 +11,10 @@ zstd
 ncurses
 readline
 bash
+# Second batch: the toolchain, so the new system can build software itself.
+binutils
+gmp
+mpfr
+mpc
+libxcrypt
+gcc

@@ -200,8 +200,12 @@ Each stage ends in something testable, built automatically in CI.
 * `independent/packages/`: Yūrei's package recipes (PKGBUILDs), built in
   the order of `ORDER`. Each takes its source from the same address, with
   the same SHA-256, as `sources.lock`; `check-recipes.py` makes sure of it.
-  First batch: the base layout (`yurei-filesystem`), glibc, the compression
-  libraries, ncurses, readline and Bash. Packages are signed with a
+  First batch: the base layout (`yurei-filesystem`), the kernel's headers,
+  glibc, the compression libraries, ncurses, readline and Bash. Second:
+  the toolchain (binutils, GMP, MPFR, MPC, libxcrypt, GCC and its runtime
+  libraries as `gcc-libs`), which the new system must use to build and
+  run C and C++ programs. A recipe that hasn't changed isn't rebuilt: the
+  last run's package is reused. Packages are signed with a
   throwaway key per run until Yūrei's own signing key is set up
 
 ## Naming

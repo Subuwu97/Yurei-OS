@@ -11,6 +11,10 @@
 #
 # Packages are signed with a throwaway key made for each run, until Yūrei's
 # own signing key is set up (docs/INDEPENDENT.md).
+#
+# A recipe that hasn't changed since the last run isn't built again: the
+# workflow hands in that run's packages (/srv/yurei/previous) with a hash of
+# each recipe, and they're reused and signed with this run's key.
 set -euo pipefail
 
 # shellcheck source=independent/bootstrap/inside-lib.sh
@@ -19,6 +23,8 @@ source /bootstrap/inside-lib.sh
 srv=/srv/yurei
 recipes=$srv/recipes
 repo=$srv/repo
+previous=$srv/previous
+stamps=$srv/stamps
 user=yurei-builder
 
 # Runs a command as the build user; makepkg won't run as root.
@@ -43,8 +49,9 @@ setup() {
     getent passwd "$user" >/dev/null || useradd -m "$user"
     as_user gpg --batch --quiet --passphrase '' \
         --quick-gen-key "Yūrei build (throwaway) <build@yurei.invalid>" ed25519 sign never
-    rm -rf "$repo" "$srv/sources"
+    rm -rf "$repo" "$srv/sources" "$stamps"
     install -d -o "$user" "$repo" "$srv/sources"
+    install -d "$stamps"
     # makepkg wants a download folder it can write to; /sources is mounted
     # read-only, so it gets one with links to the verified files
     ln -s /sources/* "$srv/sources/"
@@ -62,21 +69,49 @@ PKGEXT='.pkg.tar.zst'
 CONF
 }
 
+# The recipe's files and the build settings, as one hash.
+recipe_hash() {
+    { cd "$recipes/$1" && find . -type f -print0 | sort -z | xargs -0 sha256sum
+      cat "$srv/makepkg.conf"; } | sha256sum | cut -c1-64
+}
+
+# reuse NAME HASH: copies the last run's packages for NAME, if its recipe is
+# unchanged, and signs them with this run's key
+reuse() {
+    local name=$1 hash=$2 file
+    [[ -f $previous/stamps/$name.hash && $(< "$previous/stamps/$name.hash") == "$hash" ]] || return 1
+    while read -r file; do
+        [[ -f $previous/$file ]] || return 1
+    done < "$previous/stamps/$name.files"
+    while read -r file; do
+        install -o "$user" -m 644 "$previous/$file" "$repo/$file"
+        as_user gpg --batch --yes --detach-sign --no-armor -u "$(fingerprint)" "$repo/$file"
+    done < "$previous/stamps/$name.files"
+    cp "$previous/stamps/$name".{hash,files} "$stamps/"
+}
+
 # Builds every recipe in ORDER. --nodeps: while bootstrapping, everything a
 # recipe needs is in this system already, but not yet known to pacman.
 packages() {
-    local name fpr start
+    local name fpr start hash env
     fpr=$(fingerprint)
+    env="MAKEPKG_CONF=$srv/makepkg.conf SRCDEST=$srv/sources PKGDEST=$repo"
     while read -r name; do
         [[ -z $name || $name == \#* ]] && continue
         msg "$name"
         start=$SECONDS
+        hash=$(recipe_hash "$name")
+        if reuse "$name" "$hash"; then
+            echo "   unchanged since the last run: reused"
+            continue
+        fi
         rm -rf "$(home)/build/$name"
         as_user mkdir -p build
         cp -r "$recipes/$name" "$(home)/build/"
         chown -R "$user:" "$(home)/build/$name"
-        as_user sh -c "cd build/$name && MAKEPKG_CONF=$srv/makepkg.conf SRCDEST=$srv/sources \
-            PKGDEST=$repo makepkg --nodeps --sign --key $fpr --noconfirm --noprogressbar"
+        as_user sh -c "cd build/$name && $env makepkg --nodeps --sign --key $fpr --noconfirm --noprogressbar"
+        as_user sh -c "cd build/$name && $env makepkg --packagelist" | xargs -n1 basename > "$stamps/$name.files"
+        echo "$hash" > "$stamps/$name.hash"
         rm -rf "$(home)/build/$name"
         printf '   (%s took %d s)\n' "$name" $((SECONDS - start))
     done < "$recipes/ORDER"
@@ -112,14 +147,23 @@ CONF
     pacman-key --config "$srv/pacman.conf" --gpgdir "$gnupg" --lsign-key "$fpr"
     local p=(pacman --config "$srv/pacman.conf" --root "$root" --dbpath "$root/var/lib/pacman"
              --gpgdir "$gnupg" --noconfirm)
-    "${p[@]}" -Sy bash
+    "${p[@]}" -Sy bash gcc
     echo "installed:"
     "${p[@]}" -Q
-    # inside the new system, with only what pacman put there
+    # inside the new system, with only what pacman put there: a shell, and a
+    # compiler that builds and runs C and C++ programs
+    mount --bind /dev "$root/dev"
+    mount -t proc proc "$root/proc"
     # shellcheck disable=SC2016 # expanded by the new system's bash
-    chroot "$root" /usr/bin/bash -c '. /etc/os-release
+    chroot "$root" /usr/bin/bash -euc '. /etc/os-release
         echo "Bash $BASH_VERSION running in $PRETTY_NAME, installed by pacman"
-        ldd /usr/bin/bash'
+        cd /tmp
+        printf "#include <stdio.h>\nint main(void) { puts(\"C works\"); return 0; }\n" > c.c
+        printf "#include <iostream>\nint main() { std::cout << \"C++ works\" << std::endl; }\n" > cxx.cc
+        gcc -o c c.c && ./c
+        g++ -o cxx cxx.cc && ./cxx
+        gcc --version | { read -r line; echo "$line"; }' || { umount "$root/proc" "$root/dev"; exit 1; }
+    umount "$root/proc" "$root/dev"
     gpgconf --homedir "$gnupg" --kill all
     as_user gpgconf --kill all
     rm -rf "$root" "$gnupg" "$srv/cache" "$srv/pacman.conf" "$srv/sources"
