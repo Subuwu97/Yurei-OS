@@ -10,7 +10,7 @@ arch=(any)
 url="https://wireless.docs.kernel.org/en/latest/en/developers/regulatory/wireless-regdb.html"
 license=(ISC)
 source=("https://www.kernel.org/pub/software/network/wireless-regdb/wireless-regdb-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('a8340bcdcd1b5db6c79149879d122b170f3bb075381718d4f429ad831a6fa28d')
 
 package() {
     cd wireless-regdb-$pkgver

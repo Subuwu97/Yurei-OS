@@ -88,7 +88,7 @@ curl      8.15.0  https://curl.se/download/curl-8.15.0.tar.xz  6cd0a8a5b126ddfda
 fakeroot  1.37.1.1  https://deb.debian.org/debian/pool/main/f/fakeroot/fakeroot_1.37.1.1.orig.tar.gz  86b0b75bf319ca42e525c098675b6ed10a06b76e69ec9ccf20ef5e03883b3a14  pacman
 pacman    7.0.0   https://gitlab.archlinux.org/pacman/pacman/-/releases/v7.0.0/downloads/pacman-7.0.0.tar.xz  61cbd445d1381b4b184bc7c4e2791f07a79f0f2807b7c600399d0d08e8cd28cf  pacman
 pyelftools 0.32   https://files.pythonhosted.org/packages/source/p/pyelftools/pyelftools-0.32.tar.gz  6de90ee7b8263e740c8715a925382d4099b354f29ac48ea40d840cf7aa14ace5  repo
-linux-firmware 20260916  https://www.kernel.org/pub/linux/kernel/firmware/linux-firmware-20260916.tar.xz  -  repo
-wireless-regdb 2025.07.10  https://www.kernel.org/pub/software/network/wireless-regdb/wireless-regdb-2025.07.10.tar.xz  -  repo
-iwd       3.9     https://www.kernel.org/pub/linux/network/wireless/iwd-3.9.tar.xz  -  repo
+linux-firmware 20260916  https://www.kernel.org/pub/linux/kernel/firmware/linux-firmware-20260916.tar.xz  f80dcb757a623deda62200c08e0e1a88c76fb6b54964f31b35fa74da1c90ccc5  repo
+wireless-regdb 2025.07.10  https://www.kernel.org/pub/software/network/wireless-regdb/wireless-regdb-2025.07.10.tar.xz  a8340bcdcd1b5db6c79149879d122b170f3bb075381718d4f429ad831a6fa28d  repo
+iwd       3.9     https://www.kernel.org/pub/linux/network/wireless/iwd-3.9.tar.xz  0cd7dc9b32b9d6809a4a5e5d063b5c5fd279f5ad3a0bf03d7799da66df5cad45  repo
 dosfstools 4.2     https://github.com/dosfstools/dosfstools/releases/download/v4.2/dosfstools-4.2.tar.gz  64926eebf90092dca21b14259a5301b7b98e7b1943e8a201c7d726084809b527  repo
