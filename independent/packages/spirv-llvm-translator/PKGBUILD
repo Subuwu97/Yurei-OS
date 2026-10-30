@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=spirv-llvm-translator
+_lockname=spirv-llvm-translator
+pkgver=20.1.0
+pkgrel=1
+pkgdesc="Translates between LLVM and SPIR-V (for Mesa's OpenCL C shader kernels)"
+arch=(x86_64)
+url="https://github.com/KhronosGroup/SPIRV-LLVM-Translator"
+license=(NCSA)
+depends=(llvm spirv-tools)
+source=("https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v$pkgver/SPIRV-LLVM-Translator-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    cmake -S SPIRV-LLVM-Translator-$pkgver -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr -DLLVM_DIR=/usr/lib/cmake/llvm -DBUILD_SHARED_LIBS=ON \
+        -DLLVM_EXTERNAL_SPIRV_HEADERS_SOURCE_DIR=/usr -DLLVM_SPIRV_INCLUDE_TESTS=OFF
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

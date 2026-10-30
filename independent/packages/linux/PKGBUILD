@@ -4,7 +4,7 @@
 # keeps them the same.
 pkgname=linux
 pkgver=6.18
-pkgrel=3
+pkgrel=4
 pkgdesc="Yūrei's Linux kernel and modules"
 arch=(x86_64)
 url="https://www.kernel.org/"
@@ -22,7 +22,9 @@ build() {
     # daemon, does its key exchange with the kernel's crypto, listed too). Disks, USB,
     # file systems and the boot display are built in, so the kernel
     # starts from any of them without modules; graphics, network and
-    # sound drivers are modules, loaded for the hardware found.
+    # sound drivers are modules, loaded for the hardware found. Graphics:
+    # Intel (i915; xe for Arc B-series and newer), AMD (amdgpu; radeon for
+    # older cards), NVIDIA (nouveau) and virtual machines.
     make defconfig
     make kvm_guest.config
     scripts/config \
@@ -38,7 +40,8 @@ build() {
         -e EXFAT_FS -e NTFS3_FS -e ISO9660_FS -e JOLIET -e ZISOFS -e SQUASHFS -e SQUASHFS_XZ -e SQUASHFS_ZSTD \
         -e OVERLAY_FS -e TMPFS -e CDROM -e RD_GZIP -e RD_ZSTD \
         -e DRM -e DRM_SIMPLEDRM -e SYSFB_SIMPLEFB -e DRM_FBDEV_EMULATION -e FRAMEBUFFER_CONSOLE \
-        -m DRM_I915 -m DRM_AMDGPU -m DRM_NOUVEAU -m DRM_VIRTIO_GPU \
+        -m DRM_I915 -m DRM_XE -m DRM_AMDGPU -e DRM_AMD_DC -e DRM_AMDGPU_USERPTR -m DRM_RADEON \
+        -m DRM_NOUVEAU -m DRM_VIRTIO_GPU \
         -m E1000E -m IGB -m R8169 -m CFG80211 -m MAC80211 -m IWLWIFI -m IWLMVM \
         -m RTW88 -m RTW88_8822CE -m RTW88_8821CE -m RTW89 -m RTW89_8852AE -m RTW89_8852BE \
         -m MT7921E -m ATH10K -m ATH10K_PCI -m ATH11K -m ATH11K_PCI -m BRCMFMAC -e RFKILL \

@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libclc
+_lockname=llvm
+pkgver=20.1.8
+pkgrel=1
+pkgdesc="OpenCL C library, as SPIR-V for Mesa's precompiled GPU kernels (Intel)"
+arch=(any)
+url="https://libclc.llvm.org/"
+license=(Apache-2.0 WITH LLVM-exception)
+source=("https://github.com/llvm/llvm-project/releases/download/llvmorg-$pkgver/llvm-project-$pkgver.src.tar.xz")
+sha256sums=('6898f963c8e938981e6c4a302e83ec5beb4630147c7311183cf61069af16333d')
+
+build() {
+    # only the SPIR-V forms Mesa uses
+    cmake -S llvm-project-$pkgver.src/libclc -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr -DLLVM_DIR=/usr/lib/cmake/llvm \
+        -DLIBCLC_TARGETS_TO_BUILD="spirv-mesa3d-;spirv64-mesa3d-"
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

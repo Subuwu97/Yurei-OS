@@ -11,7 +11,7 @@ url="https://wayland.freedesktop.org/"
 license=(MIT)
 depends=(glibc libffi expat)
 source=("https://gitlab.freedesktop.org/wayland/wayland/-/releases/$pkgver/downloads/wayland-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('864fb2a8399e2d0ec39d56e9d9b753c093775beadc6022ce81f441929a81e5ed')
 
 build() {
     # no documentation (it needs Doxygen and xmlto) and no DTD check (libxml2)

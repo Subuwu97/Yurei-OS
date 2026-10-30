@@ -1,0 +1,30 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=cmake
+pkgver=3.31.7
+pkgrel=1
+pkgdesc="Build system generator (LLVM, SPIR-V tools and glslang build with it)"
+arch=(x86_64)
+url="https://cmake.org/"
+license=(BSD-3-Clause)
+depends=(glibc gcc-libs curl libarchive expat zlib bzip2 xz zstd openssl ncurses)
+source=("https://github.com/Kitware/CMake/releases/download/v$pkgver/cmake-$pkgver.tar.gz")
+sha256sums=('a6d2eb1ebeb99130dfe63ef5a340c3fdb11431cce3d7ca148524c125924cea68')
+
+build() {
+    cd cmake-$pkgver
+    # Yūrei's own libraries where it has them; CMake's bundled copies of
+    # the rest (jsoncpp, libuv, rhash)
+    ./bootstrap --prefix=/usr --mandir=/share/man --docdir=/share/doc/cmake \
+        --parallel="$(nproc)" --system-curl --system-expat --system-zlib \
+        --system-bzip2 --system-liblzma --system-zstd --system-libarchive \
+        -- -DCMAKE_USE_OPENSSL=ON -DBUILD_CursesDialog=OFF
+    make
+}
+
+package() {
+    cd cmake-$pkgver
+    make DESTDIR="$pkgdir" install
+}

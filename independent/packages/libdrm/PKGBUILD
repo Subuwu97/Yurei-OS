@@ -11,7 +11,7 @@ url="https://dri.freedesktop.org/"
 license=(MIT)
 depends=(glibc systemd)
 source=("https://dri.freedesktop.org/libdrm/libdrm-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('ac36293f61ca4aafaf4b16a2a7afff312aa4f5c37c9fbd797de9e3c0863ca379')
 
 build() {
     # no libdrm_intel: it needs libpciaccess, and Mesa's Intel drivers

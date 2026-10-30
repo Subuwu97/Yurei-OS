@@ -12,7 +12,7 @@ license=(ISC)
 depends=(glibc libxcrypt zlib openssl)
 backup=(etc/sudoers)
 source=("https://www.sudo.ws/dist/sudo-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('ff607ea717072197738a78f778692cd6df9a7e3e404565f51de063ca27455d32')
 
 build() {
     cd sudo-$pkgver

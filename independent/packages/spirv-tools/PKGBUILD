@@ -1,0 +1,27 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=spirv-tools
+_lockname=spirv-tools
+pkgver=2025.2
+pkgrel=1
+pkgdesc="SPIR-V tools: assembler, validator, optimizer"
+arch=(x86_64)
+url="https://github.com/KhronosGroup/SPIRV-Tools"
+license=(Apache-2.0)
+depends=(glibc gcc-libs)
+source=("https://github.com/KhronosGroup/SPIRV-Tools/archive/v$pkgver/SPIRV-Tools-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    cmake -S SPIRV-Tools-$pkgver -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr -DSPIRV-Headers_SOURCE_DIR=/usr \
+        -DSPIRV_TOOLS_BUILD_STATIC=OFF -DBUILD_SHARED_LIBS=ON \
+        -DSPIRV_WERROR=OFF -DSPIRV_SKIP_TESTS=ON
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

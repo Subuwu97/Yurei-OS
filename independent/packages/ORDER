@@ -93,3 +93,8 @@ mtdev
 libevdev
 xkeyboard-config
 libxkbcommon
+# Eighth batch (stage 3): the graphics drivers (Mesa), and what builds them.
+cmake
+python-mako
+python-yaml
+llvm

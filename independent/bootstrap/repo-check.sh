@@ -44,6 +44,18 @@ sudo -V | head -n1
 wayland-scanner --version
 pkg-config --modversion libdrm wayland-client wayland-protocols pixman-1 mtdev libevdev xkbcommon | tr '\n' ' '; echo
 [[ -f /usr/share/X11/xkb/rules/evdev ]]
+# the graphics stack: the compilers, then Mesa's drivers
+cmake --version | head -n1
+clang --version | head -n1
+llvm-config --version
+if pacman -Q mesa > /dev/null 2>&1; then
+    glslangValidator --version | head -n1
+    for f in /usr/lib/libEGL.so.1 /usr/lib/libGLESv2.so.2 /usr/lib/libgbm.so.1 \
+             /usr/share/vulkan/icd.d/intel_icd.x86_64.json /usr/share/vulkan/icd.d/radeon_icd.x86_64.json; do
+        [[ -e $f ]] || { echo "Mesa didn't install $f"; exit 1; }
+    done
+    echo "Mesa: OpenGL (iris, radeonsi, nouveau, llvmpipe) and Vulkan (anv, radv) installed"
+fi
 echo "firmware $(du -sh /usr/lib/firmware | cut -f1), iwd works"
 
 # every program and library finds what it links to

@@ -10,7 +10,7 @@ arch=(any)
 url="https://wayland.freedesktop.org/"
 license=(MIT)
 source=("https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/$pkgver/downloads/wayland-protocols-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('3df1107ecf8bfd6ee878aeca5d3b7afd81248a48031e14caf6ae01f14eebb50e')
 
 build() {
     meson setup wayland-protocols-$pkgver build --prefix=/usr --buildtype=release -D tests=false

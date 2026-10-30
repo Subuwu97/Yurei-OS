@@ -11,7 +11,7 @@ url="https://pixman.org/"
 license=(MIT)
 depends=(glibc)
 source=("https://cairographics.org/releases/pixman-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('6349061ce1a338ab6952b92194d1b0377472244208d47ff25bef86fc71973466')
 
 build() {
     meson setup pixman-$pkgver build --prefix=/usr --buildtype=release \

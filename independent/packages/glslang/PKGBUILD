@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=glslang
+_lockname=glslang
+pkgver=15.3.0
+pkgrel=1
+pkgdesc="GLSL to SPIR-V shader compiler (glslangValidator)"
+arch=(x86_64)
+url="https://github.com/KhronosGroup/glslang"
+license=(BSD-3-Clause)
+depends=(glibc gcc-libs spirv-tools)
+source=("https://github.com/KhronosGroup/glslang/archive/$pkgver/glslang-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    cmake -S glslang-$pkgver -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=ON -DALLOW_EXTERNAL_SPIRV_TOOLS=ON \
+        -DGLSLANG_TESTS=OFF -DENABLE_OPT=ON
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

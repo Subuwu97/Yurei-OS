@@ -1,0 +1,23 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=spirv-headers
+_lockname=spirv-headers
+pkgver=1.4.313.0
+pkgrel=1
+pkgdesc="SPIR-V (the GPU shader format) headers"
+arch=(any)
+url="https://github.com/KhronosGroup/SPIRV-Headers"
+license=(MIT)
+source=("https://github.com/KhronosGroup/SPIRV-Headers/archive/vulkan-sdk-$pkgver/SPIRV-Headers-vulkan-sdk-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    cmake -S SPIRV-Headers-vulkan-sdk-$pkgver -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

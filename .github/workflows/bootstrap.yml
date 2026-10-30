@@ -32,9 +32,13 @@ jobs:
           sudo apt-get install -y bison gawk texinfo m4 xz-utils python3 qemu-system-x86 e2fsprogs \
             squashfs-tools xorriso mtools dosfstools cpio ovmf
 
-      - name: Make room (the system, its archives and a disk image need about 20 GB)
+      - name: Make room (the system, its archives, LLVM's build and a disk image need about 30 GB)
         run: |
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          # LLVM's build needs several GB more
+          sudo rm -rf /usr/local/.ghcup /usr/share/swift /usr/local/share/boost /opt/microsoft \
+            /usr/local/share/powershell /usr/local/lib/node_modules /opt/hostedtoolcache/go
+          sudo docker image prune --all --force > /dev/null 2>&1 || true
           df -h /
 
       - uses: actions/cache@v4

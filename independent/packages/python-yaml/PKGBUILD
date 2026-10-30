@@ -1,0 +1,22 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=python-yaml
+_name=pyyaml
+_lockname=pyyaml
+pkgver=6.0.2
+pkgrel=1
+pkgdesc="YAML for Python (Mesa reads some of its tables with it)"
+arch=(x86_64)
+url="https://pyyaml.org/"
+license=(MIT)
+depends=(python)
+source=("https://files.pythonhosted.org/packages/source/P/PyYAML/pyyaml-$pkgver.tar.gz")
+sha256sums=('d584d9ec91ad65861cc08d42e834324ef890a082e591037abe114850ff7bbc3e')
+
+package() {
+    # the pure-Python form (the C speed-up needs Cython and libyaml)
+    PYYAML_FORCE_CYTHON=0 pip3 install --no-index --no-build-isolation --no-deps --ignore-installed \
+        --root="$pkgdir" --prefix=/usr "$srcdir/$_name-$pkgver"
+}

@@ -11,7 +11,7 @@ url="https://xkbcommon.org/"
 license=(MIT)
 depends=(glibc xkeyboard-config wayland)
 source=("https://xkbcommon.org/download/libxkbcommon-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('65782f0a10a4b455af9c6baab7040e2f537520caa2ec2092805cdfd36863b247')
 
 build() {
     # Wayland only; no X11 support yet, and no layout registry (it needs libxml2)

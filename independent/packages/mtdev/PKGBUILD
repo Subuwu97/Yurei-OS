@@ -11,7 +11,7 @@ url="https://bitmath.org/code/mtdev/"
 license=(MIT)
 depends=(glibc)
 source=("https://bitmath.org/code/mtdev/mtdev-$pkgver.tar.bz2")
-sha256sums=('PIN')
+sha256sums=('a107adad2101fecac54ac7f9f0e0a0dd155d954193da55c2340c97f2ff1d814e')
 
 build() {
     cd mtdev-$pkgver
