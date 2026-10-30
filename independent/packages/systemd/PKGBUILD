@@ -20,13 +20,17 @@ build() {
     cd systemd-$pkgver/build
     # firstboot off: it would stop the boot to ask questions on the
     # console. No home directories service or update service yet. The boot
-    # loader (systemd-boot) starts Yūrei on UEFI PCs, live and installed.
+    # loader (systemd-boot) starts Yūrei on UEFI PCs, live and installed;
+    # its SBAT entry, which UEFI Secure Boot checks, names Yūrei.
     meson setup .. --prefix=/usr --buildtype=release -D mode=release \
         -D default-dnssec=no -D firstboot=false -D install-tests=false -D tests=false \
         -D ldconfig=false -D rpmmacrosdir=no -D homed=disabled -D userdb=false \
         -D man=disabled -D pamconfdir=no -D dev-kvm-mode=0660 -D nobody-group=nobody \
         -D sysupdate=disabled -D ukify=disabled -D bootloader=enabled \
-        -D docdir=/usr/share/doc/systemd
+        -D docdir=/usr/share/doc/systemd \
+        -D sbat-distro=yurei -D sbat-distro-summary="Yurei Linux" \
+        -D sbat-distro-pkgname=systemd -D sbat-distro-version="$pkgver-$pkgrel" \
+        -D sbat-distro-url=https://github.com/Subuwu97/Yurei-OS
     ninja
 }
 
