@@ -140,7 +140,19 @@ Each stage ends in something testable, built automatically in CI.
      installed and updated with pacman, from Yūrei's packages only.
 3. **Graphics and desktop.** LLVM, Mesa, Wayland, Qt 6, KDE Plasma. *Milestone:
    the Plasma desktop with the Yūrei theme in a VM.*
-4. **Gaming.** The 32-bit libraries, Vulkan drivers (AMD, Intel, NVIDIA),
+   **Windows programs come with it, from the start:** Wine, built by Yūrei
+   in its "new WoW64" mode, which runs 32-bit and 64-bit Windows programs
+   without any 32-bit Linux libraries. It needs MinGW-w64 cross compilers
+   (for Wine's Windows-side parts), built by Yūrei like its own toolchain.
+   In order:
+   * MinGW-w64 headers and runtime, binutils and GCC for `x86_64` and
+     `i686` Windows targets (cross compilers, a few recipes each)
+   * Wine without a display first, as soon as the cross compilers exist:
+     console Windows programs run on the live ISO (`wine program.exe`)
+   * then with Wayland/X11, Vulkan, fonts and sound once the desktop is
+     there, plus DXVK and VKD3D-Proton for DirectX games. Double-clicking
+     a `.exe` opens it with Wine, as on the CachyOS-based Yūrei today
+4. **Gaming.** The 32-bit libraries (for Steam itself), Vulkan drivers (AMD, Intel, NVIDIA),
    Steam, gamescope, MangoHud, GameMode. *Milestone: a Steam game runs, and
    Steam Game Mode works.*
 5. **Installer and ISO.** Calamares with Yūrei's own configuration (today it
