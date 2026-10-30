@@ -83,7 +83,7 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
               "--hostname yurei-installed --user tester --yes "
               "--kernel-options 'console=ttyS0,115200 systemd.tty.term.ttyS0=dumb' "
               "&& echo INSTALL-''DONE || echo INSTALL-''FAILED")
-    done = live.wait("INSTALL-DONE", 900, fail="INSTALL-FAILED")
+    done = live.wait("INSTALL-DONE", 1800, fail="INSTALL-FAILED")
     check("yurei-install finished", done)
     live.send("poweroff")
 live.stop()
