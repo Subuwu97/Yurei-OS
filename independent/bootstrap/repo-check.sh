@@ -38,6 +38,12 @@ compgen -G '/usr/lib/firmware/i915/*.bin.zst' > /dev/null
 [[ -f /usr/lib/firmware/regulatory.db && -f /usr/lib/firmware/regulatory.db.p7s ]]
 /usr/lib/iwd/iwd --version
 iwctl --help > /dev/null
+sudo -V | head -n1
+[[ $(stat -c %a /usr/bin/sudo) == 4111 || $(stat -c %a /usr/bin/sudo) == 4755 ]]
+# the base of the desktop
+wayland-scanner --version
+pkg-config --modversion libdrm wayland-client wayland-protocols pixman-1 mtdev libevdev xkbcommon | tr '\n' ' '; echo
+[[ -f /usr/share/X11/xkb/rules/evdev ]]
 echo "firmware $(du -sh /usr/lib/firmware | cut -f1), iwd works"
 
 # every program and library finds what it links to

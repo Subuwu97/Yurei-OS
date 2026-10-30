@@ -1,0 +1,24 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=pixman
+pkgver=0.44.2
+pkgrel=1
+pkgdesc="Low-level pixel drawing, used by compositors and Cairo"
+arch=(x86_64)
+url="https://pixman.org/"
+license=(MIT)
+depends=(glibc)
+source=("https://cairographics.org/releases/pixman-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    meson setup pixman-$pkgver build --prefix=/usr --buildtype=release \
+        -D tests=disabled -D demos=disabled -D gtk=disabled -D libpng=disabled
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

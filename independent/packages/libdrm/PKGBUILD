@@ -1,0 +1,27 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libdrm
+pkgver=2.4.124
+pkgrel=1
+pkgdesc="Userspace interface to the kernel's graphics drivers (DRM)"
+arch=(x86_64)
+url="https://dri.freedesktop.org/"
+license=(MIT)
+depends=(glibc systemd)
+source=("https://dri.freedesktop.org/libdrm/libdrm-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    # no libdrm_intel: it needs libpciaccess, and Mesa's Intel drivers
+    # don't use it
+    meson setup libdrm-$pkgver build --prefix=/usr --buildtype=release \
+        -D udev=true -D intel=disabled -D valgrind=disabled -D tests=false \
+        -D man-pages=disabled -D cairo-tests=disabled
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

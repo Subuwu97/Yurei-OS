@@ -82,4 +82,14 @@ linux-firmware
 wireless-regdb
 iwd
 dosfstools
+sudo
 yurei-install
+# Seventh batch (stage 3): what every Wayland desktop builds on.
+libdrm
+wayland
+wayland-protocols
+pixman
+mtdev
+libevdev
+xkeyboard-config
+libxkbcommon

@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=wayland
+pkgver=1.23.1
+pkgrel=1
+pkgdesc="The Wayland display protocol: its libraries and wayland-scanner"
+arch=(x86_64)
+url="https://wayland.freedesktop.org/"
+license=(MIT)
+depends=(glibc libffi expat)
+source=("https://gitlab.freedesktop.org/wayland/wayland/-/releases/$pkgver/downloads/wayland-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    # no documentation (it needs Doxygen and xmlto) and no DTD check (libxml2)
+    meson setup wayland-$pkgver build --prefix=/usr --buildtype=release \
+        -D documentation=false -D dtd_validation=false -D tests=false
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

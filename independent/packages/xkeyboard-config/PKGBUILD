@@ -1,0 +1,23 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=xkeyboard-config
+pkgver=2.44
+pkgrel=1
+pkgdesc="Keyboard layouts for every language (the XKB data)"
+arch=(any)
+url="https://www.freedesktop.org/wiki/Software/XKeyboardConfig/"
+license=(LicenseRef-xkeyboard-config)
+source=("https://www.x.org/releases/individual/data/xkeyboard-config/xkeyboard-config-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    meson setup xkeyboard-config-$pkgver build --prefix=/usr --buildtype=release \
+        -D xorg-rules-symlinks=true
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

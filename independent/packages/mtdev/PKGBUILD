@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=mtdev
+pkgver=1.1.7
+pkgrel=1
+pkgdesc="Turns touchpads' and touchscreens' multi-touch events into one form"
+arch=(x86_64)
+url="https://bitmath.org/code/mtdev/"
+license=(MIT)
+depends=(glibc)
+source=("https://bitmath.org/code/mtdev/mtdev-$pkgver.tar.bz2")
+sha256sums=('PIN')
+
+build() {
+    cd mtdev-$pkgver
+    ./configure --prefix=/usr --disable-static
+    make
+}
+
+package() {
+    cd mtdev-$pkgver
+    make DESTDIR="$pkgdir" install
+}

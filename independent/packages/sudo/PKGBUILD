@@ -1,0 +1,37 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=sudo
+pkgver=1.9.17p1
+pkgrel=1
+pkgdesc="Lets the administrators (the wheel group) run commands as root"
+arch=(x86_64)
+url="https://www.sudo.ws/"
+license=(ISC)
+depends=(glibc libxcrypt zlib openssl)
+backup=(etc/sudoers)
+source=("https://www.sudo.ws/dist/sudo-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    cd sudo-$pkgver
+    # no PAM yet: sudo checks the password against /etc/shadow itself
+    ./configure --prefix=/usr --sysconfdir=/etc --libexecdir=/usr/lib --without-pam \
+        --with-secure-path --with-env-editor --with-passprompt="[sudo] password for %p: " \
+        --with-rundir=/run/sudo --with-vardir=/var/db/sudo --with-logfac=auth \
+        --enable-tmpfiles.d=/usr/lib/tmpfiles.d --with-all-insults=no
+    make
+}
+
+package() {
+    cd sudo-$pkgver
+    make DESTDIR="$pkgdir" install
+    # the members of wheel are the administrators (yurei-install puts the
+    # first user there)
+    install -dm750 "$pkgdir/etc/sudoers.d"
+    install -Dm440 /dev/stdin "$pkgdir/etc/sudoers.d/10-wheel" <<'SUDOERS'
+%wheel ALL=(ALL:ALL) ALL
+SUDOERS
+    rm -rf "$pkgdir/run"
+}

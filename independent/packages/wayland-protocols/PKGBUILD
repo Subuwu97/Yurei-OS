@@ -1,0 +1,22 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=wayland-protocols
+pkgver=1.44
+pkgrel=1
+pkgdesc="The Wayland protocol extensions desktops share"
+arch=(any)
+url="https://wayland.freedesktop.org/"
+license=(MIT)
+source=("https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/$pkgver/downloads/wayland-protocols-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    meson setup wayland-protocols-$pkgver build --prefix=/usr --buildtype=release -D tests=false
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

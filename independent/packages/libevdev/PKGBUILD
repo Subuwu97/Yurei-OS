@@ -1,0 +1,24 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libevdev
+pkgver=1.13.3
+pkgrel=1
+pkgdesc="Reads the kernel's input events (keyboards, mice, touchpads)"
+arch=(x86_64)
+url="https://www.freedesktop.org/wiki/Software/libevdev/"
+license=(MIT)
+depends=(glibc)
+source=("https://www.freedesktop.org/software/libevdev/libevdev-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    meson setup libevdev-$pkgver build --prefix=/usr --buildtype=release \
+        -D tests=disabled -D documentation=disabled
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

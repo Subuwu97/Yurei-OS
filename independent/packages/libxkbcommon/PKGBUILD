@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libxkbcommon
+pkgver=1.7.0
+pkgrel=1
+pkgdesc="Keyboard handling for Wayland compositors and apps"
+arch=(x86_64)
+url="https://xkbcommon.org/"
+license=(MIT)
+depends=(glibc xkeyboard-config wayland)
+source=("https://xkbcommon.org/download/libxkbcommon-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    # Wayland only; no X11 support yet, and no layout registry (it needs libxml2)
+    meson setup libxkbcommon-$pkgver build --prefix=/usr --buildtype=release \
+        -D enable-x11=false -D enable-docs=false -D enable-xkbregistry=false \
+        -D enable-wayland=true -D enable-tools=true
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

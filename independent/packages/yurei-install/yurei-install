@@ -149,7 +149,7 @@ say "Settings"
 rm -rf "$target/etc/systemd/system/getty@tty1.service.d"
 echo "$hostname" > "$target/etc/hostname"
 printf '\n  Yūrei Linux (independent preview)\n\n' > "$target/etc/issue"
-printf '\n  Welcome to Yūrei, built entirely from source by Yūrei itself.\n\n' > "$target/etc/motd"
+printf '\n  Welcome to Yūrei, built entirely from source by Yūrei itself.\n  Run administrator commands with sudo; Wi-Fi with iwctl.\n\n' > "$target/etc/motd"
 : > "$target/etc/machine-id"  # a new one on the first start
 cat > "$target/etc/fstab" <<FSTAB
 # <device>                                <mount>  <type>  <options>        <dump> <pass>
