@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=libarchive
+pkgver=3.8.1
+pkgrel=1
+pkgdesc="Multi-format archive and compression library (and bsdtar)"
+arch=(x86_64)
+url="https://libarchive.org/"
+license=(BSD-2-Clause)
+depends=(glibc acl attr bzip2 xz zstd lz4 zlib openssl)
+source=("https://github.com/libarchive/libarchive/releases/download/v$pkgver/libarchive-$pkgver.tar.xz")
+sha256sums=('19f917d42d530f98815ac824d90c7eaf648e9d9a50e4f309c812457ffa5496b5')
+
+build() {
+    cd libarchive-$pkgver
+    ./configure --prefix=/usr --disable-static --without-xml2
+    make
+}
+
+package() {
+    cd libarchive-$pkgver
+    make DESTDIR="$pkgdir" install
+}

@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md): the public key that
+# signs the [yurei] repository, for pacman to trust. Until Yūrei's own key
+# is set up, each build signs with a throwaway key, which repo-inside.sh
+# hands to this recipe as $YUREI_SIGNING_PUBKEY (and rebuilds it every run).
+pkgname=yurei-keyring
+pkgver=2026.10
+pkgrel=1
+pkgdesc="The key that signs Yūrei's packages"
+arch=(any)
+url="https://github.com/Subuwu97/Yurei-OS"
+license=(GPL-3.0-or-later)
+depends=(pacman gnupg)
+install=yurei-keyring.install
+
+package() {
+    local key=${YUREI_SIGNING_PUBKEY:-$startdir/yurei.asc}
+    local dir="$pkgdir/usr/share/pacman/keyrings"
+    install -Dm644 "$key" "$dir/yurei.gpg"
+    # trusted fully, by fingerprint
+    gpg --batch --with-colons --show-keys "$key" |
+        awk -F: '/^fpr/ {print $10 ":4:"; exit}' > "$dir/yurei-trusted"
+    [[ -s $dir/yurei-trusted ]]
+    : > "$dir/yurei-revoked"
+}

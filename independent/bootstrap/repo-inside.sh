@@ -97,13 +97,16 @@ reuse() {
 packages() {
     local name fpr start hash env
     fpr=$(fingerprint)
-    env="MAKEPKG_CONF=$srv/makepkg.conf SRCDEST=$srv/sources PKGDEST=$repo"
+    # the public key, for the yurei-keyring recipe
+    as_user gpg --batch --armor --export "$fpr" > "$srv/signing-key.asc"
+    env="MAKEPKG_CONF=$srv/makepkg.conf SRCDEST=$srv/sources PKGDEST=$repo YUREI_SIGNING_PUBKEY=$srv/signing-key.asc"
     while read -r name; do
         [[ -z $name || $name == \#* ]] && continue
         msg "$name"
         start=$SECONDS
         hash=$(recipe_hash "$name")
-        if reuse "$name" "$hash"; then
+        # the keyring holds this run's key, so it's always made afresh
+        if [[ $name != yurei-keyring ]] && reuse "$name" "$hash"; then
             echo "   unchanged since the last run: reused"
             continue
         fi

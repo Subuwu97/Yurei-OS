@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=libassuan
+pkgver=3.0.2
+pkgrel=1
+pkgdesc="IPC library used by some GnuPG related software"
+arch=(x86_64)
+url="https://www.gnupg.org/"
+license=(LGPL-2.1-or-later)
+depends=(glibc libgpg-error)
+source=("https://www.gnupg.org/ftp/gcrypt/libassuan/libassuan-$pkgver.tar.bz2")
+sha256sums=('d2931cdad266e633510f9970e1a2f346055e351bb19f9b78912475b8074c36f6')
+
+build() {
+    cd libassuan-$pkgver
+    ./configure --prefix=/usr --disable-static
+    make
+}
+
+package() {
+    cd libassuan-$pkgver
+    make DESTDIR="$pkgdir" install
+}

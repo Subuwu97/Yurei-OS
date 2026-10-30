@@ -1,0 +1,28 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=fakeroot
+pkgver=1.37.1.1
+pkgrel=1
+pkgdesc="Tool for simulating superuser privileges"
+arch=(x86_64)
+url="https://salsa.debian.org/clint/fakeroot"
+license=(GPL-3.0-or-later)
+depends=(glibc libcap util-linux sed bash)
+source=("https://deb.debian.org/debian/pool/main/f/fakeroot/fakeroot_$pkgver.orig.tar.gz")
+sha256sums=('86b0b75bf319ca42e525c098675b6ed10a06b76e69ec9ccf20ef5e03883b3a14')
+
+build() {
+    cd fakeroot-$pkgver
+    ./configure --prefix=/usr --libdir=/usr/lib/libfakeroot --disable-static --with-ipc=sysv
+    # translated manual pages need po4a, which Yūrei doesn't have yet
+    command -v po4a >/dev/null || printf 'all:\ninstall:\n' > doc/Makefile
+    make
+}
+
+package() {
+    cd fakeroot-$pkgver
+    make DESTDIR="$pkgdir" install
+    install -Dm644 /dev/stdin "$pkgdir/etc/ld.so.conf.d/fakeroot.conf" <<< /usr/lib/libfakeroot
+}

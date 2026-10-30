@@ -1,0 +1,54 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=pacman
+pkgver=7.0.0
+pkgrel=1
+pkgdesc="A library-based package manager with dependency support"
+arch=(x86_64)
+url="https://pacman.archlinux.page/"
+license=(GPL-2.0-or-later)
+depends=(bash glibc libarchive curl gpgme openssl gawk coreutils grep sed findutils tar xz zstd file gettext)
+optdepends=('fakeroot: building packages with makepkg' 'binutils: makepkg strips programs')
+backup=(etc/pacman.conf etc/makepkg.conf etc/pacman.d/mirrorlist)
+source=("https://gitlab.archlinux.org/pacman/pacman/-/releases/v$pkgver/downloads/pacman-$pkgver.tar.xz")
+sha256sums=('61cbd445d1381b4b184bc7c4e2791f07a79f0f2807b7c600399d0d08e8cd28cf')
+
+build() {
+    mkdir -p pacman-$pkgver/build
+    cd pacman-$pkgver/build
+    # manual pages need asciidoc, which Yūrei doesn't have yet
+    meson setup .. --prefix=/usr --sysconfdir=/etc --localstatedir=/var --buildtype=release \
+        -D doc=disabled -D scriptlet-shell=/usr/bin/bash -D ldconfig=/usr/sbin/ldconfig \
+        -D crypto=openssl -D gpgme=enabled
+    ninja
+}
+
+package() {
+    cd pacman-$pkgver/build
+    DESTDIR="$pkgdir" ninja install
+    # Yūrei's packages are compressed with zstd (makepkg's own default is gzip)
+    sed -i -e "s/^PKGEXT=.*/PKGEXT='.pkg.tar.zst'/" -e "s/^SRCEXT=.*/SRCEXT='.src.tar.zst'/" \
+        "$pkgdir/etc/makepkg.conf"
+    # Yūrei's own repository, signed with the key in yurei-keyring
+    cat > "$pkgdir/etc/pacman.conf" <<'CONF'
+# pacman's settings on Yūrei (see pacman.conf(5)).
+[options]
+HoldPkg = pacman glibc
+Architecture = auto
+CheckSpace
+ParallelDownloads = 5
+SigLevel = Required DatabaseOptional
+LocalFileSigLevel = Optional
+
+# Yūrei's packages, built from source by Yūrei and signed with its key
+[yurei]
+Include = /etc/pacman.d/mirrorlist
+CONF
+    install -Dm644 /dev/stdin "$pkgdir/etc/pacman.d/mirrorlist" <<'LIST'
+# Where pacman downloads Yūrei's packages from.
+Server = https://github.com/Subuwu97/Yurei-OS/releases/download/repo
+LIST
+    install -d "$pkgdir/var/lib/pacman" "$pkgdir/var/cache/pacman/pkg"
+}

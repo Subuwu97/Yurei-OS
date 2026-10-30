@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=gpgme
+pkgver=1.24.3
+pkgrel=1
+pkgdesc="A C wrapper library for GnuPG"
+arch=(x86_64)
+url="https://www.gnupg.org/"
+license=(LGPL-2.1-or-later)
+depends=(glibc libgpg-error libassuan gnupg)
+source=("https://www.gnupg.org/ftp/gcrypt/gpgme/gpgme-$pkgver.tar.bz2")
+sha256sums=('bfc17f5bd1b178c8649fdd918956d277080f33df006a2dc40acdecdce68c50dd')
+
+build() {
+    cd gpgme-$pkgver
+    ./configure --prefix=/usr --disable-static --disable-gpg-test --disable-gpgsm-test --enable-languages=cl
+    make
+}
+
+package() {
+    cd gpgme-$pkgver
+    make DESTDIR="$pkgdir" install
+}

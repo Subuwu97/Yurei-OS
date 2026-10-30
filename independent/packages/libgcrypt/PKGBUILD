@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=libgcrypt
+pkgver=1.11.2
+pkgrel=1
+pkgdesc="General purpose cryptographic library based on the code from GnuPG"
+arch=(x86_64)
+url="https://www.gnupg.org/"
+license=(LGPL-2.1-or-later)
+depends=(glibc libgpg-error)
+source=("https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-$pkgver.tar.bz2")
+sha256sums=('6ba59dd192270e8c1d22ddb41a07d95dcdbc1f0fb02d03c4b54b235814330aac')
+
+build() {
+    cd libgcrypt-$pkgver
+    ./configure --prefix=/usr --disable-static
+    make
+}
+
+package() {
+    cd libgcrypt-$pkgver
+    make DESTDIR="$pkgdir" install
+}

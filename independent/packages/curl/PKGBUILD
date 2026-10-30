@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=curl
+pkgver=8.15.0
+pkgrel=1
+pkgdesc="Command line tool and library for transferring data with URLs"
+arch=(x86_64)
+url="https://curl.se/"
+license=(curl)
+depends=(glibc openssl zlib zstd)
+source=("https://curl.se/download/curl-$pkgver.tar.xz")
+sha256sums=('6cd0a8a5b126ddfda61c94dc2c3fc53481ba7a35461cf7c5ab66aa9d6775b609')
+
+build() {
+    cd curl-$pkgver
+    ./configure --prefix=/usr --disable-static --with-openssl --without-libpsl --enable-threaded-resolver --with-ca-path=/etc/ssl/certs
+    make
+}
+
+package() {
+    cd curl-$pkgver
+    make DESTDIR="$pkgdir" install
+}

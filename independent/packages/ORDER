@@ -64,3 +64,16 @@ procps-ng
 kbd
 iproute2
 linux
+# Fifth batch: pacman itself, and the key it trusts.
+libgpg-error
+libgcrypt
+libassuan
+libksba
+npth
+gnupg
+gpgme
+libarchive
+curl
+fakeroot
+pacman
+yurei-keyring

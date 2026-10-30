@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=npth
+pkgver=1.8
+pkgrel=1
+pkgdesc="The new GNU portable threads library"
+arch=(x86_64)
+url="https://www.gnupg.org/"
+license=(LGPL-2.1-or-later)
+depends=(glibc)
+source=("https://www.gnupg.org/ftp/gcrypt/npth/npth-$pkgver.tar.bz2")
+sha256sums=('8bd24b4f23a3065d6e5b26e98aba9ce783ea4fd781069c1b35d149694e90ca3e')
+
+build() {
+    cd npth-$pkgver
+    ./configure --prefix=/usr --disable-static
+    make
+}
+
+package() {
+    cd npth-$pkgver
+    make DESTDIR="$pkgdir" install
+}
