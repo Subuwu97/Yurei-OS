@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Windows program (Wine)
+Comment=Runs a Windows program with Wine
+Icon=wine
+# "start /unix" runs the program from its own folder, as Windows would
+Exec=wine start /unix %f
+TryExec=wine
+MimeType=application/x-ms-dos-executable;application/x-msdownload;application/x-msi;application/x-ms-shortcut;application/x-wine-extension-msp;application/vnd.microsoft.portable-executable;
+NoDisplay=true
+Terminal=false
+Categories=System;

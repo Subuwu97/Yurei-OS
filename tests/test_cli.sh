@@ -98,5 +98,13 @@ else
     YUREI_BOXES_FILE=$tmp/none "$yurei" box setup
     check "login setup does nothing without a list" '[[ ! -s $tmp/calls ]]'
 fi
+files=$here/pkg/yurei-settings/files
+wine_types=$(sed -n 's/^MimeType=//p' "$files/usr/share/applications/yurei-wine.desktop")
+check "Windows programs open with Wine by default" '
+    while IFS="=" read -r type app; do
+        [[ $type == application/* ]] || continue
+        [[ ${app%;} == yurei-wine.desktop && ";$wine_types" == *";$type;"* ]] || exit 1
+    done < "$files/etc/xdg/mimeapps.list"'
+check "the Wine launcher runs the program from its folder" 'grep -qx "Exec=wine start /unix %f" "$files/usr/share/applications/yurei-wine.desktop"'
 check "version prints" '[[ $("$yurei" version) =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]'
 exit $fail

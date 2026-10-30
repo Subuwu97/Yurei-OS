@@ -2,7 +2,7 @@
 # yurei - one command for keeping a Yūrei system fast, updated and game-ready.
 set -euo pipefail
 
-VERSION="0.5.0"
+VERSION="0.5.1"
 BUNDLE_DIR="${YUREI_BUNDLE_DIR:-/usr/share/yurei/bundles}"
 BOXES_FILE="${YUREI_BOXES_FILE:-/etc/yurei/boxes}"
 MIN_MAP_COUNT=1048576
@@ -138,6 +138,14 @@ cmd_doctor() {
         fi
     else
         warn "GameMode not installed"
+    fi
+
+    if have wine; then
+        ok "Wine $(wine --version 2>/dev/null | sed 's/^wine-//'): Windows programs open with a double-click"
+    else
+        bad "Wine isn't installed - Windows programs can't run"
+        problems=$((problems + 1))
+        $fix && as_root pacman -S --needed wine && ok "installed Wine"
     fi
 
     if [[ -e /dev/ntsync ]]; then

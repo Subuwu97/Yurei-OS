@@ -1,0 +1,15 @@
+# Yūrei's default apps for file types. Windows programs (.exe, .msi, .lnk)
+# open with Wine, so they start with a double-click.
+[Default Applications]
+application/x-ms-dos-executable=yurei-wine.desktop
+application/x-msdownload=yurei-wine.desktop
+application/vnd.microsoft.portable-executable=yurei-wine.desktop
+application/x-msi=yurei-wine.desktop
+application/x-ms-shortcut=yurei-wine.desktop
+application/x-wine-extension-msp=yurei-wine.desktop
+
+[Added Associations]
+application/x-ms-dos-executable=yurei-wine.desktop;
+application/x-msdownload=yurei-wine.desktop;
+application/vnd.microsoft.portable-executable=yurei-wine.desktop;
+application/x-msi=yurei-wine.desktop;
