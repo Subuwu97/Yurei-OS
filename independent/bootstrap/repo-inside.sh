@@ -51,6 +51,11 @@ setup() {
     getent passwd "$user" >/dev/null || useradd -m "$user"
     as_user gpg --batch --quiet --passphrase '' \
         --quick-gen-key "Yūrei build (throwaway) <build@yurei.invalid>" ed25519 sign never
+    # systemd's boot loader is built with pyelftools; a build tool only,
+    # like the rest of this system, not part of any package
+    python3 -c 'import elftools' 2>/dev/null ||
+        pip3 install --no-index --no-build-isolation --no-deps \
+            "/sources/pyelftools-$(version pyelftools).tar.gz"
     rm -rf "$repo" "$srv/sources" "$stamps"
     install -d -o "$user" "$repo" "$srv/sources"
     install -d "$stamps"

@@ -11,6 +11,10 @@ on:
     branches: [main]
     paths: ["independent/**", ".github/workflows/bootstrap.yml"]
 
+# contents: write publishes the live ISO as a test release
+permissions:
+  contents: write
+
 jobs:
   toolchain:
     runs-on: ubuntu-24.04
@@ -25,7 +29,8 @@ jobs:
       - name: Build tools from the host (only used to build, never shipped)
         run: |
           sudo apt-get update
-          sudo apt-get install -y bison gawk texinfo m4 xz-utils python3 qemu-system-x86 e2fsprogs
+          sudo apt-get install -y bison gawk texinfo m4 xz-utils python3 qemu-system-x86 e2fsprogs \
+            squashfs-tools xorriso mtools dosfstools cpio ovmf
 
       - name: Make room (the system, its archives and a disk image need about 20 GB)
         run: |
@@ -263,6 +268,15 @@ jobs:
           sudo chown -R "$(id -u):$(id -g)" /home/runner/yurei-repo
           du -sh /home/runner/yurei-repo
 
+      # The live ISO: installed from [yurei] by pacman inside Yūrei, then
+      # packed into a UEFI ISO on the build machine.
+      - name: Live ISO
+        run: |
+          sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh iso-inside.sh
+          sudo ISO_NAME="yurei-independent-$(date +%Y.%m.%d)-${GITHUB_RUN_NUMBER}-x86_64.iso" \
+            YUREI="$YUREI" OUT=/home/runner/yurei-iso independent/bootstrap/iso.sh
+          sudo chown -R "$(id -u):$(id -g)" /home/runner/yurei-iso
+
       # This run's packages and recipe hashes, for the next run; also after
       # a failure, so the packages that did build aren't built again.
       - name: Keep the packages for the next run
@@ -299,11 +313,40 @@ jobs:
           ls -l /dev/kvm || true
           sudo YUREI="$YUREI" OUT=/home/runner/yurei-boot independent/bootstrap/boot-test.sh
 
+      - name: Boot the live ISO on UEFI (as a PC would)
+        run: sudo ISO="$(ls /home/runner/yurei-iso/*.iso)" OUT=/home/runner/yurei-boot independent/bootstrap/iso-test.sh
+
+      # Every ISO that boots in the test above is published as a test release.
+      - name: Publish the live ISO as a test release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd /home/runner/yurei-iso
+          iso=$(ls *.iso)
+          tag="independent-$(date +%Y.%m.%d)-${GITHUB_RUN_NUMBER}"
+          cat > notes.md <<NOTES
+          Yūrei, built entirely from source by Yūrei itself (no other distribution's
+          packages), as a live ISO for testing on a PC. Built from ${GITHUB_SHA::7}.
+
+          This is an early test build: it boots to a text console (no desktop yet)
+          and can't be installed to a disk yet.
+
+          1. Write ${iso} to a USB stick with balenaEtcher, Rufus (DD mode) or Ventoy.
+          2. Turn off Secure Boot in the PC's firmware settings (Yūrei isn't signed for it yet).
+          3. Boot from the USB stick in UEFI mode. You're logged in as root automatically.
+
+          Check the download with: sha256sum -c ${iso}.sha256
+          NOTES
+          gh release create "$tag" --repo "$GITHUB_REPOSITORY" --prerelease \
+            --title "Yūrei independent preview ${tag#independent-}" --notes-file notes.md \
+            "$iso" "$iso.sha256"
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: boot-log
-          path: /home/runner/yurei-boot/serial.log
+          path: /home/runner/yurei-boot/*.log
           if-no-files-found: ignore
 
       - name: Source checksums (to pin in sources.lock)

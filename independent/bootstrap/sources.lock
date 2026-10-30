@@ -1,7 +1,7 @@
 # Upstream sources for the bootstrap: name, version, URL, SHA-256, and the
 # step that first uses it (cross = stage1.sh, temp = temptools.sh,
 # chroot = chroot.sh, base = base-inside.sh, base2 = base2-inside.sh,
-# base3 = base3-inside.sh, pacman = pacman-inside.sh).
+# base3 = base3-inside.sh, pacman = pacman-inside.sh, repo = repo-inside.sh).
 # Only official upstream release tarballs; no other distribution's packages.
 #
 # A sum of "-" means not yet pinned: fetch.sh downloads it, prints its sum
@@ -87,3 +87,4 @@ libarchive 3.8.1  https://github.com/libarchive/libarchive/releases/download/v3.
 curl      8.15.0  https://curl.se/download/curl-8.15.0.tar.xz  6cd0a8a5b126ddfda61c94dc2c3fc53481ba7a35461cf7c5ab66aa9d6775b609  pacman
 fakeroot  1.37.1.1  https://deb.debian.org/debian/pool/main/f/fakeroot/fakeroot_1.37.1.1.orig.tar.gz  86b0b75bf319ca42e525c098675b6ed10a06b76e69ec9ccf20ef5e03883b3a14  pacman
 pacman    7.0.0   https://gitlab.archlinux.org/pacman/pacman/-/releases/v7.0.0/downloads/pacman-7.0.0.tar.xz  61cbd445d1381b4b184bc7c4e2791f07a79f0f2807b7c600399d0d08e8cd28cf  pacman
+pyelftools 0.32   https://files.pythonhosted.org/packages/source/p/pyelftools/pyelftools-0.32.tar.gz  6de90ee7b8263e740c8715a925382d4099b354f29ac48ea40d840cf7aa14ace5  repo

@@ -199,6 +199,15 @@ Each stage ends in something testable, built automatically in CI.
   * `boot-test.sh`: makes a disk image of the system and boots it in QEMU
     (the stage 2 milestone); a check added to the test image only reports
     what's running once the login prompt is up, and powers off
+  * `iso-inside.sh` and `iso.sh`: the live ISO. pacman installs every
+    `[yurei]` package into a live system; a small initramfs finds the ISO
+    by its label (`YUREI_LIVE`), mounts its squashfs under a RAM overlay
+    and starts systemd; systemd-boot starts the kernel on UEFI PCs. The
+    ISO is packed on the build machine (mksquashfs, xorriso, mtools),
+    whose tools only put Yūrei's files together
+  * `iso-test.sh`: boots the ISO in QEMU on UEFI firmware (OVMF), as a PC
+    would, up to the live system's login prompt. Each ISO that passes is
+    published as a test release (`independent-<date>-<run>`)
 * `independent/packages/`: Yūrei's package recipes (PKGBUILDs), built in
   the order of `ORDER`. Each takes its source from the same address, with
   the same SHA-256, as `sources.lock`; `check-recipes.py` makes sure of it.
