@@ -84,6 +84,9 @@ iwd
 dosfstools
 sudo
 yurei-install
+# From here on, each package is also installed into the build system once
+# built, since the recipes after it build with it (repo-inside.sh):
+#> install from here on
 # Seventh batch (stage 3): what every Wayland desktop builds on.
 libdrm
 wayland

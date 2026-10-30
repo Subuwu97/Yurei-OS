@@ -97,15 +97,31 @@ reuse() {
     cp "$previous/stamps/$name".{hash,files} "$stamps/"
 }
 
+# install_here NAME: installs NAME's packages into this build system, so
+# the recipes after it can build with them. Only for what the bootstrap
+# didn't already put here (ORDER's "#> install from here on" line);
+# signatures aren't checked: they were made a moment ago, by this run.
+install_here() {
+    local file files=()
+    while read -r file; do files+=("$repo/$file"); done < "$stamps/$1.files"
+    printf '[options]\nSigLevel = Never\nLocalFileSigLevel = Never\n' > "$srv/install-pacman.conf"
+    pacman --config "$srv/install-pacman.conf" -U --noconfirm --nodeps --overwrite '*' \
+        --noprogressbar "${files[@]}" > /dev/null
+    echo "   installed here, for the recipes after it"
+}
+
 # Builds every recipe in ORDER. --nodeps: while bootstrapping, everything a
-# recipe needs is in this system already, but not yet known to pacman.
+# recipe needs is in this system already, but not yet known to pacman (from
+# ORDER's "#> install from here on" line, each package is installed here
+# once built, for the ones after it).
 packages() {
-    local name fpr start hash env
+    local name fpr start hash env install=
     fpr=$(fingerprint)
     # the public key, for the yurei-keyring recipe
     as_user gpg --batch --armor --export "$fpr" > "$srv/signing-key.asc"
     env="MAKEPKG_CONF=$srv/makepkg.conf SRCDEST=$srv/sources PKGDEST=$repo YUREI_SIGNING_PUBKEY=$srv/signing-key.asc"
     while read -r name; do
+        [[ $name == "#> install from here on" ]] && install=1
         [[ -z $name || $name == \#* ]] && continue
         msg "$name"
         start=$SECONDS
@@ -113,6 +129,7 @@ packages() {
         # the keyring holds this run's key, so it's always made afresh
         if [[ $name != yurei-keyring ]] && reuse "$name" "$hash"; then
             echo "   unchanged since the last run: reused"
+            [[ -z $install ]] || install_here "$name"
             continue
         fi
         rm -rf "$(home)/build/$name"
@@ -123,6 +140,7 @@ packages() {
         as_user sh -c "cd build/$name && $env makepkg --packagelist" | xargs -n1 basename > "$stamps/$name.files"
         echo "$hash" > "$stamps/$name.hash"
         rm -rf "$(home)/build/$name"
+        [[ -z $install ]] || install_here "$name"
         printf '   (%s took %d s)\n' "$name" $((SECONDS - start))
     done < "$recipes/ORDER"
 }
