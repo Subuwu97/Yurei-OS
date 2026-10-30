@@ -100,7 +100,7 @@ if all(results):
     installed.send("findmnt -no SOURCE,FSTYPE / /boot; echo MOUNTS-''END")
     check("/ and /boot mounted from the disk", installed.wait("MOUNTS-END", 30))
     installed.send("echo test | sudo -S id -u; echo SUDO-''END")
-    check("the user is an administrator (sudo)", installed.wait("\n0", 30) and installed.wait("SUDO-END", 10))
+    check("the user is an administrator (sudo)", installed.wait("0\r\nSUDO-END", 30))
     installed.send("exit")
     installed.qemu.kill()
     installed.stop()
