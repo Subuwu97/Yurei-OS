@@ -34,10 +34,10 @@ echo "core tools work"
 
 # every program and library finds what it links to
 missing=
-for f in $(find /usr/bin /usr/sbin /usr/lib -maxdepth 1 -type f -perm -u+x); do
+while IFS= read -r -d '' f; do
     lost=$(ldd "$f" 2>/dev/null | grep 'not found' | awk '{print $1}' | tr '\n' ' ') || true
     [[ -z $lost ]] || missing+="$f ($(pacman -Qoq "$f" 2>/dev/null)): $lost"$'\n'
-done
+done < <(find /usr/bin /usr/sbin /usr/lib -maxdepth 1 -type f -perm -u+x -print0)
 if [[ -n $missing ]]; then
     echo "missing libraries (that package's depends is incomplete):"
     printf '%s' "$missing"
