@@ -1,0 +1,22 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=linux-firmware
+pkgver=20260916
+pkgrel=1
+pkgdesc="Firmware for Wi-Fi cards, graphics cards and other hardware"
+arch=(any)
+url="https://gitlab.com/kernel-firmware/linux-firmware"
+license=(LicenseRef-linux-firmware)
+options=(!strip)
+source=("https://www.kernel.org/pub/linux/kernel/firmware/linux-firmware-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+package() {
+    cd linux-firmware-$pkgver
+    # compressed with zstd, which Yūrei's kernel reads (FW_LOADER_COMPRESS_ZSTD);
+    # without "make install", whose de-duplication step needs rdfind
+    ./copy-firmware.sh --zstd "$pkgdir/usr/lib/firmware"
+    install -Dm644 -t "$pkgdir/usr/share/licenses/$pkgname" LICEN[CS]E* WHENCE
+}

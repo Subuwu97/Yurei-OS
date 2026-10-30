@@ -1,0 +1,7 @@
+post_install() {
+    systemctl enable iwd.service > /dev/null 2>&1 || true
+}
+
+pre_remove() {
+    systemctl disable iwd.service > /dev/null 2>&1 || true
+}

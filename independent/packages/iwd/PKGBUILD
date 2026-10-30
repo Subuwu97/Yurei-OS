@@ -1,0 +1,39 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=iwd
+pkgver=3.9
+pkgrel=1
+pkgdesc="Wi-Fi daemon (connect with iwctl)"
+arch=(x86_64)
+url="https://iwd.wiki.kernel.org/"
+license=(LGPL-2.1-or-later)
+depends=(glibc readline dbus systemd)
+backup=(etc/iwd/main.conf)
+install=iwd.install
+source=("https://www.kernel.org/pub/linux/network/wireless/iwd-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    cd iwd-$pkgver
+    # its own copy of ell (in the tarball); manual pages need rst2man,
+    # which Yūrei doesn't have yet
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
+        --libexecdir=/usr/lib/iwd --enable-dbus-policy --disable-manual-pages
+    make
+}
+
+package() {
+    cd iwd-$pkgver
+    make DESTDIR="$pkgdir" install
+    # iwd gets the address itself (DHCP) and hands names to resolved, so a
+    # Wi-Fi network works as soon as iwctl connects to it
+    install -Dm644 /dev/stdin "$pkgdir/etc/iwd/main.conf" <<'CONF'
+[General]
+EnableNetworkConfiguration=true
+
+[Network]
+NameResolvingService=systemd
+CONF
+}

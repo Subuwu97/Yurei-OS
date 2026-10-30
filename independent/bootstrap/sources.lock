@@ -91,3 +91,4 @@ pyelftools 0.32   https://files.pythonhosted.org/packages/source/p/pyelftools/py
 linux-firmware 20260916  https://www.kernel.org/pub/linux/kernel/firmware/linux-firmware-20260916.tar.xz  -  repo
 wireless-regdb 2025.07.10  https://www.kernel.org/pub/software/network/wireless-regdb/wireless-regdb-2025.07.10.tar.xz  -  repo
 iwd       3.9     https://www.kernel.org/pub/linux/network/wireless/iwd-3.9.tar.xz  -  repo
+dosfstools 4.2     https://github.com/dosfstools/dosfstools/releases/download/v4.2/dosfstools-4.2.tar.gz  64926eebf90092dca21b14259a5301b7b98e7b1943e8a201c7d726084809b527  repo

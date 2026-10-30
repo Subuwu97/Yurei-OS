@@ -77,3 +77,9 @@ curl
 fakeroot
 pacman
 yurei-keyring
+# Sixth batch: hardware support for real PCs, and Wi-Fi.
+linux-firmware
+wireless-regdb
+iwd
+dosfstools
+yurei-install

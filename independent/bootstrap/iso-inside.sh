@@ -70,6 +70,10 @@ ISSUE
 
   This is a live system: changes are kept in memory until you shut down.
   pacman -Q        lists what's installed (all from Yūrei's own repository)
+  iwctl            connects to Wi-Fi: "station list" shows the Wi-Fi card's
+                   name, then "station NAME connect NETWORK" (a wired
+                   connection works by itself)
+  ip addr          shows the network connections
   poweroff         shuts down
 
 MOTD

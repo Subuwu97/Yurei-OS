@@ -1,0 +1,190 @@
+#!/bin/bash
+# Installs Yūrei from the live system onto a whole disk, which it erases:
+# a 1 GiB EFI partition (systemd-boot and the kernel) and the rest for
+# Yūrei (ext4). The installed system is the live system as it was built,
+# with its own name, user and passwords, and without the live settings.
+#
+#   yurei-install                       asks everything
+#   yurei-install --disk /dev/nvme0n1 --hostname NAME --user NAME [--yes]
+#
+# Unattended (tests): the passwords come from $YUREI_USER_PASSWORD and
+# $YUREI_ROOT_PASSWORD, and --kernel-options adds to the kernel's options.
+set -euo pipefail
+
+target=/mnt/yurei-target
+rootfs=/run/live/rootfs
+disk='' hostname='' user='' yes='' kernel_options=''
+
+die() { echo "yurei-install: $*" >&2; exit 1; }
+say() { printf '\n== %s\n' "$*"; }
+
+while (( $# )); do
+    case $1 in
+        --disk) disk=$2; shift ;;
+        --hostname) hostname=$2; shift ;;
+        --user) user=$2; shift ;;
+        --kernel-options) kernel_options=$2; shift ;;
+        --yes) yes=1 ;;
+        -h|--help) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *) die "unknown option $1 (see --help)" ;;
+    esac
+    shift
+done
+
+[[ $EUID -eq 0 ]] || die "run as root"
+[[ -d /sys/firmware/efi ]] || die "this PC started in legacy BIOS mode; Yūrei installs for UEFI only (start the live system in UEFI mode)"
+mountpoint -q "$rootfs" || die "run from the Yūrei live system ($rootfs isn't there)"
+
+# --- which disk ------------------------------------------------------------
+
+# the disk the live system runs from (the ISO itself, or the stick holding
+# the ISO file); it can't be the target
+live_disk() {
+    local src
+    src=$(findmnt -no SOURCE /run/live/host 2>/dev/null || findmnt -no SOURCE /run/live/medium)
+    [[ -b $src ]] || return 0
+    lsblk -no PKNAME "$src" 2>/dev/null | head -n1 | sed 's|^|/dev/|;s|^/dev/$||'
+    [[ $(lsblk -no TYPE "$src") == disk ]] && echo "$src"
+    return 0
+}
+
+mapfile -t live < <(live_disk)
+disks=()
+while read -r name type; do
+    [[ $type == disk ]] || continue
+    for l in "${live[@]}"; do [[ $name == "$l" ]] && continue 2; done
+    disks+=("$name")
+done < <(lsblk -dpno NAME,TYPE -e 1,7,11)
+(( ${#disks[@]} )) || die "no disk to install to (the live system's own disk isn't offered)"
+
+if [[ -z $disk ]]; then
+    echo "Yūrei installs onto a whole disk, which is ERASED: everything on it is lost."
+    echo "Disks:"
+    i=0
+    for d in "${disks[@]}"; do
+        i=$((i + 1))
+        printf '  %d) %s  %s  %s\n' "$i" "$d" "$(lsblk -dno SIZE "$d" | tr -d ' ')" "$(lsblk -dno MODEL "$d")"
+    done
+    read -rp "Install onto which disk (number)? " n
+    if ! [[ $n =~ ^[0-9]+$ ]] || (( n < 1 || n > ${#disks[@]} )); then die "no such disk"; fi
+    disk=${disks[n-1]}
+fi
+found=
+for d in "${disks[@]}"; do [[ $d == "$disk" ]] && found=1; done
+[[ -n $found ]] || die "$disk isn't a disk Yūrei can install to (choose from: ${disks[*]})"
+
+# --- names and passwords ----------------------------------------------------
+
+valid_name() { [[ $1 =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]; }
+while [[ -z $hostname ]]; do
+    read -rp "Computer name [yurei]: " hostname
+    hostname=${hostname:-yurei}
+    [[ $hostname =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]{0,62})$ ]] || { echo "Letters, digits and - only."; hostname=; }
+done
+while [[ -z $user ]]; do
+    read -rp "Your user name (lower case): " user
+    valid_name "$user" || { echo "Lower-case letters, digits, - and _ only, starting with a letter."; user=; }
+done
+valid_name "$user" || die "user name $user isn't valid"
+
+ask_password() {  # PROMPT VAR
+    local a b
+    while :; do
+        read -rsp "$1: " a; echo
+        read -rsp "Again: " b; echo
+        [[ -n $a && $a == "$b" ]] && break
+        echo "They're empty or don't match; once more."
+    done
+    printf -v "$2" '%s' "$a"
+}
+user_password=${YUREI_USER_PASSWORD:-}
+root_password=${YUREI_ROOT_PASSWORD:-}
+[[ -n $user_password ]] || ask_password "Password for $user" user_password
+[[ -n $root_password ]] || ask_password "Password for root (administrator)" root_password
+
+if [[ -z $yes ]]; then
+    echo
+    lsblk -o NAME,SIZE,FSTYPE,LABEL,MODEL "$disk"
+    echo
+    echo "Everything on $disk will be erased, and Yūrei installed as '$hostname' for $user."
+    read -rp "Type ERASE to go ahead: " answer
+    [[ $answer == ERASE ]] || die "nothing was changed"
+fi
+
+# --- partitions -------------------------------------------------------------
+
+say "Partitioning $disk"
+umount -R "$target" 2>/dev/null || true
+for p in $(lsblk -lnpo NAME "$disk" | tail -n +2); do umount "$p" 2>/dev/null || true; done
+wipefs -a -q "$disk"
+# the root partition has the x86-64 root type, so systemd knows it's Yūrei
+sfdisk -q --wipe always --label gpt "$disk" <<PARTS
+size=1GiB, type=uefi, name="EFI system"
+type=4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709, name="Yurei"
+PARTS
+udevadm settle 2>/dev/null || sleep 2
+mapfile -t parts < <(lsblk -lnpo NAME,TYPE "$disk" | awk '$2 == "part" {print $1}')
+(( ${#parts[@]} == 2 )) || die "the new partitions didn't appear"
+esp=${parts[0]} root=${parts[1]}
+
+say "Formatting"
+mkfs.fat -F 32 -n YUREI_EFI "$esp" > /dev/null
+mkfs.ext4 -q -F -L yurei "$root"
+
+mkdir -p "$target"
+mount "$root" "$target"
+mkdir -p "$target/boot"
+mount -o umask=0077 "$esp" "$target/boot"
+
+# --- the system -------------------------------------------------------------
+
+say "Copying Yūrei ($(du -sh "$rootfs" 2>/dev/null | cut -f1)); this takes a few minutes"
+cp -a "$rootfs/." "$target/"
+kernel=$(compgen -G "$target/usr/lib/modules/*/vmlinuz" | head -n1) || true
+[[ -n $kernel ]] || die "no kernel in the live system"
+install -m644 "$kernel" "$target/boot/vmlinuz-yurei"
+
+say "Settings"
+# the live settings out, the installed system's in
+rm -rf "$target/etc/systemd/system/getty@tty1.service.d"
+echo "$hostname" > "$target/etc/hostname"
+printf '\n  Yūrei Linux (independent preview)\n\n' > "$target/etc/issue"
+printf '\n  Welcome to Yūrei, built entirely from source by Yūrei itself.\n\n' > "$target/etc/motd"
+: > "$target/etc/machine-id"  # a new one on the first start
+cat > "$target/etc/fstab" <<FSTAB
+# <device>                                <mount>  <type>  <options>        <dump> <pass>
+UUID=$(blkid -s UUID -o value "$root")  /        ext4    defaults         0 1
+UUID=$(blkid -s UUID -o value "$esp")                       /boot    vfat    umask=0077       0 2
+FSTAB
+
+for fs in proc sys dev run; do mount --rbind "/$fs" "$target/$fs"; done
+in_target() { chroot "$target" "$@"; }
+in_target useradd -m -G wheel -s /bin/bash "$user"
+printf 'root:%s\n%s:%s\n' "$root_password" "$user" "$user_password" | in_target chpasswd
+
+say "Boot menu (systemd-boot)"
+# with a boot entry in the PC's firmware where it allows one; disks also
+# start from the standard fallback, EFI/BOOT/BOOTX64.EFI, which it installs
+boot_entry=1
+mount -o remount,rw /sys/firmware/efi/efivars 2>/dev/null || true
+if ! bootctl --esp-path="$target/boot" --make-entry-directory=no install; then
+    boot_entry=
+    bootctl --esp-path="$target/boot" --make-entry-directory=no --no-variables install
+fi
+partuuid=$(blkid -s PARTUUID -o value "$root")
+printf 'default yurei.conf\ntimeout 3\n' > "$target/boot/loader/loader.conf"
+# no initramfs: disks, USB and ext4 are built into Yūrei's kernel
+cat > "$target/boot/loader/entries/yurei.conf" <<ENTRY
+title   Yūrei Linux
+linux   /vmlinuz-yurei
+options root=PARTUUID=$partuuid rw${kernel_options:+ $kernel_options}
+ENTRY
+
+for fs in run dev sys proc; do umount -R "$target/$fs"; done
+sync
+umount -R "$target"
+
+echo
+echo "Yūrei is installed on $disk."
+[[ -n $boot_entry ]] || echo "(The PC's boot list wasn't changed; choose the disk in its boot menu.)"
+echo "Shut down (poweroff), remove the USB stick, and start the PC again."

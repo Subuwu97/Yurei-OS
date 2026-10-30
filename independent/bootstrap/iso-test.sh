@@ -4,6 +4,8 @@
 #
 #   dvd    the ISO as a DVD
 #   usb    the ISO written to a USB stick (Etcher, Rufus in DD mode, dd)
+#   install  yurei-install onto a blank disk, then the installed system
+#          started from that disk (install-test.py)
 #   file   the ISO as a file on a FAT32 USB stick, as Ventoy keeps it; the
 #          kernel and initramfs are started directly here (Ventoy's own
 #          boot menu does that on a PC), so it tests the initramfs finding
@@ -78,4 +80,10 @@ if [[ -n $esp ]]; then
 else
     echo "== file: skipped (no ESP)"
 fi
+
+# install onto a blank disk with yurei-install, then start from that disk
+"$(dirname "$0")/install-test.py" "$iso" "$firmware" "$out" || fail=1
+for log in "$out"/install-*.log; do
+    [[ -f $log ]] && { echo "-- ${log##*/}"; cat -v "$log" | tail -n 40; }
+done
 exit $fail

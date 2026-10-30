@@ -4,7 +4,7 @@
 # keeps them the same.
 pkgname=linux
 pkgver=6.18
-pkgrel=2
+pkgrel=3
 pkgdesc="Yūrei's Linux kernel and modules"
 arch=(x86_64)
 url="https://www.kernel.org/"
@@ -18,7 +18,8 @@ build() {
     cd linux-$pkgver
     make mrproper
     # The kernel's own x86-64 defaults, what virtual machines need, what
-    # systemd needs, and what real PCs and a live ISO need. Disks, USB,
+    # systemd needs, and what real PCs and a live ISO need (iwd, the Wi-Fi
+    # daemon, does its key exchange with the kernel's crypto, listed too). Disks, USB,
     # file systems and the boot display are built in, so the kernel
     # starts from any of them without modules; graphics, network and
     # sound drivers are modules, loaded for the hardware found.
@@ -39,6 +40,16 @@ build() {
         -e DRM -e DRM_SIMPLEDRM -e SYSFB_SIMPLEFB -e DRM_FBDEV_EMULATION -e FRAMEBUFFER_CONSOLE \
         -m DRM_I915 -m DRM_AMDGPU -m DRM_NOUVEAU -m DRM_VIRTIO_GPU \
         -m E1000E -m IGB -m R8169 -m CFG80211 -m MAC80211 -m IWLWIFI -m IWLMVM \
+        -m RTW88 -m RTW88_8822CE -m RTW88_8821CE -m RTW89 -m RTW89_8852AE -m RTW89_8852BE \
+        -m MT7921E -m ATH10K -m ATH10K_PCI -m ATH11K -m ATH11K_PCI -m BRCMFMAC -e RFKILL \
+        -e USB_NET_DRIVERS -m USB_USBNET -m USB_RTL8152 -m USB_NET_CDCETHER -m USB_NET_CDC_NCM \
+        -m USB_NET_AX8817X -m USB_NET_AX88179_178A \
+        -e FW_LOADER_COMPRESS -e FW_LOADER_COMPRESS_ZSTD -e FW_LOADER_COMPRESS_XZ \
+        -e CRYPTO_USER_API_HASH -e CRYPTO_USER_API_SKCIPHER -e KEY_DH_OPERATIONS \
+        -e CRYPTO_HMAC -e CRYPTO_CMAC -e CRYPTO_MD4 -e CRYPTO_MD5 -e CRYPTO_SHA1 -e CRYPTO_SHA256 \
+        -e CRYPTO_SHA512 -e CRYPTO_AES -e CRYPTO_ECB -e CRYPTO_CBC -e CRYPTO_DES \
+        -e ASYMMETRIC_KEY_TYPE -e ASYMMETRIC_PUBLIC_KEY_SUBTYPE -e X509_CERTIFICATE_PARSER \
+        -e PKCS7_MESSAGE_PARSER -e PKCS8_PRIVATE_KEY_PARSER \
         -m SND_HDA_INTEL -m SND_HDA_CODEC_REALTEK -m SND_HDA_CODEC_HDMI \
         -e VIRTIO_BLK -e VIRTIO_NET -e SERIAL_8250_CONSOLE \
         --set-str LOCALVERSION -yurei -d LOCALVERSION_AUTO

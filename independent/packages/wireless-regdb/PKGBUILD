@@ -1,0 +1,20 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md). The source address and
+# sum are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=wireless-regdb
+pkgver=2025.07.10
+pkgrel=1
+pkgdesc="Wireless regulatory database: the radio channels and power each country allows"
+arch=(any)
+url="https://wireless.docs.kernel.org/en/latest/en/developers/regulatory/wireless-regdb.html"
+license=(ISC)
+source=("https://www.kernel.org/pub/software/network/wireless-regdb/wireless-regdb-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+package() {
+    cd wireless-regdb-$pkgver
+    # signed; the kernel checks it against the keys built into it
+    install -Dm644 -t "$pkgdir/usr/lib/firmware" regulatory.db regulatory.db.p7s
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

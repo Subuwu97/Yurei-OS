@@ -32,6 +32,14 @@ id yurei-test
 userdel -r yurei-test
 echo "core tools work"
 
+# hardware support: firmware (compressed), the regulatory database, Wi-Fi
+compgen -G '/usr/lib/firmware/iwlwifi-*.ucode.zst' > /dev/null
+compgen -G '/usr/lib/firmware/i915/*.bin.zst' > /dev/null
+[[ -f /usr/lib/firmware/regulatory.db && -f /usr/lib/firmware/regulatory.db.p7s ]]
+/usr/lib/iwd/iwd --version
+iwctl --help > /dev/null
+echo "firmware $(du -sh /usr/lib/firmware | cut -f1), iwd works"
+
 # every program and library finds what it links to
 missing=
 while IFS= read -r -d '' f; do
