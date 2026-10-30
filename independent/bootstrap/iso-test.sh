@@ -40,7 +40,7 @@ check() {
     if grep -qa "$2" "$log"; then echo "ok   $1"; else echo "FAIL $1"; fail=1; fi
 }
 check "Yūrei's kernel started from systemd-boot" "Linux version .*-yurei"
-check "the initramfs found the ISO" "looking for the live medium"
+check "the initramfs found the ISO" "Yūrei: found it on .*, starting"
 check "systemd started" "systemd.*running in system mode"
 check "the live system reached its login prompt" "yurei-live login:"
 exit $fail

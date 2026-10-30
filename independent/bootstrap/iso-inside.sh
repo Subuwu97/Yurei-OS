@@ -101,17 +101,22 @@ PATH=/usr/bin:/usr/sbin
 mount -t proc proc /proc
 mount -t sysfs sys /sys
 mount -t devtmpfs dev /dev
-echo "Yūrei: looking for the live medium…"
+# through the kernel's log, so every console shows it (the screen and,
+# in the tests, the serial port), not only the last one named
+say() { echo "Yūrei: $*" > /dev/kmsg 2>/dev/null || echo "Yūrei: $*"; }
+say "looking for the live medium…"
 dev=
 for _ in {1..60}; do
     dev=$(blkid -L YUREI_LIVE 2>/dev/null) && [[ -n $dev ]] && break
     sleep 1
 done
 if [[ -z $dev ]]; then
+    say "the live medium (YUREI_LIVE) wasn't found. A shell, to look around:"
     echo "Yūrei: the live medium (YUREI_LIVE) wasn't found. A shell, to look around:"
     exec bash
 fi
 mkdir -p /run/live/medium /run/live/rootfs /run/live/rw
+say "found it on $dev, starting"
 mount -o ro "$dev" /run/live/medium
 mount -o loop,ro /run/live/medium/yurei/rootfs.sfs /run/live/rootfs
 mount -t tmpfs -o mode=0755 tmpfs /run/live/rw

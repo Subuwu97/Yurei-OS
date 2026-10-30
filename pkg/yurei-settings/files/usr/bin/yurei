@@ -384,7 +384,9 @@ box_label() {
 }
 
 notify() {
-    have notify-send && notify-send --app-name=Yūrei --icon=yurei "$@" 2>/dev/null || true
+    if have notify-send; then
+        notify-send --app-name=Yūrei --icon=yurei "$@" 2>/dev/null || true
+    fi
 }
 
 box_exists() {
