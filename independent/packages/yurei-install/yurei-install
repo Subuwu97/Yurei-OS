@@ -157,7 +157,9 @@ UUID=$(blkid -s UUID -o value "$root")  /        ext4    defaults         0 1
 UUID=$(blkid -s UUID -o value "$esp")                       /boot    vfat    umask=0077       0 2
 FSTAB
 
-for fs in proc sys dev run; do mount --rbind "/$fs" "$target/$fs"; done
+# what the commands below need inside the new system; not /run, whose
+# live medium mounts would keep it busy
+for fs in proc sys dev; do mount --rbind "/$fs" "$target/$fs"; done
 in_target() { chroot "$target" "$@"; }
 in_target useradd -m -G wheel -s /bin/bash "$user"
 printf 'root:%s\n%s:%s\n' "$root_password" "$user" "$user_password" | in_target chpasswd
@@ -180,7 +182,7 @@ linux   /vmlinuz-yurei
 options root=PARTUUID=$partuuid rw${kernel_options:+ $kernel_options}
 ENTRY
 
-for fs in run dev sys proc; do umount -R "$target/$fs"; done
+for fs in dev sys proc; do umount -R "$target/$fs" || umount -R -l "$target/$fs"; done
 sync
 umount -R "$target"
 

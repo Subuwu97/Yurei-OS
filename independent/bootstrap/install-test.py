@@ -29,8 +29,9 @@ class Machine:
             stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         os.set_blocking(self.qemu.stdout.fileno(), False)
 
-    def wait(self, text, timeout):
-        """Waits for text on the console; True if it came."""
+    def wait(self, text, timeout, fail=None):
+        """Waits for text on the console; True if it came, False if the
+        fail text came first or time ran out."""
         end = time.time() + timeout
         while time.time() < end:
             data = self.qemu.stdout.read()
@@ -38,6 +39,8 @@ class Machine:
                 self.log.write(data)
                 self.log.flush()
                 self.seen += data
+                if fail and fail.encode() in self.seen:
+                    return False
                 if text.encode() in self.seen:
                     self.seen = self.seen[self.seen.index(text.encode()) + len(text):]
                     return True
@@ -80,7 +83,7 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
               "--hostname yurei-installed --user tester --yes "
               "--kernel-options 'console=ttyS0,115200 systemd.tty.term.ttyS0=dumb' "
               "&& echo INSTALL-''DONE || echo INSTALL-''FAILED")
-    done = live.wait("INSTALL-DONE", 900)
+    done = live.wait("INSTALL-DONE", 900, fail="INSTALL-FAILED")
     check("yurei-install finished", done)
     live.send("poweroff")
 live.stop()
