@@ -331,8 +331,12 @@ jobs:
           Yūrei, built entirely from source by Yūrei itself (no other distribution's
           packages), as a live ISO for testing on a PC. Built from ${GITHUB_SHA::7}.
 
-          This is an early test build: it boots to a text console (no desktop yet)
-          and can't be installed to a disk yet.
+          This is an early test build: it boots to a text console (no desktop yet).
+
+          - Wi-Fi: iwctl, then "station list" and "station NAME connect NETWORK";
+            a wired connection works by itself.
+          - Installing: yurei-install puts Yūrei onto a whole disk, which it
+            ERASES (it asks first). UEFI only.
 
           1. Write ${iso} to a USB stick with balenaEtcher, Rufus (DD mode) or Ventoy.
           2. Turn off Secure Boot in the PC's firmware settings (Yūrei isn't signed for it yet).

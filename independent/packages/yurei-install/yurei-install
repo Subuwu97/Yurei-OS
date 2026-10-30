@@ -182,7 +182,8 @@ linux   /vmlinuz-yurei
 options root=PARTUUID=$partuuid rw${kernel_options:+ $kernel_options}
 ENTRY
 
-for fs in dev sys proc; do umount -R "$target/$fs" || umount -R -l "$target/$fs"; done
+# (sys/fs/cgroup stays busy while systemd runs; it's let go lazily)
+for fs in dev sys proc; do umount -R "$target/$fs" 2>/dev/null || umount -R -l "$target/$fs"; done
 sync
 umount -R "$target"
 
