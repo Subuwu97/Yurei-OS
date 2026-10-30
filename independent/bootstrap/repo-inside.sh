@@ -100,12 +100,14 @@ reuse() {
 # install_here NAME: installs NAME's packages into this build system, so
 # the recipes after it can build with them. Only for what the bootstrap
 # didn't already put here (ORDER's "#> install from here on" line);
-# signatures aren't checked: they were made a moment ago, by this run.
+# signatures aren't checked (they were made a moment ago, by this run),
+# nor dependencies (--nodeps twice): the bootstrap's own files aren't
+# known to pacman.
 install_here() {
     local file files=()
     while read -r file; do files+=("$repo/$file"); done < "$stamps/$1.files"
     printf '[options]\nSigLevel = Never\nLocalFileSigLevel = Never\n' > "$srv/install-pacman.conf"
-    pacman --config "$srv/install-pacman.conf" -U --noconfirm --nodeps --overwrite '*' \
+    pacman --config "$srv/install-pacman.conf" -U --noconfirm --nodeps --nodeps --overwrite '*' \
         --noprogressbar "${files[@]}" > /dev/null
     echo "   installed here, for the recipes after it"
 }
