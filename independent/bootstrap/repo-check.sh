@@ -33,11 +33,14 @@ userdel -r yurei-test
 echo "core tools work"
 
 # every program and library finds what it links to
-missing=$(find /usr/bin /usr/sbin /usr/lib -maxdepth 1 -type f -perm -u+x -exec ldd {} + 2>/dev/null |
-    grep 'not found' | sort -u || true)
+missing=
+for f in $(find /usr/bin /usr/sbin /usr/lib -maxdepth 1 -type f -perm -u+x); do
+    lost=$(ldd "$f" 2>/dev/null | grep 'not found' | awk '{print $1}' | tr '\n' ' ') || true
+    [[ -z $lost ]] || missing+="$f ($(pacman -Qoq "$f" 2>/dev/null)): $lost"$'\n'
+done
 if [[ -n $missing ]]; then
-    echo "missing libraries (a recipe's depends is incomplete):"
-    echo "$missing"
+    echo "missing libraries (that package's depends is incomplete):"
+    printf '%s' "$missing"
     exit 1
 fi
 echo "all libraries found"
