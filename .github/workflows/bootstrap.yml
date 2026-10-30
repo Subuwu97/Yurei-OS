@@ -275,7 +275,9 @@ jobs:
           sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh iso-inside.sh
           sudo ISO_NAME="yurei-independent-$(date +%Y.%m.%d)-${GITHUB_RUN_NUMBER}-x86_64.iso" \
             YUREI="$YUREI" OUT=/home/runner/yurei-iso independent/bootstrap/iso.sh
-          sudo chown -R "$(id -u):$(id -g)" /home/runner/yurei-iso
+          # the kernel and initramfs, for the ISO test's Ventoy-style boot
+          rm -rf /home/runner/yurei-esp && sudo cp -r "$YUREI/srv/yurei/esp" /home/runner/yurei-esp
+          sudo chown -R "$(id -u):$(id -g)" /home/runner/yurei-iso /home/runner/yurei-esp
 
       # This run's packages and recipe hashes, for the next run; also after
       # a failure, so the packages that did build aren't built again.
@@ -314,7 +316,7 @@ jobs:
           sudo YUREI="$YUREI" OUT=/home/runner/yurei-boot independent/bootstrap/boot-test.sh
 
       - name: Boot the live ISO on UEFI (as a PC would)
-        run: sudo ISO="$(ls /home/runner/yurei-iso/*.iso)" OUT=/home/runner/yurei-boot independent/bootstrap/iso-test.sh
+        run: sudo ISO="$(ls /home/runner/yurei-iso/*.iso)" ESP=/home/runner/yurei-esp OUT=/home/runner/yurei-boot independent/bootstrap/iso-test.sh
 
       # Every ISO that boots in the test above is published as a test release.
       - name: Publish the live ISO as a test release

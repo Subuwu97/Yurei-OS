@@ -4,7 +4,7 @@
 # keeps them the same.
 pkgname=linux
 pkgver=6.18
-pkgrel=1
+pkgrel=2
 pkgdesc="Yūrei's Linux kernel and modules"
 arch=(x86_64)
 url="https://www.kernel.org/"
@@ -34,7 +34,7 @@ build() {
         -e USB_SUPPORT -e USB_XHCI_HCD -e USB_EHCI_HCD -e USB_OHCI_HCD -e USB_STORAGE -e USB_UAS \
         -e HID -e HID_GENERIC -e USB_HID -e INPUT_EVDEV \
         -e EXT4_FS -e VFAT_FS -e FAT_FS -e NLS_CODEPAGE_437 -e NLS_ISO8859_1 -e NLS_UTF8 \
-        -e ISO9660_FS -e JOLIET -e ZISOFS -e SQUASHFS -e SQUASHFS_XZ -e SQUASHFS_ZSTD \
+        -e EXFAT_FS -e NTFS3_FS -e ISO9660_FS -e JOLIET -e ZISOFS -e SQUASHFS -e SQUASHFS_XZ -e SQUASHFS_ZSTD \
         -e OVERLAY_FS -e TMPFS -e CDROM -e RD_GZIP -e RD_ZSTD \
         -e DRM -e DRM_SIMPLEDRM -e SYSFB_SIMPLEFB -e DRM_FBDEV_EMULATION -e FRAMEBUFFER_CONSOLE \
         -m DRM_I915 -m DRM_AMDGPU -m DRM_NOUVEAU -m DRM_VIRTIO_GPU \

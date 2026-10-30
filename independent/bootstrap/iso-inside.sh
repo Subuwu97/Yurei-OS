@@ -87,7 +87,7 @@ initramfs_tree() {
     ln -s usr/lib "$initramfs/lib"
     ln -s usr/lib "$initramfs/lib64"
     local prog lib
-    for prog in /usr/bin/{bash,mount,umount,mkdir,sleep,cat} /usr/sbin/{blkid,losetup,switch_root}; do
+    for prog in /usr/bin/{bash,mount,umount,mkdir,sleep,cat} /usr/sbin/{blkid,losetup,switch_root} /usr/bin/setsid; do
         install -D "$live$prog" "$initramfs$prog"
         while read -r lib; do
             [[ -e $initramfs$lib ]] || install -D "$live$lib" "$initramfs$lib"
@@ -95,36 +95,101 @@ initramfs_tree() {
     done
     cat > "$initramfs/init" <<'INIT'
 #!/usr/bin/bash
-# Starts the Yūrei live system: finds the ISO by its label, mounts its
-# squashfs read-only under a RAM overlay, and hands over to systemd.
+# Starts the Yūrei live system: finds the live medium, mounts its squashfs
+# read-only under a RAM overlay, and hands over to systemd.
+#
+# The medium is found in one of three ways, tried in turn:
+#   1. by its label, YUREI_LIVE (a DVD, or a USB stick written with Etcher,
+#      Rufus in DD mode or dd);
+#   2. the same, by probing each disk and partition directly, in case
+#      blkid's quick lookup misses it;
+#   3. as an ISO file on a USB stick's partition (Ventoy, or the ISO just
+#      copied onto a stick): any yurei*.iso at the top or one folder down.
 PATH=/usr/bin:/usr/sbin
 mount -t proc proc /proc
 mount -t sysfs sys /sys
 mount -t devtmpfs dev /dev
-# through the kernel's log, so every console shows it (the screen and,
-# in the tests, the serial port), not only the last one named
-say() { echo "Yūrei: $*" > /dev/kmsg 2>/dev/null || echo "Yūrei: $*"; }
-say "looking for the live medium…"
-dev=
-for _ in {1..60}; do
-    dev=$(blkid -L YUREI_LIVE 2>/dev/null) && [[ -n $dev ]] && break
+# /run is moved into the live system with everything mounted under it
+mount -t tmpfs -o mode=0755,nosuid,nodev run /run
+# through the kernel's log, so every console shows it (the screen and, in
+# the tests, the serial port); plain ASCII, which every console shows right
+say() { echo "Yurei: $*" > /dev/kmsg 2>/dev/null || echo "Yurei: $*"; }
+mkdir -p /run/live/medium /run/live/host /run/live/rootfs /run/live/rw
+
+live_medium() {  # DEVICE-OR-FILE: mounts it as the medium if it is one
+    mount -o ro "$1" /run/live/medium 2>/dev/null || return 1
+    [[ -f /run/live/medium/yurei/rootfs.sfs ]] && return 0
+    umount /run/live/medium
+    return 1
+}
+
+by_label() {
+    local dev
+    dev=$(blkid -L YUREI_LIVE 2>/dev/null) && [[ -n $dev ]] && live_medium "$dev" && found=$dev
+}
+
+by_probe() {
+    local b dev
+    for b in /sys/class/block/*; do
+        dev=/dev/${b##*/}
+        [[ $(blkid -p -o value -s LABEL "$dev" 2>/dev/null) == YUREI_LIVE ]] || continue
+        live_medium "$dev" && { found=$dev; return 0; }
+    done
+    return 1
+}
+
+by_file() {
+    local b dev type iso
+    for b in /sys/class/block/*; do
+        dev=/dev/${b##*/}
+        type=$(blkid -p -o value -s TYPE "$dev" 2>/dev/null)
+        case $type in vfat|exfat|ntfs|ext4|ext3|ext2|iso9660) ;; *) continue ;; esac
+        mount -o ro "$dev" /run/live/host 2>/dev/null || continue
+        shopt -s nullglob nocaseglob
+        for iso in /run/live/host/yurei*.iso /run/live/host/*/yurei*.iso; do
+            if live_medium "$iso"; then
+                shopt -u nullglob nocaseglob
+                found="$iso on $dev"
+                return 0
+            fi
+        done
+        shopt -u nullglob nocaseglob
+        umount /run/live/host
+    done
+    return 1
+}
+
+say "looking for the live medium..."
+found=
+for i in {1..45}; do
+    by_label || by_probe || { (( i >= 3 )) && by_file; } && break
     sleep 1
 done
-if [[ -z $dev ]]; then
-    say "the live medium (YUREI_LIVE) wasn't found. A shell, to look around:"
-    echo "Yūrei: the live medium (YUREI_LIVE) wasn't found. A shell, to look around:"
-    exec bash
+if [[ -z $found ]]; then
+    say "the live medium wasn't found. What the system sees:"
+    {
+        echo
+        echo "Yurei: the live medium wasn't found."
+        echo "Disks and partitions seen (/proc/partitions):"
+        cat /proc/partitions
+        echo "What's on them (blkid):"
+        blkid
+        echo
+        echo "A shell, to look around (type exit to try again):"
+    } > /dev/tty1 2>&1
+    while :; do
+        setsid -c -w bash -i 0<>/dev/tty1 1>&0 2>&1
+        found=
+        by_label || by_probe || by_file && break
+        echo "Still not found. Another shell:" > /dev/tty1
+    done
 fi
-mkdir -p /run/live/medium /run/live/rootfs /run/live/rw
-say "found it on $dev, starting"
-mount -o ro "$dev" /run/live/medium
+say "found it on $found, starting"
 mount -o loop,ro /run/live/medium/yurei/rootfs.sfs /run/live/rootfs
 mount -t tmpfs -o mode=0755 tmpfs /run/live/rw
 mkdir -p /run/live/rw/upper /run/live/rw/work
 mount -t overlay overlay \
     -o lowerdir=/run/live/rootfs,upperdir=/run/live/rw/upper,workdir=/run/live/rw/work /newroot
-mkdir -p /newroot/run/live
-mount --move /run/live /newroot/run/live 2>/dev/null || true
 exec switch_root /newroot /usr/lib/systemd/systemd
 INIT
     chmod 755 "$initramfs/init"
