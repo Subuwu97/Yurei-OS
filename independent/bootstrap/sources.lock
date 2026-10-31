@@ -220,3 +220,12 @@ xcb-util  0.4.1  https://www.x.org/releases/individual/lib/xcb-util-0.4.1.tar.xz
 xcb-util-image  0.4.1  https://www.x.org/releases/individual/lib/xcb-util-image-0.4.1.tar.xz  ccad8ee5dadb1271fd4727ad14d9bd77a64e505608766c4e98267d9aede40d3d  repo
 xcb-util-renderutil  0.3.10  https://www.x.org/releases/individual/lib/xcb-util-renderutil-0.3.10.tar.xz  3e15d4f0e22d8ddbfbb9f5d77db43eacd7a304029bf25a6166cc63caa96d04ba  repo
 xcb-util-cursor  0.1.5  https://www.x.org/releases/individual/lib/xcb-util-cursor-0.1.5.tar.xz  0caf99b0d60970f81ce41c7ba694e5eaaf833227bb2cbcdb2f6dc9666a663c57  repo
+
+# KDE Frameworks 6.18: foundation batch
+extra-cmake-modules  6.18.0  https://download.kde.org/stable/frameworks/6.18/extra-cmake-modules-6.18.0.tar.xz  b2d2222cfe5ace502c60bd8a77a79bc0230f48cee83265c89dcc2618b960e293  repo
+karchive  6.18.0  https://download.kde.org/stable/frameworks/6.18/karchive-6.18.0.tar.xz  fa24f703aa799e4ff5b9cc2e4a628745912ebfcc9f0c6bb6d92106ff9e02e26f  repo
+kcodecs  6.18.0  https://download.kde.org/stable/frameworks/6.18/kcodecs-6.18.0.tar.xz  247eda9ade502699062c7baaca7bb93691a308f202c165954652875ebe777426  repo
+kconfig  6.18.0  https://download.kde.org/stable/frameworks/6.18/kconfig-6.18.0.tar.xz  517cbf6747df9289d6fce860a73d49e59354685334ae468ecd53f1067d9d618b  repo
+kcoreaddons  6.18.0  https://download.kde.org/stable/frameworks/6.18/kcoreaddons-6.18.0.tar.xz  e1d03cfc7d45987ec31f31104f4732812980e0038beab222633da1108eb6f42f  repo
+kitemviews  6.18.0  https://download.kde.org/stable/frameworks/6.18/kitemviews-6.18.0.tar.xz  f74c03e2ec367238ec395b1f2438878999c2be3e29b41b6bd4a3ccd04440e29a  repo
+kwidgetsaddons  6.18.0  https://download.kde.org/stable/frameworks/6.18/kwidgetsaddons-6.18.0.tar.xz  0c2fb00744ffd9ecb7531ee5a79c1db4b406753f250565122f3add93cf200afb  repo

@@ -1,0 +1,26 @@
+# Maintainer: Yurei Linux project
+# KDE Frameworks 6.18 foundation, built from KDE's verified source archive.
+pkgname=kconfig
+pkgver=6.18.0
+pkgrel=1
+pkgdesc="KDE configuration system and QML bindings"
+arch=(x86_64)
+url="https://invent.kde.org/frameworks/kconfig"
+license=(BSD-2-Clause BSD-3-Clause CC0-1.0 GPL-2.0-or-later LGPL-2.0-only LGPL-2.0-or-later LGPL-2.1-only LGPL-3.0-only LicenseRef-KDE-Accepted-LGPL MIT)
+depends=(qt6-base qt6-declarative gcc-libs)
+makedepends=(cmake ninja extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/frameworks/6.18/kconfig-$pkgver.tar.xz")
+sha256sums=('517cbf6747df9289d6fce860a73d49e59354685334ae468ecd53f1067d9d618b')
+
+build() {
+    cmake -S kconfig-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+        -DBUILD_QCH=OFF -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 -t "$pkgdir/usr/share/licenses/$pkgname" kconfig-$pkgver/LICENSES/*
+}

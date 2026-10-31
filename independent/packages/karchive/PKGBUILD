@@ -1,0 +1,26 @@
+# Maintainer: Yurei Linux project
+# KDE Frameworks 6.18 foundation, built from KDE's verified source archive.
+pkgname=karchive
+pkgver=6.18.0
+pkgrel=1
+pkgdesc="KDE archive and compression library"
+arch=(x86_64)
+url="https://invent.kde.org/frameworks/karchive"
+license=(Apache-2.0 BSD-2-Clause CC0-1.0 LGPL-2.0-or-later)
+depends=(qt6-base gcc-libs zlib bzip2 xz zstd openssl)
+makedepends=(cmake ninja extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/frameworks/6.18/karchive-$pkgver.tar.xz")
+sha256sums=('fa24f703aa799e4ff5b9cc2e4a628745912ebfcc9f0c6bb6d92106ff9e02e26f')
+
+build() {
+    cmake -S karchive-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+        -DBUILD_QCH=OFF -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 -t "$pkgdir/usr/share/licenses/$pkgname" karchive-$pkgver/LICENSES/*
+}
