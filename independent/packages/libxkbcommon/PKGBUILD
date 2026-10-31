@@ -4,19 +4,20 @@
 # check-recipes.py keeps them the same.
 pkgname=libxkbcommon
 pkgver=1.7.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Keyboard handling for Wayland compositors and apps"
 arch=(x86_64)
 url="https://xkbcommon.org/"
 license=(MIT)
-depends=(glibc xkeyboard-config wayland)
+depends=(glibc xkeyboard-config wayland libxml2)
 source=("https://xkbcommon.org/download/libxkbcommon-$pkgver.tar.xz")
 sha256sums=('65782f0a10a4b455af9c6baab7040e2f537520caa2ec2092805cdfd36863b247')
 
 build() {
-    # Wayland only; no X11 support yet, and no layout registry (it needs libxml2)
+    # Wayland only, no X11 support yet; with the layout registry
+    # (xkbregistry), which panels use to list keyboard layouts
     meson setup libxkbcommon-$pkgver build --prefix=/usr --buildtype=release \
-        -D enable-x11=false -D enable-docs=false -D enable-xkbregistry=false \
+        -D enable-x11=false -D enable-docs=false -D enable-xkbregistry=true \
         -D enable-wayland=true -D enable-tools=true
     ninja -C build
 }

@@ -95,6 +95,7 @@ pixman
 mtdev
 libevdev
 xkeyboard-config
+libxml2
 libxkbcommon
 # Eighth batch (stage 3): the graphics drivers (Mesa), and what builds them.
 cmake
@@ -125,7 +126,6 @@ libpng
 libjpeg-turbo
 pcre2
 glib
-libxml2
 harfbuzz
 fribidi
 cairo
