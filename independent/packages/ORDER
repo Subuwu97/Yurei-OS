@@ -138,8 +138,6 @@ libinput
 seatd
 hwdata
 libdisplay-info
-wlroots
-cage
 freetype
 fontconfig
 ttf-dejavu
@@ -157,7 +155,6 @@ cairo
 pango
 shared-mime-info
 gdk-pixbuf
-labwc
 # Eleventh batch (stage 3): audio, GTK3 and a panel.
 alsa-lib
 lua
@@ -174,10 +171,13 @@ sfwbar
 # Twelfth batch (stage 3): polkit.
 duktape
 polkit
-# Fourteenth batch (stage 3): Xwayland, for X11 programs.
+# Fourteenth batch (stage 3): Xwayland, for X11 programs; wlroots (which needs it to be built first), cage and labwc.
 libfontenc
 libxfont2
 libxcvt
 xkbcomp
 xwayland
+wlroots
+cage
+labwc
 yurei-desktop
