@@ -1,0 +1,24 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 4, gaming; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=vulkan-headers
+pkgver=1.4.313.0
+pkgrel=1
+pkgdesc="Vulkan API headers and registry"
+arch=(any)
+url="https://github.com/KhronosGroup/Vulkan-Headers"
+license=(Apache-2.0)
+source=("https://github.com/KhronosGroup/Vulkan-Headers/archive/vulkan-sdk-$pkgver/Vulkan-Headers-vulkan-sdk-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    cmake -S Vulkan-Headers-vulkan-sdk-$pkgver -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_INSTALL_SYSCONFDIR=/etc -DCMAKE_INSTALL_DATADIR=share \
+        -DVULKAN_HEADERS_ENABLE_TESTS=OFF -DVULKAN_HEADERS_ENABLE_MODULE=OFF
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

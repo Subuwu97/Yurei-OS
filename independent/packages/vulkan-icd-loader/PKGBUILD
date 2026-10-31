@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 4, gaming; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=vulkan-icd-loader
+pkgver=1.4.313.0
+pkgrel=1
+pkgdesc="The Vulkan loader (libvulkan): finds the GPU drivers for programs"
+arch=(x86_64)
+url="https://github.com/KhronosGroup/Vulkan-Loader"
+license=(Apache-2.0)
+depends=(glibc libx11 libxcb libxrandr wayland)
+source=("https://github.com/KhronosGroup/Vulkan-Loader/archive/vulkan-sdk-$pkgver/Vulkan-Loader-vulkan-sdk-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    cmake -S Vulkan-Loader-vulkan-sdk-$pkgver -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_INSTALL_SYSCONFDIR=/etc -DCMAKE_INSTALL_DATADIR=share \
+        -DBUILD_TESTS=OFF -DBUILD_WSI_XCB_SUPPORT=ON -DBUILD_WSI_XLIB_SUPPORT=ON -DBUILD_WSI_WAYLAND_SUPPORT=ON -DBUILD_WSI_XLIB_XRANDR_SUPPORT=ON -DCMAKE_BUILD_TYPE=Release
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}
