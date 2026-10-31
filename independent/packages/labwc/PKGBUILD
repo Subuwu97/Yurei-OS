@@ -4,19 +4,19 @@
 # check-recipes.py keeps them the same.
 pkgname=labwc
 pkgver=0.8.4
-pkgrel=1
+pkgrel=2
 pkgdesc="Wayland window manager: stacking windows, a right-click menu, keyboard shortcuts"
 arch=(x86_64)
 url="https://labwc.github.io/"
 license=(GPL-2.0-only)
-depends=(glibc wlroots wayland libinput libxkbcommon libxml2 glib cairo pango libpng)
+depends=(glibc wlroots wayland libinput libxkbcommon libxml2 glib cairo pango libpng libxcb xwayland)
 source=("https://github.com/labwc/labwc/archive/$pkgver/labwc-$pkgver.tar.gz")
 sha256sums=('2d3ded90f78efb5060f7057ea802c78a79dc9b2e82ae7a2ad902af957b8b9797')
 
 build() {
-    # no X11 programs (Xwayland), SVG icons or window icons (libsfdo) yet
+    # X11 programs through Xwayland; no SVG icons or window icons (libsfdo) yet
     meson setup labwc-$pkgver build --prefix=/usr --buildtype=release \
-        -D xwayland=disabled -D svg=disabled -D icon=disabled -D nls=disabled \
+        -D xwayland=enabled -D svg=disabled -D icon=disabled -D nls=disabled \
         -D man-pages=disabled --wrap-mode=nofallback
     ninja -C build
 }

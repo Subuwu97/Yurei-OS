@@ -4,20 +4,21 @@
 # check-recipes.py keeps them the same.
 pkgname=wlroots
 pkgver=0.18.2
-pkgrel=1
+pkgrel=2
 pkgdesc="The library Wayland compositors are built on (cage, and later others)"
 arch=(x86_64)
 url="https://gitlab.freedesktop.org/wlroots/wlroots"
 license=(MIT)
-depends=(glibc mesa libdrm libinput libxkbcommon pixman seatd wayland libdisplay-info systemd)
+depends=(glibc mesa libdrm libinput libxkbcommon pixman seatd wayland libdisplay-info systemd
+         libxcb xcb-util-wm)
 source=("https://gitlab.freedesktop.org/wlroots/wlroots/-/releases/$pkgver/downloads/wlroots-$pkgver.tar.gz")
 sha256sums=('cf776c169169f279808d9eabc6583f484338dcd454c966a285ff178c88c105d4')
 
 build() {
     # screens through DRM, input through libinput, drawing with OpenGL ES;
-    # no X11 programs (Xwayland) or Vulkan renderer yet
+    # X11 programs through Xwayland; no Vulkan renderer yet
     meson setup wlroots-$pkgver build --prefix=/usr --buildtype=release \
-        -D xwayland=disabled -D backends=drm,libinput -D renderers=gles2 \
+        -D xwayland=enabled -D backends=drm,libinput -D renderers=gles2 \
         -D allocators=gbm -D session=enabled -D libliftoff=disabled -D examples=false
     ninja -C build
 }

@@ -4,23 +4,24 @@
 # check-recipes.py keeps them the same.
 pkgname=mesa
 pkgver=25.1.5
-pkgrel=1
+pkgrel=2
 pkgdesc="Graphics drivers: OpenGL and Vulkan for Intel (Arc too), AMD and NVIDIA (nouveau)"
 arch=(x86_64)
 url="https://www.mesa3d.org/"
 license=(MIT)
-depends=(glibc gcc-libs libdrm wayland expat zlib zstd libelf llvm systemd spirv-tools)
+depends=(glibc gcc-libs libdrm wayland expat zlib zstd libelf llvm systemd spirv-tools
+         libx11 libxcb libxext libxfixes libxrandr libxshmfence libxxf86vm xcb-util-keysyms)
 source=("https://archive.mesa3d.org/mesa-$pkgver.tar.xz")
 sha256sums=('3c4f6b10ff6ee950d0ec6ea733cc6e6d34c569454e3d39a9b276de9115a3b363')
 
 build() {
-    # Wayland only, for now (no X11 or GLX).
+    # Wayland and X11 (GLX, for X11 programs through Xwayland: Wine, games).
     #   OpenGL: iris and crocus (Intel, Arc included), radeonsi (AMD),
     #           nouveau (NVIDIA), llvmpipe (software), virgl (virtual machines)
     #   Vulkan: anv (Intel, Arc included), radv (AMD)
     # NVK (NVIDIA Vulkan) needs Rust, which Yūrei doesn't have yet.
     meson setup mesa-$pkgver build --prefix=/usr --buildtype=release \
-        -D platforms=wayland -D glx=disabled -D egl=enabled -D gbm=enabled \
+        -D platforms=x11,wayland -D glx=dri -D egl=enabled -D gbm=enabled \
         -D gles1=disabled -D gles2=enabled -D glvnd=disabled \
         -D gallium-drivers=iris,crocus,radeonsi,nouveau,llvmpipe,softpipe,virgl \
         -D vulkan-drivers=intel,amd -D vulkan-layers=device-select \
