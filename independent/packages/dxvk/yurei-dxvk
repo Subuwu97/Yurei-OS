@@ -1,12 +1,11 @@
 #!/bin/sh
-# yurei-dxvk [install|remove]: puts DXVK's Direct3D DLLs into a Wine prefix
-# (WINEPREFIX, or ~/.wine) and tells Wine to use them, or takes them out
-# again so Wine's own (OpenGL-based) Direct3D is used.
+# yurei-dxvk [install|remove]: puts DXVK's Direct3D 8-11 DLLs, and
+# vkd3d-proton's Direct3D 12 ones when it's installed, into a Wine prefix
+# (WINEPREFIX, or ~/.wine) and tells Wine to use them; or takes them out
+# again, so Wine's own (OpenGL-based) Direct3D is used.
 set -e
 action=${1:-install}
 prefix=${WINEPREFIX:-$HOME/.wine}
-dxvk=/usr/share/dxvk
-dlls="d3d8 d3d9 d3d10core d3d11 dxgi"
 case $action in
     install|remove) ;;
     *) echo "usage: yurei-dxvk [install|remove]   (the prefix is \$WINEPREFIX, or ~/.wine)" >&2; exit 2 ;;
@@ -15,15 +14,29 @@ export WINEPREFIX=$prefix WINEDEBUG=-all
 [ -d "$prefix/drive_c/windows" ] || wineboot -i
 sys64=$prefix/drive_c/windows/system32
 sys32=$prefix/drive_c/windows/syswow64
-for dll in $dlls; do
-    if [ "$action" = install ]; then
-        cp "$dxvk/x64/$dll.dll" "$sys64/$dll.dll"
-        [ -d "$sys32" ] && cp "$dxvk/x32/$dll.dll" "$sys32/$dll.dll"
-        wine reg add 'HKEY_CURRENT_USER\Software\Wine\DllOverrides' /v "$dll" /d native /f > /dev/null
-    else
-        wine reg delete 'HKEY_CURRENT_USER\Software\Wine\DllOverrides' /v "$dll" /f > /dev/null 2>&1 || true
-    fi
-done
+
+# setup DIR DIR64 DIR32 DLL...: installs (or removes) DLLs from DIR/DIR64
+# and DIR/DIR32 for the 64- and 32-bit Windows sides of the prefix
+setup() {
+    dir=$1 d64=$2 d32=$3
+    shift 3
+    for dll in "$@"; do
+        if [ "$action" = install ]; then
+            cp "$dir/$d64/$dll.dll" "$sys64/$dll.dll"
+            [ -d "$sys32" ] && cp "$dir/$d32/$dll.dll" "$sys32/$dll.dll"
+            wine reg add 'HKEY_CURRENT_USER\Software\Wine\DllOverrides' /v "$dll" /d native /f > /dev/null
+        else
+            wine reg delete 'HKEY_CURRENT_USER\Software\Wine\DllOverrides' /v "$dll" /f > /dev/null 2>&1 || true
+        fi
+    done
+}
+
+setup /usr/share/dxvk x64 x32 d3d8 d3d9 d3d10core d3d11 dxgi
+what="DXVK (Direct3D 8-11)"
+if [ -d /usr/share/vkd3d-proton ]; then
+    setup /usr/share/vkd3d-proton x64 x86 d3d12 d3d12core
+    what="$what and vkd3d-proton (Direct3D 12)"
+fi
 # Wine puts its own DLLs back on the next update of the prefix
 [ "$action" = remove ] && wineboot -u
-echo "DXVK ${action}ed in $prefix"
+echo "$what: ${action}ed in $prefix"

@@ -1,0 +1,28 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 4, gaming; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=gamemode
+pkgver=1.8.2
+pkgrel=1
+pkgdesc="Feral GameMode: the CPU (and GPU) at full speed while a game runs (gamemoderun GAME)"
+arch=(x86_64)
+url="https://github.com/FeralInteractive/gamemode"
+license=(BSD-3-Clause)
+depends=(glibc systemd dbus polkit)
+source=("https://github.com/FeralInteractive/gamemode/releases/download/$pkgver/gamemode-$pkgver.tar.xz")
+sha256sums=('98cd1bcf6101c92fe87f974c7776af23c7e18f29ce6ecfe572b1c39dcde5c181')
+
+build() {
+    # the daemon is started on demand by the session's D-Bus (Yūrei's
+    # desktop runs one); no PAM, so no limits.d file
+    meson setup gamemode-$pkgver build --prefix=/usr --buildtype=release \
+        -D with-sd-bus-provider=systemd -D with-pam-renicing=false \
+        -D with-examples=false -D with-util=true
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+    install -Dm644 gamemode-$pkgver/LICENSE.txt "$pkgdir/usr/share/licenses/gamemode/LICENSE.txt"
+}

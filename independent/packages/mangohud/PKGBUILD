@@ -1,0 +1,30 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 4, gaming; docs/INDEPENDENT.md). MangoHud's
+# "Source" release carries the libraries it builds in (ImGui, spdlog,
+# ImPlot, JSON, Vulkan headers). The source address and sum are the ones
+# in independent/bootstrap/sources.lock; check-recipes.py keeps them the
+# same.
+pkgname=mangohud
+pkgver=0.8.1
+pkgrel=1
+pkgdesc="MangoHud: frame rate, frame times, CPU/GPU load and temperatures over a game (mangohud GAME)"
+arch=(x86_64)
+url="https://github.com/flightlessmango/MangoHud"
+license=(MIT)
+depends=(glibc gcc-libs libx11 wayland libxkbcommon dbus vulkan-icd-loader)
+source=("https://github.com/flightlessmango/MangoHud/releases/download/v$pkgver/MangoHud-v$pkgver-Source.tar.xz")
+sha256sums=('4c8d8098f5deff7737978d792eef909b7469933f456a47132dccc06804825482')
+
+build() {
+    # NVIDIA's NVML is loaded when present (for its GPU readings); the
+    # XNVCtrl library isn't on Yūrei, so that part is left out
+    meson setup MangoHud-v$pkgver build --prefix=/usr --buildtype=release \
+        --wrap-mode=nodownload -D with_xnvctrl=disabled -D tests=disabled \
+        -D mangoplot=disabled -D mangohudctl=true -D append_libdir_mangohud=true
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+    install -Dm644 MangoHud-v$pkgver/LICENSE "$pkgdir/usr/share/licenses/mangohud/LICENSE"
+}
