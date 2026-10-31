@@ -11,7 +11,7 @@ url="https://www.x.org/"
 license=(MIT)
 depends=(libxcb)
 source=("https://www.x.org/releases/individual/lib/xcb-util-keysyms-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('7c260a5294412aed429df1da2f8afd3bd07b7cba3fec772fba15a613a6d5c638')
 
 build() {
     cd xcb-util-keysyms-$pkgver

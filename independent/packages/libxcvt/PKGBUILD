@@ -11,7 +11,7 @@ url="https://www.x.org/"
 license=(MIT)
 depends=(glibc)
 source=("https://www.x.org/releases/individual/lib/libxcvt-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('0561690544796e25cfbd71806ba1b0d797ffe464e9796411123e79450f71db38')
 
 build() {
     meson setup libxcvt-$pkgver build --prefix=/usr --buildtype=release

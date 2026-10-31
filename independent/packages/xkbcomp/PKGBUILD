@@ -11,7 +11,7 @@ url="https://www.x.org/"
 license=(MIT)
 depends=(libx11 libxkbfile)
 source=("https://www.x.org/releases/individual/app/xkbcomp-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('0a288114e5f44e31987042c79aecff1ffad53a8154b8ec971c24a69a80f81f77')
 
 build() {
     cd xkbcomp-$pkgver

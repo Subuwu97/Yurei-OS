@@ -97,6 +97,31 @@ libevdev
 xkeyboard-config
 libxml2
 libxkbcommon
+# Thirteenth batch (stage 3): the X11 client libraries (for Xwayland and Mesa's X11 drivers).
+util-macros
+xorgproto
+xtrans
+libxau
+libxdmcp
+xcb-proto
+libxcb
+libx11
+libxext
+libxrender
+libxfixes
+libxi
+libxrandr
+libxcursor
+libxdamage
+libxcomposite
+libxtst
+libxkbfile
+libice
+libsm
+libxshmfence
+libxxf86vm
+xcb-util-wm
+xcb-util-keysyms
 # Eighth batch (stage 3): the graphics drivers (Mesa), and what builds them.
 cmake
 python-mako
@@ -149,27 +174,10 @@ sfwbar
 # Twelfth batch (stage 3): polkit.
 duktape
 polkit
-# Thirteenth batch (stage 3): the X11 client libraries (for Xwayland).
-util-macros
-xorgproto
-xtrans
-libxau
-libxdmcp
-xcb-proto
-libxcb
-libx11
-libxext
-libxrender
-libxfixes
-libxi
-libxrandr
-libxcursor
-libxdamage
-libxcomposite
-libxtst
-libxkbfile
-libice
-libsm
-libxshmfence
-libxxf86vm
+# Fourteenth batch (stage 3): Xwayland, for X11 programs.
+libfontenc
+libxfont2
+libxcvt
+xkbcomp
+xwayland
 yurei-desktop

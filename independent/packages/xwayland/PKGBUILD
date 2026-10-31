@@ -12,7 +12,7 @@ license=(MIT)
 depends=(glibc libxau libxfont2 libxkbfile libxshmfence libxcvt libdrm libepoxy mesa pixman
          wayland openssl xkbcomp xkeyboard-config)
 source=("https://www.x.org/releases/individual/xserver/xwayland-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('737e612ca36bbdf415a911644eb7592cf9389846847b47fa46dc705bd754d2d7')
 
 build() {
     # glamor draws with OpenGL through EGL and GBM; no remote X (XDMCP,
