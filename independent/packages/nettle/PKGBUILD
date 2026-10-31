@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 4, gaming; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=nettle
+pkgver=3.10.1
+pkgrel=1
+pkgdesc="Low-level cryptography library, for GnuTLS"
+arch=(x86_64)
+url="https://www.lysator.liu.se/~nisse/nettle/"
+license=(LGPL-3.0-or-later OR GPL-2.0-or-later)
+depends=(glibc gmp)
+source=("https://ftp.gnu.org/gnu/nettle/nettle-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    cd nettle-$pkgver
+    ./configure --prefix=/usr --libdir=/usr/lib --disable-static --disable-documentation
+    make
+}
+
+package() {
+    cd nettle-$pkgver
+    make DESTDIR="$pkgdir" install
+}

@@ -1,0 +1,27 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 4, gaming; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=gnutls
+pkgver=3.8.9
+pkgrel=1
+pkgdesc="TLS library: HTTPS for Wine (and the programs in it)"
+arch=(x86_64)
+url="https://www.gnutls.org/"
+license=(LGPL-2.1-or-later)
+depends=(glibc nettle gmp libtasn1 p11-kit zlib zstd ca-certificates)
+source=("https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    cd gnutls-$pkgver
+    ./configure --prefix=/usr --disable-static --disable-doc --disable-tests \
+        --with-included-unistring --without-idn --without-brotli \
+        --with-default-trust-store-file=/etc/ssl/certs/ca-certificates.crt
+    make
+}
+
+package() {
+    cd gnutls-$pkgver
+    make DESTDIR="$pkgdir" install
+}

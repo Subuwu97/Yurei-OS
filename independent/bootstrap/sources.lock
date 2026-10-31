@@ -186,3 +186,8 @@ vulkan-headers 1.4.313.0  https://github.com/KhronosGroup/Vulkan-Headers/archive
 vulkan-icd-loader 1.4.313.0  https://github.com/KhronosGroup/Vulkan-Loader/archive/vulkan-sdk-1.4.313.0/Vulkan-Loader-vulkan-sdk-1.4.313.0.tar.gz  c736fa79d974c3513f5573b74249ed002aab59f1d15d1c13fc1d00644830869a  repo
 vulkan-tools 1.4.313.0  https://github.com/KhronosGroup/Vulkan-Tools/archive/vulkan-sdk-1.4.313.0/Vulkan-Tools-vulkan-sdk-1.4.313.0.tar.gz  6b88045c8cad7bd042e202826d8b597c657b9a422ca1f89fc3b0ab2dd64c5a0f  repo
 wine      10.0    https://dl.winehq.org/wine/source/10.0/wine-10.0.tar.xz  c5e0b3f5f7efafb30e9cd4d9c624b85c583171d33549d933cd3402f341ac3601  repo
+ca-certificates 2025.07.15  https://curl.se/ca/cacert-2025-07-15.pem  -  repo
+libtasn1  4.20.0  https://ftp.gnu.org/gnu/libtasn1/libtasn1-4.20.0.tar.gz  -  repo
+nettle    3.10.1  https://ftp.gnu.org/gnu/nettle/nettle-3.10.1.tar.gz  -  repo
+p11-kit   0.25.5  https://github.com/p11-glue/p11-kit/releases/download/0.25.5/p11-kit-0.25.5.tar.xz  04d0a86450cdb1be018f26af6699857171a188ac6d5b8c90786a60854e1198e5  repo
+gnutls    3.8.9   https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-3.8.9.tar.xz  -  repo

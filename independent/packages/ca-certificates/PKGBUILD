@@ -1,0 +1,23 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 4, gaming; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=ca-certificates
+pkgver=2025.07.15
+pkgrel=1
+pkgdesc="The certificate authorities that HTTPS sites are checked against (Mozilla's list, as curl publishes it)"
+arch=(any)
+url="https://curl.se/docs/caextract.html"
+license=(MPL-2.0)
+makedepends=(openssl)
+source=("https://curl.se/ca/cacert-2025-07-15.pem")
+sha256sums=('PIN')
+
+package() {
+    install -Dm644 cacert-2025-07-15.pem "$pkgdir/etc/ssl/certs/ca-certificates.crt"
+    ln -s certs/ca-certificates.crt "$pkgdir/etc/ssl/cert.pem"
+    # one file per authority, with the hash links OpenSSL (and curl) look up
+    cd "$pkgdir/etc/ssl/certs"
+    awk '/-----BEGIN CERTIFICATE-----/ { n++; f = sprintf("ca-%03d.pem", n) } f { print > f } /-----END CERTIFICATE-----/ { close(f); f = "" }' ca-certificates.crt
+    openssl rehash .
+}

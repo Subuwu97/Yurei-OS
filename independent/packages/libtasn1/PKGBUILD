@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 4, gaming; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libtasn1
+pkgver=4.20.0
+pkgrel=1
+pkgdesc="ASN.1 library, for GnuTLS and p11-kit"
+arch=(x86_64)
+url="https://www.gnu.org/software/libtasn1/"
+license=(LGPL-2.1-or-later)
+depends=(glibc)
+source=("https://ftp.gnu.org/gnu/libtasn1/libtasn1-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    cd libtasn1-$pkgver
+    ./configure --prefix=/usr --disable-static --disable-doc
+    make
+}
+
+package() {
+    cd libtasn1-$pkgver
+    make DESTDIR="$pkgdir" install
+}

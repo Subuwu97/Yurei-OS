@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 4, gaming; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=p11-kit
+pkgver=0.25.5
+pkgrel=1
+pkgdesc="Loads PKCS#11 modules and the system's trusted certificates, for GnuTLS"
+arch=(x86_64)
+url="https://p11-glue.github.io/p11-glue/p11-kit.html"
+license=(BSD-3-Clause)
+depends=(glibc libtasn1 libffi ca-certificates)
+source=("https://github.com/p11-glue/p11-kit/releases/download/$pkgver/p11-kit-$pkgver.tar.xz")
+sha256sums=('04d0a86450cdb1be018f26af6699857171a188ac6d5b8c90786a60854e1198e5')
+
+build() {
+    meson setup p11-kit-$pkgver build --prefix=/usr --buildtype=release \
+        -D trust_paths=/etc/ssl/certs/ca-certificates.crt -D systemd=disabled \
+        -D bash_completion=disabled -D gtk_doc=false -D man=false -D nls=false -D test=false
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}
