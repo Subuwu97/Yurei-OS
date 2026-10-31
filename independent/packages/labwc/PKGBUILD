@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=labwc
+pkgver=0.8.4
+pkgrel=1
+pkgdesc="Wayland window manager: stacking windows, a right-click menu, keyboard shortcuts"
+arch=(x86_64)
+url="https://labwc.github.io/"
+license=(GPL-2.0-only)
+depends=(glibc wlroots wayland libinput libxkbcommon libxml2 glib cairo pango libpng)
+source=("https://github.com/labwc/labwc/archive/$pkgver/labwc-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    # no X11 programs (Xwayland), SVG icons or window icons (libsfdo) yet
+    meson setup labwc-$pkgver build --prefix=/usr --buildtype=release \
+        -D xwayland=disabled -D svg=disabled -D icon=disabled -D nls=disabled \
+        -D man-pages=disabled --wrap-mode=nofallback
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

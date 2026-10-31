@@ -1,0 +1,24 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=harfbuzz
+pkgver=11.2.1
+pkgrel=1
+pkgdesc="Text shaping: places the glyphs of every script right"
+arch=(x86_64)
+url="https://harfbuzz.github.io/"
+license=(MIT)
+depends=(glibc freetype glib)
+source=("https://github.com/harfbuzz/harfbuzz/releases/download/$pkgver/harfbuzz-$pkgver.tar.xz")
+sha256sums=('093714c8548a285094685f0bdc999e202d666b59eeb3df2ff921ab68b8336a49')
+
+build() {
+    meson setup harfbuzz-$pkgver build --prefix=/usr --buildtype=release \
+        -D freetype=enabled -D glib=enabled -D gobject=disabled -D cairo=disabled -D icu=disabled -D graphite2=disabled -D introspection=disabled -D tests=disabled -D docs=disabled
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

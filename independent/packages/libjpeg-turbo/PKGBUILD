@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libjpeg-turbo
+pkgver=3.1.0
+pkgrel=1
+pkgdesc="JPEG images"
+arch=(x86_64)
+url="https://libjpeg-turbo.org/"
+license=(BSD-3-Clause IJG)
+depends=(glibc)
+source=("https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/$pkgver/libjpeg-turbo-$pkgver.tar.gz")
+sha256sums=('9564c72b1dfd1d6fe6274c5f95a8d989b59854575d4bbee44ade7bc17aa9bc93')
+
+build() {
+    # no SIMD yet: it needs the NASM assembler
+    cmake -S libjpeg-turbo-$pkgver -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DENABLE_STATIC=OFF \
+        -DWITH_JPEG8=ON -DWITH_SIMD=OFF
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libpng
+pkgver=1.6.47
+pkgrel=1
+pkgdesc="PNG images"
+arch=(x86_64)
+url="http://www.libpng.org/pub/png/libpng.html"
+license=(libpng-2.0)
+depends=(glibc zlib)
+source=("https://downloads.sourceforge.net/libpng/libpng-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    cd libpng-$pkgver
+    ./configure --prefix=/usr --disable-static
+    make
+}
+
+package() {
+    cd libpng-$pkgver
+    make DESTDIR="$pkgdir" install
+}

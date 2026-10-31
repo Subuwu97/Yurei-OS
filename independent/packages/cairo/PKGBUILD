@@ -1,0 +1,24 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=cairo
+pkgver=1.18.4
+pkgrel=1
+pkgdesc="2D drawing (no X11): window decorations, menus, toolkits"
+arch=(x86_64)
+url="https://cairographics.org/"
+license=(LGPL-2.1-or-later OR MPL-1.1)
+depends=(glibc pixman freetype fontconfig libpng zlib glib)
+source=("https://cairographics.org/releases/cairo-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    meson setup cairo-$pkgver build --prefix=/usr --buildtype=release \
+        -D xlib=disabled -D xcb=disabled -D tests=disabled -D glib=enabled -D png=enabled -D freetype=enabled -D fontconfig=enabled -D zlib=enabled -D spectre=disabled -D symbol-lookup=disabled -D gtk_doc=false
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

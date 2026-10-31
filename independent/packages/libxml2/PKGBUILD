@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libxml2
+pkgver=2.14.3
+pkgrel=1
+pkgdesc="XML parsing (labwc reads its settings with it)"
+arch=(x86_64)
+url="https://gitlab.gnome.org/GNOME/libxml2"
+license=(MIT)
+depends=(glibc zlib xz)
+source=("https://download.gnome.org/sources/libxml2/2.14/libxml2-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    cd libxml2-$pkgver
+    ./configure --prefix=/usr --disable-static --without-python --with-history
+    make
+}
+
+package() {
+    cd libxml2-$pkgver
+    make DESTDIR="$pkgdir" install
+}

@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=gdk-pixbuf
+pkgver=2.42.12
+pkgrel=1
+pkgdesc="Image loading for GTK programs (PNG, JPEG)"
+arch=(x86_64)
+url="https://gitlab.gnome.org/GNOME/gdk-pixbuf"
+license=(LGPL-2.1-or-later)
+depends=(glibc glib libpng libjpeg-turbo shared-mime-info)
+install=gdk-pixbuf.install
+source=("https://download.gnome.org/sources/gdk-pixbuf/2.42/gdk-pixbuf-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    meson setup gdk-pixbuf-$pkgver build --prefix=/usr --buildtype=release \
+        -D introspection=disabled -D man=false -D tests=false -D installed_tests=false \
+        -D tiff=disabled -D gtk_doc=false -D others=disabled
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

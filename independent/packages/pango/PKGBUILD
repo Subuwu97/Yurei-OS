@@ -1,0 +1,24 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=pango
+pkgver=1.56.3
+pkgrel=1
+pkgdesc="Text layout for GTK programs and labwc"
+arch=(x86_64)
+url="https://pango.gnome.org/"
+license=(LGPL-2.1-or-later)
+depends=(glibc glib harfbuzz fribidi cairo fontconfig freetype)
+source=("https://download.gnome.org/sources/pango/1.56/pango-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    meson setup pango-$pkgver build --prefix=/usr --buildtype=release \
+        -D introspection=disabled -D build-testsuite=false -D build-examples=false -D fontconfig=enabled -D cairo=enabled -D freetype=enabled -D xft=disabled -D documentation=false -D man-pages=false
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=pcre2
+pkgver=10.45
+pkgrel=1
+pkgdesc="Perl-compatible regular expressions (GLib uses them)"
+arch=(x86_64)
+url="https://github.com/PCRE2Project/pcre2"
+license=(BSD-3-Clause)
+depends=(glibc zlib bzip2 readline)
+source=("https://github.com/PCRE2Project/pcre2/releases/download/pcre2-$pkgver/pcre2-$pkgver.tar.bz2")
+sha256sums=('21547f3516120c75597e5b30a992e27a592a31950b5140e7b8bfde3f192033c4')
+
+build() {
+    cd pcre2-$pkgver
+    ./configure --prefix=/usr --disable-static --enable-unicode --enable-jit \
+        --enable-pcre2-16 --enable-pcre2-32 --enable-pcre2grep-libz --enable-pcre2grep-libbz2
+    make
+}
+
+package() {
+    cd pcre2-$pkgver
+    make DESTDIR="$pkgdir" install
+}

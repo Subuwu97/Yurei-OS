@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=shared-mime-info
+pkgver=2.4
+pkgrel=1
+pkgdesc="What kind of file is this: the shared file type database"
+arch=(x86_64)
+url="https://gitlab.freedesktop.org/xdg/shared-mime-info"
+license=(GPL-2.0-or-later)
+depends=(glibc glib libxml2)
+install=shared-mime-info.install
+source=("https://gitlab.freedesktop.org/xdg/shared-mime-info/-/archive/$pkgver/shared-mime-info-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    meson setup shared-mime-info-$pkgver build --prefix=/usr --buildtype=release \
+        -D update-mimedb=false -D build-tests=false -D build-translations=false
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}
