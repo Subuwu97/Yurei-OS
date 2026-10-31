@@ -101,6 +101,11 @@ if pacman -Q vulkan-icd-loader > /dev/null 2>&1; then
     [[ -f /usr/lib/libvulkan.so.1 && -x /usr/bin/vulkaninfo ]]
     ls /usr/share/vulkan/icd.d
 fi
+# Wine, and the linker its Windows side was built with
+if pacman -Q wine > /dev/null 2>&1; then
+    wine --version
+    [[ -x /usr/bin/lld-link && -d /usr/lib/wine/x86_64-windows && -d /usr/lib/wine/i386-windows ]]
+fi
 echo "firmware $(du -sh /usr/lib/firmware | cut -f1), iwd works"
 
 # every program and library finds what it links to

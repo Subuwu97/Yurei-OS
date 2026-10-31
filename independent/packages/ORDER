@@ -190,4 +190,7 @@ thunar
 vulkan-headers
 vulkan-icd-loader
 vulkan-tools
+# Seventeenth batch (stage 4, gaming): lld, and Wine (Windows programs).
+lld
+wine
 yurei-desktop
