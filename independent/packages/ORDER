@@ -186,4 +186,8 @@ xfconf
 libxfce4ui
 exo
 thunar
+# Sixteenth batch (stage 4, gaming): the Vulkan loader.
+vulkan-headers
+vulkan-icd-loader
+vulkan-tools
 yurei-desktop

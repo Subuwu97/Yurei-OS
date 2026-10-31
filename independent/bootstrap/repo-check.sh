@@ -96,6 +96,11 @@ if pacman -Q thunar > /dev/null 2>&1; then
     # (Thunar needs a display to run, so only check it's there and links)
     [[ -x /usr/bin/thunar ]]
 fi
+# the Vulkan loader, and Mesa's Vulkan drivers it finds
+if pacman -Q vulkan-icd-loader > /dev/null 2>&1; then
+    [[ -f /usr/lib/libvulkan.so.1 && -x /usr/bin/vulkaninfo ]]
+    ls /usr/share/vulkan/icd.d
+fi
 echo "firmware $(du -sh /usr/lib/firmware | cut -f1), iwd works"
 
 # every program and library finds what it links to

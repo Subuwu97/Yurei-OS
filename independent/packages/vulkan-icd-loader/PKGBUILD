@@ -11,7 +11,7 @@ url="https://github.com/KhronosGroup/Vulkan-Loader"
 license=(Apache-2.0)
 depends=(glibc libx11 libxcb libxrandr wayland)
 source=("https://github.com/KhronosGroup/Vulkan-Loader/archive/vulkan-sdk-$pkgver/Vulkan-Loader-vulkan-sdk-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('c736fa79d974c3513f5573b74249ed002aab59f1d15d1c13fc1d00644830869a')
 
 build() {
     cmake -S Vulkan-Loader-vulkan-sdk-$pkgver -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \

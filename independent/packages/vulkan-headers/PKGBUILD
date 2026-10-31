@@ -10,7 +10,7 @@ arch=(any)
 url="https://github.com/KhronosGroup/Vulkan-Headers"
 license=(Apache-2.0)
 source=("https://github.com/KhronosGroup/Vulkan-Headers/archive/vulkan-sdk-$pkgver/Vulkan-Headers-vulkan-sdk-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('20743c99a96c07290f24377360e7a12bdd2c465ba202e0c7ef2ec25d446cf61d')
 
 build() {
     cmake -S Vulkan-Headers-vulkan-sdk-$pkgver -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
