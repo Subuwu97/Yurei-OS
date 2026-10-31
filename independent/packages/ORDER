@@ -146,4 +146,7 @@ adwaita-icon-theme
 json-c
 gtk-layer-shell
 sfwbar
+# Twelfth batch (stage 3): polkit.
+duktape
+polkit
 yurei-desktop

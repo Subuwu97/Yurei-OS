@@ -78,6 +78,11 @@ if pacman -Q gtk3 > /dev/null 2>&1; then
     command -v sfwbar
     [[ -f /etc/xdg/labwc/autostart ]]
 fi
+# polkit, and the login shell's profile
+if pacman -Q polkit > /dev/null 2>&1; then
+    pkcheck --version
+    [[ -f /etc/polkit-1/rules.d/40-yurei-wheel.rules && -f /etc/profile && -f /etc/profile.d/yurei-desktop.sh ]]
+fi
 echo "firmware $(du -sh /usr/lib/firmware | cut -f1), iwd works"
 
 # every program and library finds what it links to
