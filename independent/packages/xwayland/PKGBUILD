@@ -1,0 +1,29 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=xwayland
+pkgver=24.1.6
+pkgrel=1
+pkgdesc="X server that runs X11 programs on the Wayland desktop"
+arch=(x86_64)
+url="https://www.x.org/"
+license=(MIT)
+depends=(glibc libxau libxfont2 libxkbfile libxshmfence libxcvt libdrm libepoxy mesa pixman
+         wayland openssl xkbcomp xkeyboard-config)
+source=("https://www.x.org/releases/individual/xserver/xwayland-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    # glamor draws with OpenGL through EGL and GBM; no remote X (XDMCP,
+    # Secure RPC), no libdecor or libei yet
+    meson setup xwayland-$pkgver build --prefix=/usr --buildtype=release \
+        -D glamor=true -D xwayland_eglstream=false -D secure-rpc=false \
+        -D xdmcp=false -D xdm-auth-1=false -D sha1=libcrypto -D libdecor=false \
+        -D xwayland_ei=false -D docs=false -D devel-docs=false -D dtrace=false
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

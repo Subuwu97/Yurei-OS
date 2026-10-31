@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libxfont2
+pkgver=2.0.7
+pkgrel=1
+pkgdesc="X11 font rasterisation library, for Xwayland"
+arch=(x86_64)
+url="https://www.x.org/"
+license=(MIT)
+depends=(freetype libfontenc)
+source=("https://www.x.org/releases/individual/lib/libXfont2-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    cd libXfont2-$pkgver
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static --disable-devel-docs
+    make
+}
+
+package() {
+    cd libXfont2-$pkgver
+    make DESTDIR="$pkgdir" install
+}
