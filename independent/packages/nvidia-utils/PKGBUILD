@@ -1,0 +1,82 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 4, gaming; docs/INDEPENDENT.md). NVIDIA's
+# driver for GeForce RTX 20-series (Turing) and newer: NVIDIA publishes the
+# kernel modules as source (built with Yūrei's kernel, in the linux recipe,
+# at this same version) and the rest only as its own installer, which this
+# unpacks: the Vulkan driver, GBM and EGL for Wayland, the GPU firmware and
+# nvidia-smi. OpenGL through it needs libglvnd, which Yūrei doesn't have
+# yet; Vulkan games (DXVK, vkd3d-proton) don't. The source address and sum
+# are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# keeps them the same.
+pkgname=nvidia-utils
+pkgver=595.112.07
+pkgrel=1
+pkgdesc="NVIDIA's driver (Vulkan, Wayland, firmware) for RTX 20-series and newer; prime-run runs a program on it"
+arch=(x86_64)
+url="https://www.nvidia.com/"
+license=(LicenseRef-NVIDIA)
+depends=(glibc linux libdrm wayland mesa vulkan-icd-loader)
+options=(!strip !debug)
+source=("https://download.nvidia.com/XFree86/Linux-x86_64/$pkgver/NVIDIA-Linux-x86_64-$pkgver.run")
+noextract=("NVIDIA-Linux-x86_64-$pkgver.run")
+sha256sums=('PIN')
+
+prepare() {
+    rm -rf NVIDIA-Linux-x86_64-$pkgver
+    sh NVIDIA-Linux-x86_64-$pkgver.run --extract-only
+}
+
+package() {
+    cd NVIDIA-Linux-x86_64-$pkgver
+    local lib=$pkgdir/usr/lib f
+    install -d "$lib"
+    # the 64-bit libraries (the X server's module and the settings tool's
+    # GTK parts aren't used here); ldconfig makes the soname links
+    for f in lib*.so.*; do
+        case $f in
+            libglxserver_nvidia*|libnvidia-gtk*|libnvidia-wayland-client*) continue ;;
+        esac
+        install -m755 "$f" "$lib/"
+    done
+    ldconfig -n "$lib"
+    for f in "$lib"/lib*.so.[0-9]; do ln -sf "${f##*/}" "${f%.so.*}.so"; done
+
+    # Vulkan, GBM (Wayland compositors), EGL platforms
+    install -Dm644 nvidia_icd.json "$pkgdir/usr/share/vulkan/icd.d/nvidia_icd.json"
+    [[ -f nvidia_layers.json ]] && install -Dm644 nvidia_layers.json "$pkgdir/usr/share/vulkan/implicit_layer.d/nvidia_layers.json"
+    install -d "$lib/gbm"
+    ln -s ../libnvidia-allocator.so.1 "$lib/gbm/nvidia-drm_gbm.so"
+    for f in 10_nvidia_wayland.json 15_nvidia_gbm.json 20_nvidia_xcb.json 20_nvidia_xlib.json; do
+        [[ -f $f ]] && install -Dm644 "$f" "$pkgdir/usr/share/egl/egl_external_platform.d/$f"
+    done
+    [[ -f 10_nvidia.json ]] && install -Dm644 10_nvidia.json "$pkgdir/usr/share/glvnd/egl_vendor.d/10_nvidia.json"
+
+    # the GPU's own firmware (GSP), which the open modules need
+    install -d "$pkgdir/usr/lib/firmware/nvidia/$pkgver"
+    install -m644 firmware/*.bin "$pkgdir/usr/lib/firmware/nvidia/$pkgver/"
+
+    install -Dm755 nvidia-smi "$pkgdir/usr/bin/nvidia-smi"
+    install -Dm4755 nvidia-modprobe "$pkgdir/usr/bin/nvidia-modprobe"
+    for f in nvidia-application-profiles-$pkgver-rc nvidia-application-profiles-$pkgver-key-documentation; do
+        [[ -f $f ]] && install -Dm644 "$f" "$pkgdir/usr/share/nvidia/$f"
+    done
+
+    # kernel mode setting for Wayland; nouveau stays away from the card
+    install -Dm644 /dev/stdin "$pkgdir/usr/lib/modprobe.d/nvidia.conf" <<CONF
+options nvidia-drm modeset=1 fbdev=1
+blacklist nouveau
+CONF
+    # /dev/nvidia* (the driver's own device files), as the card appears
+    install -Dm644 /dev/stdin "$pkgdir/usr/lib/udev/rules.d/60-nvidia.rules" <<'RULES'
+ACTION=="add", DEVPATH=="/bus/pci/drivers/nvidia", RUN+="/usr/bin/nvidia-modprobe -c0 -u"
+RULES
+    # prime-run: a program on the NVIDIA GPU of a laptop with two
+    install -Dm755 /dev/stdin "$pkgdir/usr/bin/prime-run" <<'PRIME'
+#!/bin/sh
+# prime-run PROGRAM...: runs PROGRAM on the NVIDIA GPU (laptops with two GPUs)
+export __NV_PRIME_RENDER_OFFLOAD=1 __VK_LAYER_NV_optimus=NVIDIA_only __GLX_VENDOR_LIBRARY_NAME=nvidia
+export DXVK_FILTER_DEVICE_NAME=NVIDIA VKD3D_FILTER_DEVICE_NAME=NVIDIA
+exec "$@"
+PRIME
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/nvidia-utils/LICENSE"
+}

@@ -1,0 +1,27 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3; docs/INDEPENDENT.md). The GL vendor-neutral
+# dispatch: libGL, libEGL and libGLES pick the driver (Mesa, or NVIDIA's)
+# for each screen and program. The source address and sum are the ones in
+# independent/bootstrap/sources.lock; check-recipes.py keeps them the same.
+pkgname=libglvnd
+pkgver=1.7.0
+pkgrel=1
+pkgdesc="The GL vendor-neutral dispatch library (OpenGL and EGL for both Mesa and NVIDIA)"
+arch=(x86_64)
+url="https://gitlab.freedesktop.org/glvnd/libglvnd"
+license=(MIT)
+depends=(glibc libx11 libxext)
+source=("https://gitlab.freedesktop.org/glvnd/libglvnd/-/archive/v$pkgver/libglvnd-v$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    meson setup libglvnd-v$pkgver build --prefix=/usr --buildtype=release \
+        -D x11=enabled -D glx=enabled -D egl=true -D gles1=false -D gles2=true \
+        -D headers=true -D tls=true
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+    install -Dm644 libglvnd-v$pkgver/README.md "$pkgdir/usr/share/doc/libglvnd/README.md"
+}

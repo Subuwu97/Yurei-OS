@@ -1,0 +1,23 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 4; docs/INDEPENDENT.md). ALSA's use-case
+# profiles: how a laptop's sound card is set up (speakers, headphones,
+# microphones), which PipeWire reads; laptops with SOF sound need them.
+# The source address and sum are the ones in
+# independent/bootstrap/sources.lock; check-recipes.py keeps them the same.
+pkgname=alsa-ucm-conf
+pkgver=1.2.14
+pkgrel=1
+pkgdesc="ALSA use-case profiles (laptop speakers, headphones and microphones)"
+arch=(any)
+url="https://www.alsa-project.org/"
+license=(BSD-3-Clause)
+source=("https://www.alsa-project.org/files/pub/lib/alsa-ucm-conf-$pkgver.tar.bz2")
+sha256sums=('PIN')
+
+package() {
+    cd alsa-ucm-conf-$pkgver
+    install -d "$pkgdir/usr/share/alsa"
+    cp -dr --no-preserve=ownership ucm2 "$pkgdir/usr/share/alsa/"
+    [[ -d ucm ]] && cp -dr --no-preserve=ownership ucm "$pkgdir/usr/share/alsa/"
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/alsa-ucm-conf/LICENSE"
+}

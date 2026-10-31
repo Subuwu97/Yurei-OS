@@ -25,7 +25,10 @@ source=("vkd3d-proton-$pkgver.tar.gz::https://github.com/HansKristian-Work/vkd3d
         "vkd3d-proton-spirv-headers-$_dxilspirv_headers.tar.gz::https://github.com/KhronosGroup/SPIRV-Headers/archive/$_dxilspirv_headers.tar.gz"
         "vkd3d-proton-vulkan-headers-$_vulkan.tar.gz::https://github.com/KhronosGroup/Vulkan-Headers/archive/$_vulkan.tar.gz"
         "dxvk-spirv-headers-$_spirv.tar.gz::https://github.com/KhronosGroup/SPIRV-Headers/archive/$_spirv.tar.gz")
-sha256sums=('PIN' 'PIN' 'PIN' 'PIN'
+sha256sums=('30a39c2e487ea539afb996e260c063f68802a6338c52abc12dc95a52c45a65e1'
+            '68c1e8b9c2e4b80e2f0308c676ef1ec519c3ee51d2f68fa5030bd8c352539db7'
+            'c2a98de022539a77c11a8aee81ace958e53c668dfe6d9915f4f61e01f476139a'
+            'dfc96c55d7e481c42b917706ff52205d47c0f0957c8c2a60766ee781f16d18bd'
             'cfeed5f9a97d12a9761a26e7f5bd10fedb1a8ce92033075151ae3bc7206fc229')
 
 prepare() {
