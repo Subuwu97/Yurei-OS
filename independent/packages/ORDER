@@ -199,4 +199,6 @@ gnutls
 # Seventeenth batch (stage 4, gaming): lld, and Wine (Windows programs).
 lld
 wine
+# Nineteenth batch (stage 4, gaming): a MinGW-w64 cross toolchain (for DXVK).
+mingw-w64
 yurei-desktop

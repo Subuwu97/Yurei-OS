@@ -191,4 +191,4 @@ libtasn1  4.20.0  https://ftp.gnu.org/gnu/libtasn1/libtasn1-4.20.0.tar.gz  92e0e
 nettle    3.10.1  https://ftp.gnu.org/gnu/nettle/nettle-3.10.1.tar.gz  b0fcdd7fc0cdea6e80dcf1dd85ba794af0d5b4a57e26397eee3bc193272d9132  repo
 p11-kit   0.25.5  https://github.com/p11-glue/p11-kit/releases/download/0.25.5/p11-kit-0.25.5.tar.xz  04d0a86450cdb1be018f26af6699857171a188ac6d5b8c90786a60854e1198e5  repo
 gnutls    3.8.9   https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-3.8.9.tar.xz  69e113d802d1670c4d5ac1b99040b1f2d5c7c05daec5003813c049b5184820ed  repo
-mingw-w64 12.0.0  https://downloads.sourceforge.net/project/mingw-w64/mingw-w64/mingw-w64-release/mingw-w64-v12.0.0.tar.bz2  -  repo
+mingw-w64 12.0.0  https://downloads.sourceforge.net/project/mingw-w64/mingw-w64/mingw-w64-release/mingw-w64-v12.0.0.tar.bz2  cc41898aac4b6e8dd5cffd7331b9d9515b912df4420a3a612b5ea2955bbeed2f  repo

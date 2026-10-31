@@ -23,7 +23,7 @@ options=(!strip !buildflags staticlibs !lto !debug)
 source=("https://downloads.sourceforge.net/project/mingw-w64/mingw-w64/mingw-w64-release/mingw-w64-v$pkgver.tar.bz2"
         "https://ftp.gnu.org/gnu/binutils/binutils-$_binutils.tar.xz"
         "https://ftp.gnu.org/gnu/gcc/gcc-$_gcc/gcc-$_gcc.tar.xz")
-sha256sums=('PIN'
+sha256sums=('cc41898aac4b6e8dd5cffd7331b9d9515b912df4420a3a612b5ea2955bbeed2f'
             'c50c0e7f9cb188980e2cc97e4537626b1672441815587f1eab69d2a1bfbef5d2'
             '438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e')
 

@@ -106,6 +106,15 @@ if pacman -Q gnutls > /dev/null 2>&1; then
     gnutls-cli --version | head -1
     [[ -f /etc/ssl/certs/ca-certificates.crt && -f /etc/ssl/cert.pem ]]
 fi
+# the Windows cross compilers: build a small threaded C++ program for
+# 64- and 32-bit Windows (which also shows they work from /usr)
+if pacman -Q mingw-w64 > /dev/null 2>&1; then
+    x86_64-w64-mingw32-g++ --version | head -1
+    printf '#include <thread>\nint main() { std::thread t([] {}); t.join(); }\n' > /tmp/mingw-test.cpp
+    x86_64-w64-mingw32-g++ -o /tmp/mingw-test64.exe /tmp/mingw-test.cpp
+    i686-w64-mingw32-g++ -o /tmp/mingw-test32.exe /tmp/mingw-test.cpp
+    rm -f /tmp/mingw-test*
+fi
 # Wine, and the linker its Windows side was built with
 if pacman -Q wine > /dev/null 2>&1; then
     wine --version
