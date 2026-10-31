@@ -18,7 +18,7 @@ build() {
     # glamor draws with OpenGL through EGL and GBM; no remote X (XDMCP,
     # Secure RPC), no libdecor or libei yet
     meson setup xwayland-$pkgver build --prefix=/usr --buildtype=release \
-        -D glamor=true -D xwayland_eglstream=false -D secure-rpc=false \
+        -D glamor=true -D secure-rpc=false \
         -D xdmcp=false -D xdm-auth-1=false -D sha1=libcrypto -D libdecor=false \
         -D xwayland_ei=false -D docs=false -D devel-docs=false -D dtrace=false
     ninja -C build
