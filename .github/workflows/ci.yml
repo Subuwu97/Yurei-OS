@@ -29,6 +29,12 @@ jobs:
         run: YUREI_SCREENSHOTS=theme-screenshots python3 -m pytest -q tests/test_branding_qml.py
       - name: Plymouth theme in the real daemon
         run: sudo python3 tests/plymouth_check.py --out theme-screenshots
+      - name: Make test diagnostics readable by the artifact uploader
+        if: always()
+        run: |
+          if [ -d theme-screenshots ]; then
+            sudo find theme-screenshots -maxdepth 1 -type f -name '*.log' -exec chmod 0644 {} +
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:

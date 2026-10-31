@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Runs the real Plymouth daemon with the YÅ«rei theme in a virtual X display
+"""Runs the real Plymouth daemon with the Yūrei theme in a virtual X display
 and checks what it draws. Also saves screenshots for review.
 
     sudo python3 tests/plymouth_check.py [--out DIR]
