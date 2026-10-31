@@ -201,4 +201,6 @@ lld
 wine
 # Nineteenth batch (stage 4, gaming): a MinGW-w64 cross toolchain (for DXVK).
 mingw-w64 build-only
+# Twentieth batch (stage 4, gaming): DXVK (Direct3D 8-11 on Vulkan).
+dxvk
 yurei-desktop

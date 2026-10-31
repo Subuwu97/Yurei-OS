@@ -115,6 +115,11 @@ if pacman -Q mingw-w64 > /dev/null 2>&1; then
     i686-w64-mingw32-g++ -o /tmp/mingw-test32.exe /tmp/mingw-test.cpp
     rm -f /tmp/mingw-test*
 fi
+# DXVK, for both kinds of Windows programs, and its setup command
+if pacman -Q dxvk > /dev/null 2>&1; then
+    ls /usr/share/dxvk/x64/d3d11.dll /usr/share/dxvk/x32/d3d9.dll
+    command -v yurei-dxvk
+fi
 # Wine, and the linker its Windows side was built with
 if pacman -Q wine > /dev/null 2>&1; then
     wine --version

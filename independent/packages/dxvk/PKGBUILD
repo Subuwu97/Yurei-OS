@@ -27,7 +27,12 @@ source=("dxvk-$pkgver.tar.gz::https://github.com/doitsujin/dxvk/archive/v$pkgver
         "dxvk-spirv-headers-$_spirv.tar.gz::https://github.com/KhronosGroup/SPIRV-Headers/archive/$_spirv.tar.gz"
         "dxvk-libdisplay-info-$_displayinfo.tar.gz::https://github.com/doitsujin/libdisplay-info/archive/$_displayinfo.tar.gz"
         yurei-dxvk)
-sha256sums=('PIN' 'PIN' 'PIN' 'PIN' 'PIN' 'SKIP')
+sha256sums=('1e159583c12351a0bc584ce7540ea257e27d501f4ba793d3faa3930fcde78770'
+            '9c1b8bbfd2d6c758fac4d93c2808a46bc1eee429fe656b4f21b29e02615aa8aa'
+            'b5dc57fc79fade0a2bc563bdbacf4f0902d0144c5ba85e9e162ab2995f9ac2ea'
+            'cfeed5f9a97d12a9761a26e7f5bd10fedb1a8ce92033075151ae3bc7206fc229'
+            'c83c3e600f90a3ac98932e9259de62ad8ad3a65dd5efb1d2abcb1e4d1c8f494a'
+            'SKIP')
 
 prepare() {
     cd dxvk-$pkgver
