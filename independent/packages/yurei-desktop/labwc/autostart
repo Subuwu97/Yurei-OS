@@ -1,0 +1,4 @@
+# Started with every labwc session (Yūrei's defaults; a user's own
+# ~/.config/labwc/autostart replaces this). The panel: taskbar, app menu,
+# clock, volume and network.
+sfwbar >/dev/null 2>&1 &

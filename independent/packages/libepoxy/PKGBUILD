@@ -11,7 +11,7 @@ url="https://github.com/anholt/libepoxy"
 license=(MIT)
 depends=(glibc mesa)
 source=("https://download.gnome.org/sources/libepoxy/1.5/libepoxy-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('072cda4b59dd098bba8c2363a6247299db1fa89411dc221c8b81b8ee8192e623')
 
 build() {
     meson setup libepoxy-$pkgver build --prefix=/usr --buildtype=release \

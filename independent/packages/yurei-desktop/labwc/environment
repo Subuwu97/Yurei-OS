@@ -1,0 +1,3 @@
+# Environment for labwc sessions: Wayland for GTK programs, Adwaita icons
+GDK_BACKEND=wayland
+XDG_CURRENT_DESKTOP=labwc:wlroots

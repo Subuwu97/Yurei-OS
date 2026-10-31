@@ -12,7 +12,7 @@ license=(LGPL-3.0-or-later OR CC-BY-SA-3.0)
 depends=(hicolor-icon-theme)
 install=adwaita-icon-theme.install
 source=("https://download.gnome.org/sources/adwaita-icon-theme/48/adwaita-icon-theme-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('847068888650d9673115be6dbf2bfdc31a46aebc528a6a9db4420e60e656b8d4')
 
 build() {
     meson setup adwaita-icon-theme-$pkgver build --prefix=/usr

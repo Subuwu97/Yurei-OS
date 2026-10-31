@@ -12,7 +12,7 @@ license=(MIT)
 depends=(glibc alsa-lib dbus systemd)
 install=pipewire.install
 source=("https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/$pkgver/pipewire-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('8dc846cdb060ee93050ccdae1517e9709b22fcf827b0b2f1a76dd53acb5a6b9e')
 
 build() {
     # WirePlumber is the session manager (its own package); no Bluetooth,

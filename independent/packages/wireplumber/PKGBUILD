@@ -12,7 +12,7 @@ license=(MIT)
 depends=(glibc pipewire glib lua systemd)
 install=wireplumber.install
 source=("https://gitlab.freedesktop.org/pipewire/wireplumber/-/archive/$pkgver/wireplumber-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('c2e021d8e6ef1db644facd4a97f5a644b67481c641da9100e851aab6752ba446')
 
 build() {
     meson setup wireplumber-$pkgver build --prefix=/usr --buildtype=release --wrap-mode=nofallback \

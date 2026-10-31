@@ -10,7 +10,7 @@ arch=(any)
 url="https://www.freedesktop.org/wiki/Software/icon-theme/"
 license=(GPL-2.0-only)
 source=("https://icon-theme.freedesktop.org/releases/hicolor-icon-theme-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('db0e50a80aa3bf64bb45cbca5cf9f75efd9348cf2ac690b907435238c3cf81d7')
 
 build() {
     meson setup hicolor-icon-theme-$pkgver build --prefix=/usr

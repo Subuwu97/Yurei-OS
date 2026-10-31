@@ -70,6 +70,14 @@ if pacman -Q labwc > /dev/null 2>&1; then
     [[ -f /etc/xdg/labwc/menu.xml && -f /etc/xdg/labwc/rc.xml ]]
     echo "labwc installed, with Yūrei's menu"
 fi
+# audio, GTK3 and the panel
+if pacman -Q gtk3 > /dev/null 2>&1; then
+    echo "GTK $(pkg-config --modversion gtk+-3.0)"
+    pipewire --version | head -n2
+    wireplumber --version | head -n1
+    command -v sfwbar
+    [[ -f /etc/xdg/labwc/autostart ]]
+fi
 echo "firmware $(du -sh /usr/lib/firmware | cut -f1), iwd works"
 
 # every program and library finds what it links to

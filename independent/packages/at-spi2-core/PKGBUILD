@@ -11,7 +11,7 @@ url="https://gitlab.gnome.org/GNOME/at-spi2-core"
 license=(LGPL-2.1-or-later)
 depends=(glibc glib dbus libxml2 systemd)
 source=("https://download.gnome.org/sources/at-spi2-core/2.56/at-spi2-core-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('e1b1c9836a8947852f7440c32e23179234c76bd98cd9cc4001f376405f8b783b')
 
 build() {
     meson setup at-spi2-core-$pkgver build --prefix=/usr --buildtype=release \

@@ -133,4 +133,17 @@ pango
 shared-mime-info
 gdk-pixbuf
 labwc
+# Eleventh batch (stage 3): audio, GTK3 and a panel.
+alsa-lib
+lua
+pipewire
+wireplumber
+at-spi2-core
+libepoxy
+hicolor-icon-theme
+gtk3
+adwaita-icon-theme
+json-c
+gtk-layer-shell
+sfwbar
 yurei-desktop

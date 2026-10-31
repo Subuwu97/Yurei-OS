@@ -11,7 +11,7 @@ url="https://www.alsa-project.org/"
 license=(LGPL-2.1-or-later)
 depends=(glibc)
 source=("https://www.alsa-project.org/files/pub/lib/alsa-lib-$pkgver.tar.bz2")
-sha256sums=('PIN')
+sha256sums=('be9c88a0b3604367dd74167a2b754a35e142f670292ae47a2fdef27a2ee97a32')
 
 build() {
     cd alsa-lib-$pkgver

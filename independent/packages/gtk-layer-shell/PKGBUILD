@@ -11,7 +11,7 @@ url="https://github.com/wmww/gtk-layer-shell"
 license=(MIT)
 depends=(glibc gtk3 wayland)
 source=("https://github.com/wmww/gtk-layer-shell/archive/v$pkgver/gtk-layer-shell-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('43e2165cf1a9aa8a317b081c2a583648e02389162f1fbbd33836ba27f9ca19fa')
 
 build() {
     meson setup gtk-layer-shell-$pkgver build --prefix=/usr --buildtype=release \

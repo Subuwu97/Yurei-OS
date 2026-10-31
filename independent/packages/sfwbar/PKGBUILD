@@ -11,7 +11,7 @@ url="https://github.com/LBCrion/sfwbar"
 license=(GPL-3.0-or-later)
 depends=(glibc gtk3 gtk-layer-shell json-c)
 source=("https://github.com/LBCrion/sfwbar/archive/v$pkgver/sfwbar-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('238d6394650dfdfc2f36374ec25702bbef57e2cff1d9a149ecb9a52f887c3cdf')
 
 build() {
     # modules that need libraries Yūrei doesn't have yet are left out
