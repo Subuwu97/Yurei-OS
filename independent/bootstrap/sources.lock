@@ -185,3 +185,4 @@ thunar    4.20.0  https://archive.xfce.org/src/xfce/thunar/4.20/thunar-4.20.0.ta
 vulkan-headers 1.4.313.0  https://github.com/KhronosGroup/Vulkan-Headers/archive/vulkan-sdk-1.4.313.0/Vulkan-Headers-vulkan-sdk-1.4.313.0.tar.gz  20743c99a96c07290f24377360e7a12bdd2c465ba202e0c7ef2ec25d446cf61d  repo
 vulkan-icd-loader 1.4.313.0  https://github.com/KhronosGroup/Vulkan-Loader/archive/vulkan-sdk-1.4.313.0/Vulkan-Loader-vulkan-sdk-1.4.313.0.tar.gz  c736fa79d974c3513f5573b74249ed002aab59f1d15d1c13fc1d00644830869a  repo
 vulkan-tools 1.4.313.0  https://github.com/KhronosGroup/Vulkan-Tools/archive/vulkan-sdk-1.4.313.0/Vulkan-Tools-vulkan-sdk-1.4.313.0.tar.gz  6b88045c8cad7bd042e202826d8b597c657b9a422ca1f89fc3b0ab2dd64c5a0f  repo
+wine      10.0    https://dl.winehq.org/wine/source/10.0/wine-10.0.tar.xz  -  repo

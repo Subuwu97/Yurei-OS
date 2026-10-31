@@ -1,0 +1,31 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 4, gaming; docs/INDEPENDENT.md). LLVM's linker,
+# built on its own from the same LLVM source as the llvm recipe (which it
+# leaves alone): Wine links its Windows (PE) programs and libraries with
+# lld-link. The source address and sum are the ones in
+# independent/bootstrap/sources.lock; check-recipes.py keeps them the same.
+pkgname=lld
+_lockname=llvm
+pkgver=20.1.8
+pkgrel=1
+pkgdesc="LLVM's linker (ld.lld, and lld-link for Windows programs)"
+arch=(x86_64)
+url="https://lld.llvm.org/"
+license=(Apache-2.0 WITH LLVM-exception)
+depends=(glibc gcc-libs llvm zlib zstd)
+options=(!lto)
+source=("https://github.com/llvm/llvm-project/releases/download/llvmorg-$pkgver/llvm-project-$pkgver.src.tar.xz")
+sha256sums=('6898f963c8e938981e6c4a302e83ec5beb4630147c7311183cf61069af16333d')
+
+build() {
+    cmake -S llvm-project-$pkgver.src/lld -B build -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \
+        -DLLVM_DIR=/usr/lib/cmake/llvm -DLLVM_MAIN_SRC_DIR="$srcdir/llvm-project-$pkgver.src/llvm" \
+        -DLLVM_LINK_LLVM_DYLIB=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_INCLUDE_TESTS=OFF \
+        -DLLD_BUILD_TOOLS=ON
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}
