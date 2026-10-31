@@ -50,10 +50,17 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build yurei packages with makepkg
         run: |
-          pacman -Syu --noconfirm --needed base-devel git
+          pacman -Syu --noconfirm --needed base-devel git python
           useradd -m builder
           chown -R builder .
           su builder -c 'make package'
+      - name: Verify packaged appearance assets against the shared source
+        run: |
+          mkdir -p out/appearance-check-root
+          for archive in out/packages/*.pkg.tar.zst; do
+            bsdtar -xf "$archive" -C out/appearance-check-root
+          done
+          python tests/check_appearance_payload.py out/appearance-check-root
       - uses: actions/upload-artifact@v4
         with:
           name: yurei-packages
