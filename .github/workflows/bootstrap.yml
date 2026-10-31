@@ -11,9 +11,11 @@ on:
     branches: [main]
     paths: ["independent/**", ".github/workflows/bootstrap.yml"]
 
-# contents: write publishes the live ISO as a test release
+# contents: write publishes the live ISO as a test release; actions: write
+# lets a run drop the caches older runs left
 permissions:
   contents: write
+  actions: write
 
 jobs:
   toolchain:
@@ -320,6 +322,26 @@ jobs:
         with:
           path: /home/runner/yurei-pkgcache
           key: yurei-pkgs-${{ github.run_id }}
+
+      # GitHub keeps 10 GB of caches per repository and drops the least
+      # recently used beyond that: each run's packages (about 1.5 GB) and
+      # each version of the sources would soon push out the toolchain
+      # caches, and every stage would be built again. Only the newest of
+      # each is kept.
+      - name: Drop older package and source caches
+        if: always() && steps.keep.outputs.save == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KEEP_PKGS: yurei-pkgs-${{ github.run_id }}
+          KEEP_SOURCES: yurei-sources-${{ hashFiles('independent/bootstrap/sources.lock') }}
+        run: |
+          command -v gh > /dev/null || { echo "no gh here; leaving the caches"; exit 0; }
+          for prefix in yurei-pkgs- yurei-sources-; do
+            gh cache list --repo "$GITHUB_REPOSITORY" --key "$prefix" --limit 100 --json key --jq '.[].key'
+          done | grep -vx -e "$KEEP_PKGS" -e "$KEEP_SOURCES" | while read -r key; do
+            echo "dropping $key"
+            gh cache delete "$key" --repo "$GITHUB_REPOSITORY" || true
+          done
 
       - uses: actions/upload-artifact@v4
         with:
