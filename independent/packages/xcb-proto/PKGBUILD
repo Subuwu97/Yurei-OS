@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=xcb-proto
+pkgver=1.17.0
+pkgrel=1
+pkgdesc="XCB protocol descriptions and Python generator"
+arch=(any)
+url="https://www.x.org/"
+license=(MIT)
+depends=(python)
+source=("https://www.x.org/releases/individual/proto/xcb-proto-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    cd xcb-proto-$pkgver
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static
+    make
+}
+
+package() {
+    cd xcb-proto-$pkgver
+    make DESTDIR="$pkgdir" install
+}

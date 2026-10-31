@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=xtrans
+pkgver=1.5.2
+pkgrel=1
+pkgdesc="X11 network transport code, used by the X libraries"
+arch=(any)
+url="https://www.x.org/"
+license=(MIT)
+source=("https://www.x.org/releases/individual/lib/xtrans-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    cd xtrans-$pkgver
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static \
+        --disable-docs
+    make
+}
+
+package() {
+    cd xtrans-$pkgver
+    make DESTDIR="$pkgdir" install
+}

@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libxcb
+pkgver=1.17.0
+pkgrel=1
+pkgdesc="X protocol C binding"
+arch=(x86_64)
+url="https://www.x.org/"
+license=(MIT)
+depends=(libxau libxdmcp)
+source=("https://www.x.org/releases/individual/lib/libxcb-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    cd libxcb-$pkgver
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static \
+        --disable-devel-docs --without-doxygen
+    make
+}
+
+package() {
+    cd libxcb-$pkgver
+    make DESTDIR="$pkgdir" install
+}

@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libxxf86vm
+pkgver=1.1.6
+pkgrel=1
+pkgdesc="X11 video mode extension library"
+arch=(x86_64)
+url="https://www.x.org/"
+license=(MIT)
+depends=(libxext)
+source=("https://www.x.org/releases/individual/lib/libXxf86vm-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    cd libXxf86vm-$pkgver
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static
+    make
+}
+
+package() {
+    cd libXxf86vm-$pkgver
+    make DESTDIR="$pkgdir" install
+}

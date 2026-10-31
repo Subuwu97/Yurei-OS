@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libxcursor
+pkgver=1.2.3
+pkgrel=1
+pkgdesc="X11 cursor management library"
+arch=(x86_64)
+url="https://www.x.org/"
+license=(MIT)
+depends=(libxrender libxfixes)
+source=("https://www.x.org/releases/individual/lib/libXcursor-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    cd libXcursor-$pkgver
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static
+    make
+}
+
+package() {
+    cd libXcursor-$pkgver
+    make DESTDIR="$pkgdir" install
+}

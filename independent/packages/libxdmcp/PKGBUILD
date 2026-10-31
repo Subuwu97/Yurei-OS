@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libxdmcp
+pkgver=1.1.5
+pkgrel=1
+pkgdesc="X11 display manager control protocol library"
+arch=(x86_64)
+url="https://www.x.org/"
+license=(MIT)
+depends=(glibc)
+source=("https://www.x.org/releases/individual/lib/libXdmcp-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    cd libXdmcp-$pkgver
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static \
+        --disable-docs
+    make
+}
+
+package() {
+    cd libXdmcp-$pkgver
+    make DESTDIR="$pkgdir" install
+}

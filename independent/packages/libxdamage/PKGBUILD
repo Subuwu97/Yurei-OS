@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libxdamage
+pkgver=1.1.6
+pkgrel=1
+pkgdesc="X11 damaged region extension library"
+arch=(x86_64)
+url="https://www.x.org/"
+license=(MIT)
+depends=(libxfixes)
+source=("https://www.x.org/releases/individual/lib/libXdamage-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    cd libXdamage-$pkgver
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static
+    make
+}
+
+package() {
+    cd libXdamage-$pkgver
+    make DESTDIR="$pkgdir" install
+}

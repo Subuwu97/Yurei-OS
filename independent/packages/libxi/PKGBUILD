@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libxi
+pkgver=1.8.2
+pkgrel=1
+pkgdesc="X11 input extension library"
+arch=(x86_64)
+url="https://www.x.org/"
+license=(MIT)
+depends=(libxext libxfixes)
+source=("https://www.x.org/releases/individual/lib/libXi-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    cd libXi-$pkgver
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static \
+        --disable-specs --disable-docs
+    make
+}
+
+package() {
+    cd libXi-$pkgver
+    make DESTDIR="$pkgdir" install
+}

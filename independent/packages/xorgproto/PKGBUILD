@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=xorgproto
+pkgver=2024.1
+pkgrel=1
+pkgdesc="X11 protocol headers"
+arch=(any)
+url="https://www.x.org/"
+license=(MIT)
+source=("https://www.x.org/releases/individual/proto/xorgproto-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    cd xorgproto-$pkgver
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static \
+        --disable-specs
+    make
+}
+
+package() {
+    cd xorgproto-$pkgver
+    make DESTDIR="$pkgdir" install
+}
