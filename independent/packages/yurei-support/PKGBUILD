@@ -1,0 +1,13 @@
+# Maintainer: Yurei Linux project
+pkgname=yurei-support
+pkgver=0.1
+pkgrel=1
+pkgdesc="Read-only Yurei system report for build and hardware troubleshooting"
+arch=(any)
+url="https://github.com/Subuwu97/Yurei-OS"
+license=(GPL-3.0-or-later)
+depends=(python)
+
+package() {
+    install -Dm755 "$startdir/yurei-support.py" "$pkgdir/usr/bin/yurei-support"
+}

@@ -234,3 +234,5 @@ kconfig
 kcoreaddons
 kitemviews
 kwidgetsaddons
+# Local support report; Python is already part of the base system.
+yurei-support
