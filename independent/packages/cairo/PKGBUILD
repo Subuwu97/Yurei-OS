@@ -4,18 +4,18 @@
 # check-recipes.py keeps them the same.
 pkgname=cairo
 pkgver=1.18.4
-pkgrel=1
+pkgrel=2
 pkgdesc="2D drawing (no X11): window decorations, menus, toolkits"
 arch=(x86_64)
 url="https://cairographics.org/"
 license=(LGPL-2.1-or-later OR MPL-1.1)
-depends=(glibc pixman freetype fontconfig libpng zlib glib)
+depends=(glibc pixman freetype fontconfig libpng zlib glib libx11 libxext libxrender libxcb
 source=("https://cairographics.org/releases/cairo-$pkgver.tar.xz")
 sha256sums=('445ed8208a6e4823de1226a74ca319d3600e83f6369f99b14265006599c32ccb')
 
 build() {
     meson setup cairo-$pkgver build --prefix=/usr --buildtype=release \
-        -D xlib=disabled -D xcb=disabled -D tests=disabled -D glib=enabled -D png=enabled -D freetype=enabled -D fontconfig=enabled -D zlib=enabled -D spectre=disabled -D symbol-lookup=disabled -D gtk_doc=false
+        -D xlib=enabled -D xcb=enabled -D tests=disabled -D glib=enabled -D png=enabled -D freetype=enabled -D fontconfig=enabled -D zlib=enabled -D spectre=disabled -D symbol-lookup=disabled -D gtk_doc=false
     ninja -C build
 }
 
