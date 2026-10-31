@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Doki Doki Literature Club!
+Comment=Play the original Doki Doki Literature Club
+Exec=yurei-game ddlc
+TryExec=yurei-game
+Icon=applications-games
+Categories=Game;
+Terminal=false
