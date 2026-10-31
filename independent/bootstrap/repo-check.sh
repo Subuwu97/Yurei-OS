@@ -93,7 +93,8 @@ if pacman -Q xwayland > /dev/null 2>&1; then
     [[ -x /usr/bin/xkbcomp ]]
 fi
 if pacman -Q thunar > /dev/null 2>&1; then
-    thunar --version | head -1
+    # (Thunar needs a display to run, so only check it's there and links)
+    [[ -x /usr/bin/thunar && -f /usr/share/applications/thunar.desktop ]]
 fi
 echo "firmware $(du -sh /usr/lib/firmware | cut -f1), iwd works"
 
