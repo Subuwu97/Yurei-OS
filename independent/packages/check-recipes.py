@@ -4,6 +4,7 @@ source address and SHA-256 are the ones in ../bootstrap/sources.lock, so the
 packages are built from exactly the sources the bootstrap verified."""
 
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -26,6 +27,10 @@ for name in order:
         errors.append(f"{name}: no PKGBUILD")
         continue
     text = recipe.read_text()
+    syntax = subprocess.run(["bash", "-n", str(recipe)], capture_output=True, text=True)
+    if syntax.returncode:
+        errors.append(f"{name}: PKGBUILD isn't valid shell: {syntax.stderr.strip()}")
+        continue
     source = field(text, "source")
     if source is None:  # Yūrei's own files, nothing from upstream
         continue
