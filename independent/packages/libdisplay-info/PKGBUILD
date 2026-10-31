@@ -1,0 +1,23 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libdisplay-info
+pkgver=0.2.0
+pkgrel=1
+pkgdesc="Reads what a monitor says about itself (EDID)"
+arch=(x86_64)
+url="https://gitlab.freedesktop.org/emersion/libdisplay-info"
+license=(MIT)
+depends=(glibc)
+source=("https://gitlab.freedesktop.org/emersion/libdisplay-info/-/releases/$pkgver/downloads/libdisplay-info-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    meson setup libdisplay-info-$pkgver build --prefix=/usr --buildtype=release
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

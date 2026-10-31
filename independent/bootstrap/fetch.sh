@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Downloads the sources listed in sources.lock into $SOURCES and checks
-# their SHA-256 sums. Sources not yet pinned ("-") are downloaded and their
+# their SHA-256 sums (a URL written NAME::URL is saved as NAME, as makepkg
+# does). Sources not yet pinned ("-") are downloaded and their
 # sums printed, then the script fails until they're filled in.
 #
 #   SOURCES=/path/to/cache ./fetch.sh
@@ -44,7 +45,13 @@ download() {
 unpinned=0 missing=()
 while read -r name version url sum _step; do
     [[ -z $name || $name == \#* ]] && continue
-    file=$sources/${url##*/}
+    # NAME::URL saves URL as NAME (for tarballs named only by version)
+    if [[ $url == *::* ]]; then
+        file=$sources/${url%%::*}
+        url=${url#*::}
+    else
+        file=$sources/${url##*/}
+    fi
     if [[ ! -f $file ]]; then
         echo "fetching $name $version"
         # keep going, so one run lists every source that can't be had

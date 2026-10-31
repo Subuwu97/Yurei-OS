@@ -1,0 +1,23 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=hwdata
+pkgver=0.390
+pkgrel=1
+pkgdesc="Hardware identification data (PCI, USB and monitor maker IDs)"
+arch=(any)
+url="https://github.com/vcrhonek/hwdata"
+license=(GPL-2.0-or-later)
+source=("https://github.com/vcrhonek/hwdata/archive/v$pkgver/hwdata-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    cd hwdata-$pkgver
+    ./configure --prefix=/usr --disable-blacklist
+}
+
+package() {
+    cd hwdata-$pkgver
+    make DESTDIR="$pkgdir" install
+}

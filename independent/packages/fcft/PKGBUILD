@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=fcft
+pkgver=3.3.1
+pkgrel=1
+pkgdesc="Font loading and glyph rasterization for Wayland programs (foot)"
+arch=(x86_64)
+url="https://codeberg.org/dnkl/fcft"
+license=(MIT)
+depends=(glibc freetype fontconfig pixman)
+source=("fcft-$pkgver.tar.gz::https://codeberg.org/dnkl/fcft/archive/$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    # no HarfBuzz/utf8proc text shaping yet
+    meson setup fcft build --prefix=/usr --buildtype=release \
+        -D grapheme-shaping=disabled -D run-shaping=disabled -D docs=disabled -D test-text-shaping=false
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=freetype
+pkgver=2.13.3
+pkgrel=1
+pkgdesc="Font rendering"
+arch=(x86_64)
+url="https://freetype.org/"
+license=(FTL)
+depends=(glibc zlib bzip2)
+source=("https://download.savannah.gnu.org/releases/freetype/freetype-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    # no HarfBuzz, PNG (colour emoji) or Brotli yet
+    meson setup freetype-$pkgver build --prefix=/usr --buildtype=release \
+        -D harfbuzz=disabled -D png=disabled -D brotli=disabled -D tests=disabled
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

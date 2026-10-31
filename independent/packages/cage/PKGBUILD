@@ -1,0 +1,23 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=cage
+pkgver=0.2.0
+pkgrel=1
+pkgdesc="Kiosk compositor: runs one program full screen"
+arch=(x86_64)
+url="https://github.com/cage-kiosk/cage"
+license=(MIT)
+depends=(glibc wlroots wayland libxkbcommon)
+source=("https://github.com/cage-kiosk/cage/releases/download/v$pkgver/cage-$pkgver.tar.gz")
+sha256sums=('557c194d18af7202a9ec2e8be6dd7129f6c16d0f4528f4079ba26ccd57b6ef88')
+
+build() {
+    meson setup cage-$pkgver build --prefix=/usr --buildtype=release -D man-pages=disabled
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

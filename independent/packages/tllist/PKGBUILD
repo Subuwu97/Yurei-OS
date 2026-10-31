@@ -1,0 +1,22 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=tllist
+pkgver=1.1.0
+pkgrel=1
+pkgdesc="Typed linked list for C (foot and fcft build with it)"
+arch=(any)
+url="https://codeberg.org/dnkl/tllist"
+license=(MIT)
+source=("tllist-$pkgver.tar.gz::https://codeberg.org/dnkl/tllist/archive/$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    meson setup tllist build --prefix=/usr --buildtype=release
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

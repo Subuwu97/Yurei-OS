@@ -1,0 +1,27 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=wlroots
+pkgver=0.18.2
+pkgrel=1
+pkgdesc="The library Wayland compositors are built on (cage, and later others)"
+arch=(x86_64)
+url="https://gitlab.freedesktop.org/wlroots/wlroots"
+license=(MIT)
+depends=(glibc mesa libdrm libinput libxkbcommon pixman seatd wayland libdisplay-info systemd)
+source=("https://gitlab.freedesktop.org/wlroots/wlroots/-/releases/$pkgver/downloads/wlroots-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    # screens through DRM, input through libinput, drawing with OpenGL ES;
+    # no X11 programs (Xwayland) or Vulkan renderer yet
+    meson setup wlroots-$pkgver build --prefix=/usr --buildtype=release \
+        -D xwayland=disabled -D backends=drm,libinput -D renderers=gles2 \
+        -D allocators=gbm -D session=enabled -D libliftoff=disabled -D examples=false
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

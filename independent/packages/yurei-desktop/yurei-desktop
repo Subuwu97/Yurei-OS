@@ -1,0 +1,10 @@
+#!/bin/sh
+# Starts Yūrei's first graphical session from a console login: a terminal
+# (foot), full screen, in the cage compositor. Leave it with "exit" in the
+# terminal. The full desktop replaces this later.
+if [ -n "$WAYLAND_DISPLAY" ]; then
+    echo "yurei-desktop: already running in a graphical session" >&2
+    exit 1
+fi
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+exec cage -- foot "$@"

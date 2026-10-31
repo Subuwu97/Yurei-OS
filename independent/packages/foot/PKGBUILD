@@ -1,0 +1,24 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=foot
+pkgver=1.21.0
+pkgrel=1
+pkgdesc="Fast, light Wayland terminal"
+arch=(x86_64)
+url="https://codeberg.org/dnkl/foot"
+license=(MIT)
+depends=(glibc fcft fontconfig pixman wayland libxkbcommon ttf-dejavu)
+source=("foot-$pkgver.tar.gz::https://codeberg.org/dnkl/foot/archive/$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    meson setup foot build --prefix=/usr --buildtype=release \
+        -D docs=disabled -D grapheme-clustering=disabled -D tests=false -D themes=true
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

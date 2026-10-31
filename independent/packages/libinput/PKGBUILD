@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libinput
+pkgver=1.28.1
+pkgrel=1
+pkgdesc="Input devices for Wayland compositors: keyboards, mice, touchpads (gestures too)"
+arch=(x86_64)
+url="https://www.freedesktop.org/wiki/Software/libinput/"
+license=(MIT)
+depends=(glibc systemd mtdev libevdev)
+source=("https://gitlab.freedesktop.org/libinput/libinput/-/archive/$pkgver/libinput-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    # no libwacom (tablet details) or debug GUI (GTK) yet
+    meson setup libinput-$pkgver build --prefix=/usr --buildtype=release \
+        -D libwacom=false -D debug-gui=false -D tests=false -D documentation=false
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

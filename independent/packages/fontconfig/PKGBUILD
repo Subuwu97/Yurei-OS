@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=fontconfig
+pkgver=2.16.0
+pkgrel=1
+pkgdesc="Finds and configures the installed fonts"
+arch=(x86_64)
+url="https://www.freedesktop.org/wiki/Software/fontconfig/"
+license=(HPND)
+depends=(glibc freetype expat)
+install=fontconfig.install
+source=("https://www.freedesktop.org/software/fontconfig/release/fontconfig-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    meson setup fontconfig-$pkgver build --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
+        --buildtype=release -D doc=disabled -D tests=disabled -D nls=disabled
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

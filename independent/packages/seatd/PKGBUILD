@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=seatd
+pkgver=0.9.1
+pkgrel=1
+pkgdesc="libseat: lets a compositor use the screen and input devices of the seat it runs on"
+arch=(x86_64)
+url="https://git.sr.ht/~kennylevinsen/seatd"
+license=(MIT)
+depends=(glibc systemd)
+source=("seatd-$pkgver.tar.gz::https://git.sr.ht/~kennylevinsen/seatd/archive/$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    # through systemd-logind (the session a console login gets), or seatd
+    meson setup seatd-$pkgver build --prefix=/usr --buildtype=release \
+        -D libseat-logind=systemd -D libseat-builtin=enabled -D server=enabled \
+        -D examples=disabled -D man-pages=disabled
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

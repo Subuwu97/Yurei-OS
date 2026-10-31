@@ -1,0 +1,27 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=ttf-dejavu
+_lockname=dejavu-fonts
+pkgver=2.37
+pkgrel=1
+pkgdesc="DejaVu fonts: sans, serif and monospace, for many languages"
+arch=(any)
+url="https://dejavu-fonts.github.io/"
+license=(Bitstream-Vera)
+depends=(fontconfig)
+install=ttf-dejavu.install
+source=("https://github.com/dejavu-fonts/dejavu-fonts/releases/download/version_2_37/dejavu-fonts-ttf-$pkgver.tar.bz2")
+sha256sums=('fa9ca4d13871dd122f61258a80d01751d603b4d3ee14095d65453b4e846e17d7')
+
+package() {
+    cd dejavu-fonts-ttf-$pkgver
+    install -Dm644 -t "$pkgdir/usr/share/fonts/TTF" ttf/*.ttf
+    install -Dm644 -t "$pkgdir/usr/share/fontconfig/conf.avail" fontconfig/*.conf
+    install -d "$pkgdir/etc/fonts/conf.d"
+    for conf in fontconfig/*.conf; do
+        ln -s "/usr/share/fontconfig/conf.avail/${conf##*/}" "$pkgdir/etc/fonts/conf.d/${conf##*/}"
+    done
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
