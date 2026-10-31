@@ -140,6 +140,13 @@ packages() {
         chown -R "$user:" "$(home)/build/$name"
         as_user sh -c "cd build/$name && $env makepkg --nodeps --sign --key $fpr --noconfirm --noprogressbar"
         as_user sh -c "cd build/$name && $env makepkg --packagelist" | xargs -n1 basename > "$stamps/$name.files"
+        # Yūrei's libraries live in /usr/lib (/usr/lib64 is a link to it)
+        while read -r file; do
+            if bsdtar -tf "$repo/$file" | grep -q '^usr/lib64/'; then
+                echo "$file puts files in /usr/lib64; set its libdir to lib" >&2
+                exit 1
+            fi
+        done < "$stamps/$name.files"
         echo "$hash" > "$stamps/$name.hash"
         rm -rf "$(home)/build/$name"
         [[ -z $install ]] || install_here "$name"

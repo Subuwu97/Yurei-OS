@@ -16,7 +16,7 @@ sha256sums=('6898f963c8e938981e6c4a302e83ec5beb4630147c7311183cf61069af16333d')
 build() {
     # only the SPIR-V forms Mesa uses
     cmake -S llvm-project-$pkgver.src/libclc -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=/usr -DLLVM_DIR=/usr/lib/cmake/llvm \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DLLVM_DIR=/usr/lib/cmake/llvm \
         -DLIBCLC_TARGETS_TO_BUILD="spirv-mesa3d-;spirv64-mesa3d-"
     ninja -C build
 }
