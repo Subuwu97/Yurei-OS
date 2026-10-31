@@ -11,7 +11,7 @@ url="https://www.gnu.org/software/libtasn1/"
 license=(LGPL-2.1-or-later)
 depends=(glibc)
 source=("https://ftp.gnu.org/gnu/libtasn1/libtasn1-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('92e0e3bd4c02d4aeee76036b2ddd83f0c732ba4cda5cb71d583272b23587a76c')
 
 build() {
     cd libtasn1-$pkgver

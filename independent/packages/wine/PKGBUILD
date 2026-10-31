@@ -4,14 +4,14 @@
 # check-recipes.py keeps them the same.
 pkgname=wine
 pkgver=10.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Runs Windows programs (64- and 32-bit) on Yūrei"
 arch=(x86_64)
 url="https://www.winehq.org/"
 license=(LGPL-2.1-or-later)
 depends=(glibc freetype fontconfig libx11 libxext libxrender libxrandr libxi libxcursor
          libxfixes libxcomposite mesa vulkan-icd-loader wayland libxkbcommon alsa-lib dbus
-         systemd libdrm)
+         systemd libdrm gnutls)
 options=(!lto staticlibs)
 source=("https://dl.winehq.org/wine/source/10.0/wine-$pkgver.tar.xz")
 sha256sums=('c5e0b3f5f7efafb30e9cd4d9c624b85c583171d33549d933cd3402f341ac3601')
@@ -19,13 +19,13 @@ sha256sums=('c5e0b3f5f7efafb30e9cd4d9c624b85c583171d33549d933cd3402f341ac3601')
 build() {
     # The new WoW64 mode: 32-bit Windows programs run inside the 64-bit Wine,
     # with no 32-bit Linux libraries. Its Windows (PE) side is compiled with
-    # clang and linked with lld. No TLS (GnuTLS), printing, scanners,
-    # cameras or GStreamer yet.
+    # clang and linked with lld. HTTPS through GnuTLS; no printing,
+    # scanners, cameras or GStreamer yet.
     cd wine-$pkgver
     ./configure --prefix=/usr --libdir=/usr/lib --enable-archs=i386,x86_64 \
         --with-x --with-wayland --with-vulkan --with-opengl --with-freetype \
-        --with-fontconfig --with-alsa --with-dbus --with-udev \
-        --without-gnutls --without-cups --without-gphoto --without-gstreamer \
+        --with-fontconfig --with-alsa --with-dbus --with-udev --with-gnutls \
+        --without-cups --without-gphoto --without-gstreamer \
         --without-krb5 --without-gssapi --without-netapi --without-opencl \
         --without-pcap --without-pcsclite --without-sane --without-usb --without-v4l2 \
         --without-capi --without-oss --without-sdl --without-pulse --without-unwind \

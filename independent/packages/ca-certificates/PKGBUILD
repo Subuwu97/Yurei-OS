@@ -11,7 +11,7 @@ url="https://curl.se/docs/caextract.html"
 license=(MPL-2.0)
 makedepends=(openssl)
 source=("https://curl.se/ca/cacert-2025-07-15.pem")
-sha256sums=('PIN')
+sha256sums=('7430e90ee0cdca2d0f02b1ece46fbf255d5d0408111f009638e3b892d6ca089c')
 
 package() {
     install -Dm644 cacert-2025-07-15.pem "$pkgdir/etc/ssl/certs/ca-certificates.crt"

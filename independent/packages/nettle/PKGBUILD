@@ -11,7 +11,7 @@ url="https://www.lysator.liu.se/~nisse/nettle/"
 license=(LGPL-3.0-or-later OR GPL-2.0-or-later)
 depends=(glibc gmp)
 source=("https://ftp.gnu.org/gnu/nettle/nettle-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('b0fcdd7fc0cdea6e80dcf1dd85ba794af0d5b4a57e26397eee3bc193272d9132')
 
 build() {
     cd nettle-$pkgver

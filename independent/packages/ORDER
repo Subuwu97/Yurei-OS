@@ -190,6 +190,12 @@ thunar
 vulkan-headers
 vulkan-icd-loader
 vulkan-tools
+# Eighteenth batch (stage 4, gaming): certificates and GnuTLS, for HTTPS.
+ca-certificates
+libtasn1
+nettle
+p11-kit
+gnutls
 # Seventeenth batch (stage 4, gaming): lld, and Wine (Windows programs).
 lld
 wine

@@ -101,6 +101,11 @@ if pacman -Q vulkan-icd-loader > /dev/null 2>&1; then
     [[ -f /usr/lib/libvulkan.so.1 && -x /usr/bin/vulkaninfo ]]
     ls /usr/share/vulkan/icd.d
 fi
+# HTTPS: the certificate list and GnuTLS
+if pacman -Q gnutls > /dev/null 2>&1; then
+    gnutls-cli --version | head -1
+    [[ -f /etc/ssl/certs/ca-certificates.crt && -f /etc/ssl/cert.pem ]]
+fi
 # Wine, and the linker its Windows side was built with
 if pacman -Q wine > /dev/null 2>&1; then
     wine --version
