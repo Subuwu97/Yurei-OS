@@ -14,9 +14,10 @@ source=("https://github.com/polkit-org/polkit/archive/$pkgver/polkit-$pkgver.tar
 sha256sums=('2814a7281989f6baa9e57bd33bbc5e148827e2721ccef22aaf28ab2b376068e8')
 
 build() {
-    # no PAM yet: passwords are checked against /etc/shadow
+    # no PAM yet: passwords are checked against /etc/shadow; duktape is
+    # polkit's only JavaScript engine now, so it needs no option
     meson setup polkit-$pkgver build --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
-        --buildtype=release -D authfw=shadow -D js_engine=duktape -D session_tracking=logind \
+        --buildtype=release -D authfw=shadow -D session_tracking=logind \
         -D introspection=false -D man=false -D examples=false -D tests=false -D gtk_doc=false \
         -D polkitd_user=polkitd
     ninja -C build
