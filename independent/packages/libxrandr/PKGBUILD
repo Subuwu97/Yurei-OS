@@ -11,7 +11,7 @@ url="https://www.x.org/"
 license=(MIT)
 depends=(libxext libxrender)
 source=("https://www.x.org/releases/individual/lib/libXrandr-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('1ad5b065375f4a85915aa60611cc6407c060492a214d7f9daf214be752c3b4d3')
 
 build() {
     cd libXrandr-$pkgver

@@ -11,7 +11,7 @@ url="https://www.x.org/"
 license=(MIT)
 depends=(xtrans glibc)
 source=("https://www.x.org/releases/individual/lib/libICE-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('974e4ed414225eb3c716985df9709f4da8d22a67a2890066bc6dfc89ad298625')
 
 build() {
     cd libICE-$pkgver

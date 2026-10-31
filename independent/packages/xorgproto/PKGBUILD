@@ -10,7 +10,7 @@ arch=(any)
 url="https://www.x.org/"
 license=(MIT)
 source=("https://www.x.org/releases/individual/proto/xorgproto-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('372225fd40815b8423547f5d890c5debc72e88b91088fbfb13158c20495ccb59')
 
 build() {
     cd xorgproto-$pkgver

@@ -11,7 +11,7 @@ url="https://www.x.org/"
 license=(MIT)
 depends=(glibc)
 source=("https://www.x.org/releases/individual/lib/libXdmcp-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('d8a5222828c3adab70adf69a5583f1d32eb5ece04304f7f8392b6a353aa2228c')
 
 build() {
     cd libXdmcp-$pkgver

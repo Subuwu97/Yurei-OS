@@ -11,7 +11,7 @@ url="https://www.x.org/"
 license=(MIT)
 depends=(libice util-linux)
 source=("https://www.x.org/releases/individual/lib/libSM-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('2af9e12da5ef670dc3a7bce1895c9c0f1bfb0cb9e64e8db40fcc33f883bd20bc')
 
 build() {
     cd libSM-$pkgver

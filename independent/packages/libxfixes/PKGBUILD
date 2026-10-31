@@ -11,7 +11,7 @@ url="https://www.x.org/"
 license=(MIT)
 depends=(libx11)
 source=("https://www.x.org/releases/individual/lib/libXfixes-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('b695f93cd2499421ab02d22744458e650ccc88c1d4c8130d60200213abc02d58')
 
 build() {
     cd libXfixes-$pkgver

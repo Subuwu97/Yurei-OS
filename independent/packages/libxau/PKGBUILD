@@ -11,7 +11,7 @@ url="https://www.x.org/"
 license=(MIT)
 depends=(glibc)
 source=("https://www.x.org/releases/individual/lib/libXau-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('74d0e4dfa3d39ad8939e99bda37f5967aba528211076828464d2777d477fc0fb')
 
 build() {
     cd libXau-$pkgver

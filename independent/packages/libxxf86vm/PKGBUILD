@@ -11,7 +11,7 @@ url="https://www.x.org/"
 license=(MIT)
 depends=(libxext)
 source=("https://www.x.org/releases/individual/lib/libXxf86vm-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('96af414c73ce1d5449ad04be7f9f27fa8330f844b6dda843ef22e3e1befb3ee3')
 
 build() {
     cd libXxf86vm-$pkgver

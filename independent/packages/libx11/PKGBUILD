@@ -11,7 +11,7 @@ url="https://www.x.org/"
 license=(MIT)
 depends=(libxcb)
 source=("https://www.x.org/releases/individual/lib/libX11-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('fa026f9bb0124f4d6c808f9aef4057aad65e7b35d8ff43951cef0abe06bb9a9a')
 
 build() {
     cd libX11-$pkgver

@@ -11,7 +11,7 @@ url="https://www.x.org/"
 license=(MIT)
 depends=(libxfixes)
 source=("https://www.x.org/releases/individual/lib/libXcomposite-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('fe40bcf0ae1a09070eba24088a5eb9810efe57453779ec1e20a55080c6dc2c87')
 
 build() {
     cd libXcomposite-$pkgver

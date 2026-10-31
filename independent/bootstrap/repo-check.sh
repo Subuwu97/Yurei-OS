@@ -83,6 +83,11 @@ if pacman -Q polkit > /dev/null 2>&1; then
     pkcheck --version
     [[ -f /etc/polkit-1/rules.d/40-yurei-wheel.rules && -f /etc/profile && -f /etc/profile.d/yurei-desktop.sh ]]
 fi
+# the X11 client libraries (for Xwayland)
+if pacman -Q libx11 > /dev/null 2>&1; then
+    pkg-config --exists x11 xcb xext xrender xfixes xi xrandr xcursor xtst xkbfile sm xshmfence xxf86vm
+    pkg-config --modversion x11
+fi
 echo "firmware $(du -sh /usr/lib/firmware | cut -f1), iwd works"
 
 # every program and library finds what it links to

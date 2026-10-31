@@ -10,7 +10,7 @@ arch=(any)
 url="https://www.x.org/"
 license=(MIT)
 source=("https://www.x.org/releases/individual/lib/xtrans-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('5c5cbfe34764a9131d048f03c31c19e57fb4c682d67713eab6a65541b4dff86c')
 
 build() {
     cd xtrans-$pkgver

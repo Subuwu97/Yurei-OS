@@ -11,7 +11,7 @@ url="https://www.x.org/"
 license=(MIT)
 depends=(glibc)
 source=("https://www.x.org/releases/individual/lib/libxshmfence-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('d4a4df096aba96fea02c029ee3a44e11a47eb7f7213c1a729be83e85ec3fde10')
 
 build() {
     cd libxshmfence-$pkgver
