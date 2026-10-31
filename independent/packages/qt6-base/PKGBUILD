@@ -1,0 +1,43 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 5, KDE Plasma; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=qt6-base
+pkgver=6.9.3
+pkgrel=1
+pkgdesc="Qt 6: core, GUI, widgets, network, D-Bus, SQL (the base of KDE Plasma)"
+arch=(x86_64)
+url="https://www.qt.io/"
+license=(LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only)
+depends=(glibc zlib zstd openssl dbus systemd libdrm mesa libglvnd libxkbcommon libinput wayland fontconfig freetype harfbuzz libpng libjpeg-turbo pcre2 glib libx11 libxcb xcb-util-keysyms vulkan-icd-loader)
+options=(!lto)
+source=("https://download.qt.io/official_releases/qt/6.9/$pkgver/submodules/qtbase-everywhere-src-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    cmake -S qtbase-everywhere-src-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DQT_BUILD_TESTS=OFF -DQT_BUILD_EXAMPLES=OFF \
+        -DINSTALL_LIBDIR=lib -DINSTALL_BINDIR=lib/qt6/bin -DINSTALL_PUBLICBINDIR=usr/bin -DINSTALL_LIBEXECDIR=lib/qt6 \
+        -DINSTALL_DOCDIR=share/doc/qt6 -DINSTALL_ARCHDATADIR=lib/qt6 -DINSTALL_DATADIR=share/qt6 \
+        -DINSTALL_INCLUDEDIR=include/qt6 -DINSTALL_MKSPECSDIR=lib/qt6/mkspecs \
+        -DINSTALL_EXAMPLESDIR=share/doc/qt6/examples \
+        -DFEATURE_journald=ON -DFEATURE_openssl_linked=ON -DFEATURE_system_sqlite=OFF \
+        -DFEATURE_libproxy=OFF -DFEATURE_vulkan=ON -DFEATURE_xcb=ON -DFEATURE_wayland=ON \
+        -DFEATURE_sql_odbc=OFF -DFEATURE_sql_mysql=OFF -DFEATURE_sql_psql=OFF -DFEATURE_sql_ibase=OFF \
+        -DFEATURE_cups=OFF -DFEATURE_gtk3=OFF -DFEATURE_icu=OFF -DFEATURE_glib=ON \
+        -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    # the tools people run also in /usr/bin, as Qt lists them
+    if [[ -f "$srcdir/build/user_facing_tool_links.txt" ]]; then
+        cd "$pkgdir"
+        mkdir -p usr/bin
+        while read -r target link; do
+            ln -s "/$target" "$link"
+        done < "$srcdir/build/user_facing_tool_links.txt"
+    fi
+}

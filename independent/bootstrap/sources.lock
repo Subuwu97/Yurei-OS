@@ -208,3 +208,11 @@ nvidia-utils 595.112.07  https://download.nvidia.com/XFree86/Linux-x86_64/595.11
 sof-firmware 2025.12.2  https://github.com/thesofproject/sof-bin/releases/download/v2025.12.2/sof-bin-2025.12.2.tar.gz  533f63e3a6d94c09ce05a782657b675fa683ff20787c0979226cf563ec79f517  repo
 alsa-ucm-conf 1.2.14  https://www.alsa-project.org/files/pub/lib/alsa-ucm-conf-1.2.14.tar.bz2  32e9809f592d92b978aa1032e35293c33b8d0f1ec475f937022c3ee9a3069c21  repo
 libglvnd  1.7.0   https://gitlab.freedesktop.org/glvnd/libglvnd/-/archive/v1.7.0/libglvnd-v1.7.0.tar.gz  2b6e15b06aafb4c0b6e2348124808cbd9b291c647299eaaba2e3202f51ff2f3d  repo
+qt6-base  6.9.3  https://download.qt.io/official_releases/qt/6.9/6.9.3/submodules/qtbase-everywhere-src-6.9.3.tar.xz  -  repo
+qt6-shadertools 6.9.3  https://download.qt.io/official_releases/qt/6.9/6.9.3/submodules/qtshadertools-everywhere-src-6.9.3.tar.xz  -  repo
+qt6-svg   6.9.3  https://download.qt.io/official_releases/qt/6.9/6.9.3/submodules/qtsvg-everywhere-src-6.9.3.tar.xz  -  repo
+qt6-declarative 6.9.3  https://download.qt.io/official_releases/qt/6.9/6.9.3/submodules/qtdeclarative-everywhere-src-6.9.3.tar.xz  -  repo
+qt6-wayland 6.9.3  https://download.qt.io/official_releases/qt/6.9/6.9.3/submodules/qtwayland-everywhere-src-6.9.3.tar.xz  -  repo
+qt6-5compat 6.9.3  https://download.qt.io/official_releases/qt/6.9/6.9.3/submodules/qt5compat-everywhere-src-6.9.3.tar.xz  -  repo
+qt6-imageformats 6.9.3  https://download.qt.io/official_releases/qt/6.9/6.9.3/submodules/qtimageformats-everywhere-src-6.9.3.tar.xz  -  repo
+qt6-tools 6.9.3  https://download.qt.io/official_releases/qt/6.9/6.9.3/submodules/qttools-everywhere-src-6.9.3.tar.xz  -  repo
