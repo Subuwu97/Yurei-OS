@@ -4,7 +4,7 @@
 # check-recipes.py keeps them the same.
 pkgname=wine
 pkgver=10.0
-pkgrel=2
+pkgrel=3
 pkgdesc="Runs Windows programs (64- and 32-bit) on Yūrei"
 arch=(x86_64)
 url="https://www.winehq.org/"
@@ -21,6 +21,9 @@ build() {
     # with no 32-bit Linux libraries. Its Windows (PE) side is compiled with
     # clang and linked with lld. HTTPS through GnuTLS; no printing,
     # scanners, cameras or GStreamer yet.
+    # The Windows side without debug information (Wine's default adds -g,
+    # and those DLLs aren't stripped like Linux libraries): about 1 GB less.
+    export CROSSCFLAGS="-O2 -pipe" CROSSLDFLAGS=""
     cd wine-$pkgver
     ./configure --prefix=/usr --libdir=/usr/lib --enable-archs=i386,x86_64 \
         --with-x --with-wayland --with-vulkan --with-opengl --with-freetype \

@@ -374,10 +374,16 @@ jobs:
           Yūrei, built entirely from source by Yūrei itself (no other distribution's
           packages), as a live ISO for testing on a PC. Built from ${GITHUB_SHA::7}.
 
-          This is an early test build: it boots to a text console (no desktop yet).
+          An early test build. After a login on the first screen the desktop
+          starts by itself (labwc, with a panel; press a key within 3 seconds to
+          stay in the console). Super+Enter opens a terminal, Super+E the Thunar
+          file manager; right-click the desktop for the menu.
 
           - Wi-Fi: iwctl, then "station list" and "station NAME connect NETWORK";
             a wired connection works by itself.
+          - Windows programs: wine program.exe (64- and 32-bit). For Direct3D 8-11
+            games, run yurei-dxvk once for the Wine prefix (DXVK on Vulkan).
+          - Graphics: Mesa for Intel (Arc included) and AMD, OpenGL and Vulkan.
           - Installing: yurei-install puts Yūrei onto a whole disk, which it
             ERASES (it asks first). UEFI only.
 
@@ -387,9 +393,17 @@ jobs:
 
           Check the download with: sha256sum -c ${iso}.sha256
           NOTES
+          # GitHub takes files under 2 GiB: a bigger ISO goes up in parts
+          files=("$iso" "$iso.sha256")
+          if (( $(stat -c %s "$iso") >= 2000000000 )); then
+            split -b 1900M -d -a 1 "$iso" "$iso.part"
+            files=("$iso".part* "$iso.sha256")
+            printf '\nThe ISO is in parts (GitHub takes files under 2 GiB). Join them first:\n    cat %s.part* > %s\n' \
+              "$iso" "$iso" >> notes.md
+          fi
           gh release create "$tag" --repo "$GITHUB_REPOSITORY" --prerelease \
             --title "Yūrei independent preview ${tag#independent-}" --notes-file notes.md \
-            "$iso" "$iso.sha256"
+            "${files[@]}"
 
       - uses: actions/upload-artifact@v4
         if: always()

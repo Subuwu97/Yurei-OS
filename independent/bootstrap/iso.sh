@@ -2,7 +2,7 @@
 # Packs the live system that iso-inside.sh made (in $YUREI/srv/yurei) into
 # a UEFI ISO, bootable from a USB stick or a DVD:
 #
-#   yurei/rootfs.sfs     the live system, as squashfs (zstd)
+#   yurei/rootfs.sfs     the live system, as squashfs (xz)
 #   an EFI partition     systemd-boot, the kernel and the initramfs
 #
 # Runs as root on the build machine. Its packing tools (mksquashfs, cpio,
@@ -22,7 +22,10 @@ work=$out/work
 rm -rf "$work" && mkdir -p "$work/iso/yurei" "$out"
 
 echo "== squashfs of the live system"
-mksquashfs "$srv/live" "$work/iso/yurei/rootfs.sfs" -comp zstd -Xcompression-level 15 \
+# xz with the x86 filter and 1 MB blocks: about a fifth smaller than zstd
+# on a system this size (Wine, LLVM, Mesa), which keeps the ISO small
+# enough to publish; the live system reads it a little more slowly
+mksquashfs "$srv/live" "$work/iso/yurei/rootfs.sfs" -comp xz -Xbcj x86 -b 1M \
     -noappend -quiet -e boot
 du -h "$work/iso/yurei/rootfs.sfs"
 
