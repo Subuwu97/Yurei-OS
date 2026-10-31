@@ -24,7 +24,7 @@ jobs:
             python3-pil python3-pytest python3-pip libegl1 libgl1 libxkbcommon0 fonts-noto-core
           pip install --break-system-packages PySide6-Essentials
       - name: SDDM theme in Qt 6
-        run: python3 -m pytest -q tests/test_sddm_theme.py
+        run: YUREI_SCREENSHOTS=theme-screenshots python3 -m pytest -q tests/test_sddm_theme.py
       - name: Plasma splash and installer branding in Qt 6
         run: YUREI_SCREENSHOTS=theme-screenshots python3 -m pytest -q tests/test_branding_qml.py
       - name: Plymouth theme in the real daemon
@@ -50,10 +50,17 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build yurei packages with makepkg
         run: |
-          pacman -Syu --noconfirm --needed base-devel git
+          pacman -Syu --noconfirm --needed base-devel git python
           useradd -m builder
           chown -R builder .
           su builder -c 'make package'
+      - name: Verify packaged appearance assets against the shared source
+        run: |
+          mkdir -p out/appearance-check-root
+          for archive in out/packages/*.pkg.tar.zst; do
+            bsdtar -xf "$archive" -C out/appearance-check-root
+          done
+          python tests/check_appearance_payload.py out/appearance-check-root
       - uses: actions/upload-artifact@v4
         with:
           name: yurei-packages

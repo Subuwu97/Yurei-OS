@@ -17,6 +17,9 @@ from pathlib import Path
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("QT_QUICK_BACKEND", "software")
+# The native Windows/macOS styles reject the theme's custom control visuals.
+# Use the same portable style for reproducible preview/test rendering.
+os.environ.setdefault("QT_QUICK_CONTROLS_STYLE", "Basic")
 
 from PySide6.QtCore import (QAbstractListModel, QByteArray, QModelIndex, QObject, QPoint, Qt,
                             QUrl, Property, Signal, Slot)
