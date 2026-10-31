@@ -105,8 +105,8 @@ cmake     3.31.7  https://github.com/Kitware/CMake/releases/download/v3.31.7/cma
 mako      1.3.10  https://files.pythonhosted.org/packages/source/m/mako/mako-1.3.10.tar.gz  99579a6f39583fa7e5630a28c3c1f440e4e97a414b80372649c0ce338da2ea28  repo
 pyyaml    6.0.2   https://files.pythonhosted.org/packages/source/P/PyYAML/pyyaml-6.0.2.tar.gz  d584d9ec91ad65861cc08d42e834324ef890a082e591037abe114850ff7bbc3e  repo
 llvm      20.1.8  https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.8/llvm-project-20.1.8.src.tar.xz  6898f963c8e938981e6c4a302e83ec5beb4630147c7311183cf61069af16333d  repo
-spirv-headers 1.4.313.0  https://github.com/KhronosGroup/SPIRV-Headers/archive/vulkan-sdk-1.4.313.0/SPIRV-Headers-vulkan-sdk-1.4.313.0.tar.gz  -  repo
-spirv-tools 2025.2  https://github.com/KhronosGroup/SPIRV-Tools/archive/v2025.2/SPIRV-Tools-2025.2.tar.gz  -  repo
-spirv-llvm-translator 20.1.0  https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v20.1.0/SPIRV-LLVM-Translator-20.1.0.tar.gz  -  repo
-glslang   15.3.0  https://github.com/KhronosGroup/glslang/archive/15.3.0/glslang-15.3.0.tar.gz  -  repo
-mesa      25.1.5  https://archive.mesa3d.org/mesa-25.1.5.tar.xz  -  repo
+spirv-headers 1.4.313.0  https://github.com/KhronosGroup/SPIRV-Headers/archive/vulkan-sdk-1.4.313.0/SPIRV-Headers-vulkan-sdk-1.4.313.0.tar.gz  f68be549d74afb61600a1e3a7d1da1e6b7437758c8e77d664909f88f302c5ac1  repo
+spirv-tools 2025.2  https://github.com/KhronosGroup/SPIRV-Tools/archive/v2025.2/SPIRV-Tools-2025.2.tar.gz  4a6147f9cb00ca33adedeb717c4b397480cd7f7f3128ac24dee8c24b6145ecf3  repo
+spirv-llvm-translator 20.1.0  https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v20.1.0/SPIRV-LLVM-Translator-20.1.0.tar.gz  ffca6b2aa53076ef85a09676ef0079877cce4977d7aa64f5f5b33596c7d1d285  repo
+glslang   15.3.0  https://github.com/KhronosGroup/glslang/archive/15.3.0/glslang-15.3.0.tar.gz  c6c21fe1873c37e639a6a9ac72d857ab63a5be6893a589f34e09a6c757174201  repo
+mesa      25.1.5  https://archive.mesa3d.org/mesa-25.1.5.tar.xz  3c4f6b10ff6ee950d0ec6ea733cc6e6d34c569454e3d39a9b276de9115a3b363  repo

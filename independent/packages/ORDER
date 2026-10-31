@@ -101,3 +101,9 @@ cmake
 python-mako
 python-yaml
 llvm
+spirv-headers
+spirv-tools
+spirv-llvm-translator
+libclc
+glslang
+mesa

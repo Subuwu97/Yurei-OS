@@ -12,7 +12,7 @@ url="https://github.com/KhronosGroup/SPIRV-Tools"
 license=(Apache-2.0)
 depends=(glibc gcc-libs)
 source=("https://github.com/KhronosGroup/SPIRV-Tools/archive/v$pkgver/SPIRV-Tools-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('4a6147f9cb00ca33adedeb717c4b397480cd7f7f3128ac24dee8c24b6145ecf3')
 
 build() {
     cmake -S SPIRV-Tools-$pkgver -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \

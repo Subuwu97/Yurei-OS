@@ -11,7 +11,7 @@ arch=(any)
 url="https://github.com/KhronosGroup/SPIRV-Headers"
 license=(MIT)
 source=("https://github.com/KhronosGroup/SPIRV-Headers/archive/vulkan-sdk-$pkgver/SPIRV-Headers-vulkan-sdk-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('f68be549d74afb61600a1e3a7d1da1e6b7437758c8e77d664909f88f302c5ac1')
 
 build() {
     cmake -S SPIRV-Headers-vulkan-sdk-$pkgver -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr

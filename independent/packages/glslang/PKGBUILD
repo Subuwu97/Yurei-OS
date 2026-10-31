@@ -12,7 +12,7 @@ url="https://github.com/KhronosGroup/glslang"
 license=(BSD-3-Clause)
 depends=(glibc gcc-libs spirv-tools)
 source=("https://github.com/KhronosGroup/glslang/archive/$pkgver/glslang-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('c6c21fe1873c37e639a6a9ac72d857ab63a5be6893a589f34e09a6c757174201')
 
 build() {
     cmake -S glslang-$pkgver -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \

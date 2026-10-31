@@ -12,7 +12,7 @@ url="https://github.com/KhronosGroup/SPIRV-LLVM-Translator"
 license=(NCSA)
 depends=(llvm spirv-tools)
 source=("https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v$pkgver/SPIRV-LLVM-Translator-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('ffca6b2aa53076ef85a09676ef0079877cce4977d7aa64f5f5b33596c7d1d285')
 
 build() {
     cmake -S SPIRV-LLVM-Translator-$pkgver -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
