@@ -9,6 +9,7 @@ SHELL_SCRIPTS = build.sh tests/*.sh independent/bootstrap/*.sh overlay/airootfs/
                 pkg/yurei-settings/files/usr/bin/steamos-session-select
 
 test:
+	python3 independent/packages/check_build_order.py
 	tests/test_cli.sh
 	tests/test_session.sh
 	tests/test_install_target.sh
