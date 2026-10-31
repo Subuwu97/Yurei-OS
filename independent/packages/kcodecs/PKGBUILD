@@ -1,0 +1,26 @@
+# Maintainer: Yurei Linux project
+# KDE Frameworks 6.18 foundation, built from KDE's verified source archive.
+pkgname=kcodecs
+pkgver=6.18.0
+pkgrel=1
+pkgdesc="KDE text encoding library"
+arch=(x86_64)
+url="https://invent.kde.org/frameworks/kcodecs"
+license=(Apache-2.0 BSD-3-Clause CC0-1.0 GPL-2.0-or-later LGPL-2.0-only LGPL-2.0-or-later LGPL-2.1-or-later MIT MPL-1.1)
+depends=(qt6-base gcc-libs)
+makedepends=(cmake ninja extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/frameworks/6.18/kcodecs-$pkgver.tar.xz")
+sha256sums=('247eda9ade502699062c7baaca7bb93691a308f202c165954652875ebe777426')
+
+build() {
+    cmake -S kcodecs-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+        -DBUILD_QCH=OFF -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 -t "$pkgdir/usr/share/licenses/$pkgname" kcodecs-$pkgver/LICENSES/*
+}

@@ -1,0 +1,26 @@
+# Maintainer: Yurei Linux project
+# KDE Frameworks 6.18 foundation, built from KDE's verified source archive.
+pkgname=kcoreaddons
+pkgver=6.18.0
+pkgrel=1
+pkgdesc="KDE core utility library and QML bindings"
+arch=(x86_64)
+url="https://invent.kde.org/frameworks/kcoreaddons"
+license=(BSD-2-Clause BSD-3-Clause CC0-1.0 GPL-2.0-or-later LGPL-2.0-only LGPL-2.0-or-later LGPL-2.1-only LGPL-2.1-or-later LGPL-3.0-only LicenseRef-KDE-Accepted-LGPL LicenseRef-Qt-Commercial MPL-1.1 Qt-LGPL-exception-1.1)
+depends=(qt6-base qt6-declarative gcc-libs systemd)
+makedepends=(cmake ninja extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/frameworks/6.18/kcoreaddons-$pkgver.tar.xz")
+sha256sums=('e1d03cfc7d45987ec31f31104f4732812980e0038beab222633da1108eb6f42f')
+
+build() {
+    cmake -S kcoreaddons-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+        -DBUILD_QCH=OFF -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON -DBUILD_PYTHON_BINDINGS=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 -t "$pkgdir/usr/share/licenses/$pkgname" kcoreaddons-$pkgver/LICENSES/*
+}

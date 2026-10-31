@@ -1,0 +1,25 @@
+# Maintainer: Yurei Linux project
+# KDE Frameworks 6.18 foundation, built from KDE's verified source archive.
+pkgname=extra-cmake-modules
+pkgver=6.18.0
+pkgrel=1
+pkgdesc="KDE build system modules"
+arch=(any)
+url="https://invent.kde.org/frameworks/extra-cmake-modules"
+license=(BSD-2-Clause BSD-3-Clause CC0-1.0 MIT)
+depends=(cmake)
+source=("https://download.kde.org/stable/frameworks/6.18/extra-cmake-modules-$pkgver.tar.xz")
+sha256sums=('b2d2222cfe5ace502c60bd8a77a79bc0230f48cee83265c89dcc2618b960e293')
+
+build() {
+    cmake -S extra-cmake-modules-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+        -DBUILD_DOC=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 -t "$pkgdir/usr/share/licenses/$pkgname" extra-cmake-modules-$pkgver/LICENSES/*
+}

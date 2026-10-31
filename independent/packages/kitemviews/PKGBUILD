@@ -1,0 +1,26 @@
+# Maintainer: Yurei Linux project
+# KDE Frameworks 6.18 foundation, built from KDE's verified source archive.
+pkgname=kitemviews
+pkgver=6.18.0
+pkgrel=1
+pkgdesc="KDE item view widgets"
+arch=(x86_64)
+url="https://invent.kde.org/frameworks/kitemviews"
+license=(CC0-1.0 GPL-2.0-or-later LGPL-2.0-or-later)
+depends=(qt6-base gcc-libs)
+makedepends=(cmake ninja extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/frameworks/6.18/kitemviews-$pkgver.tar.xz")
+sha256sums=('f74c03e2ec367238ec395b1f2438878999c2be3e29b41b6bd4a3ccd04440e29a')
+
+build() {
+    cmake -S kitemviews-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+        -DBUILD_QCH=OFF -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 -t "$pkgdir/usr/share/licenses/$pkgname" kitemviews-$pkgver/LICENSES/*
+}
