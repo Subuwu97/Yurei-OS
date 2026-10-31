@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Katawa Shoujo
+Comment=Play Katawa Shoujo
+Exec=yurei-game katawa-shoujo
+TryExec=yurei-game
+Icon=applications-games
+Categories=Game;
+Terminal=false
