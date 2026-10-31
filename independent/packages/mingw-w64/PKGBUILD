@@ -1,0 +1,96 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 4, gaming; docs/INDEPENDENT.md). A cross
+# toolchain that builds Windows programs and libraries: MinGW-w64 (the
+# Windows headers, C runtime and winpthreads) with binutils and GCC (C and
+# C++, libstdc++), for 64-bit (x86_64) and 32-bit (i686) Windows. DXVK is
+# built with it. binutils and GCC are the same releases as the system's
+# own. The source addresses and sums are the ones in
+# independent/bootstrap/sources.lock; check-recipes.py checks the first.
+pkgname=mingw-w64
+_lockname=mingw-w64
+pkgver=12.0.0
+_binutils=2.45
+_gcc=15.2.0
+pkgrel=1
+pkgdesc="Cross compilers for Windows programs (MinGW-w64 GCC, 64- and 32-bit)"
+arch=(x86_64)
+url="https://www.mingw-w64.org/"
+license=(GPL-3.0-or-later LGPL-3.0-or-later ZPL-2.1 LicenseRef-custom)
+depends=(glibc zlib zstd gmp mpfr mpc)
+# the Windows libraries aren't ELF: no stripping, and none of the host's
+# compiler flags
+options=(!strip !buildflags staticlibs !lto !debug)
+source=("https://downloads.sourceforge.net/project/mingw-w64/mingw-w64/mingw-w64-release/mingw-w64-v$pkgver.tar.bz2"
+        "https://ftp.gnu.org/gnu/binutils/binutils-$_binutils.tar.xz"
+        "https://ftp.gnu.org/gnu/gcc/gcc-$_gcc/gcc-$_gcc.tar.xz")
+sha256sums=('PIN'
+            'c50c0e7f9cb188980e2cc97e4537626b1672441815587f1eab69d2a1bfbef5d2'
+            '438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e')
+
+# Everything is built into one staging prefix and then moved to /usr: GCC
+# and binutils find their own files relative to where they are, and the
+# compiler passes the library paths to the linker itself.
+_stage="$startdir/stage"
+
+build() {
+    local p="$_stage/usr" t arch mw="$srcdir/mingw-w64-v$pkgver"
+    rm -rf "$_stage"
+    export PATH="$p/bin:$PATH"
+    for arch in x86_64 i686; do
+        t=$arch-w64-mingw32
+        local libs=(--disable-lib32 --enable-lib64) exc=()
+        [[ $arch == i686 ]] && libs=(--enable-lib32 --disable-lib64) exc=(--disable-sjlj-exceptions --with-dwarf2)
+
+        mkdir -p "$srcdir/$arch"/{binutils,headers,gcc,crt,winpthreads}
+
+        cd "$srcdir/$arch/binutils"
+        "$srcdir/binutils-$_binutils/configure" --prefix="$p" --target=$t \
+            --disable-nls --disable-werror --disable-multilib --disable-gprofng
+        make
+        make install
+
+        cd "$srcdir/$arch/headers"
+        "$mw/mingw-w64-headers/configure" --prefix="$p/$t" --host=$t --enable-sdk=all
+        make install
+
+        # the compiler alone first, then the C runtime it links against,
+        # then threads, then the rest of GCC (libgcc, libstdc++)
+        cd "$srcdir/$arch/gcc"
+        "$srcdir/gcc-$_gcc/configure" --prefix="$p" --target=$t \
+            --enable-languages=c,c++ --disable-multilib --disable-nls \
+            --enable-threads=posix --enable-shared --enable-static \
+            --enable-libstdcxx-time=yes --enable-fully-dynamic-string \
+            --disable-libssp --disable-libgomp --disable-werror --disable-plugin \
+            --with-system-zlib "${exc[@]}"
+        make all-gcc
+        make install-gcc
+
+        cd "$srcdir/$arch/crt"
+        "$mw/mingw-w64-crt/configure" --prefix="$p/$t" --host=$t "${libs[@]}"
+        make
+        make install
+
+        cd "$srcdir/$arch/winpthreads"
+        "$mw/mingw-w64-libraries/winpthreads/configure" --prefix="$p/$t" --host=$t \
+            --enable-static --enable-shared
+        make
+        make install
+
+        cd "$srcdir/$arch/gcc"
+        make
+        make install
+        # GCC's build takes several GB; the next one needs the room
+        cd "$srcdir"
+        rm -rf "$srcdir/$arch"
+    done
+    # what would clash with the system's own binutils and GCC
+    rm -rf "$p/share" "$p/lib/bfd-plugins" "$p"/lib/libcc1* "$p/include"
+    find "$p" -name '*.la' -delete
+}
+
+package() {
+    mkdir -p "$pkgdir"
+    # (not cp -a: the files belong to root in the package, not the builder)
+    cp -dR --preserve=mode,timestamps "$_stage/usr" "$pkgdir/"
+    rm -rf "$_stage"
+}
