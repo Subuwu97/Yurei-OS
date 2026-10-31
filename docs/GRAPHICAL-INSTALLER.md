@@ -46,7 +46,8 @@ physical identity. Do not unplug or swap target disks during installation.
 ## Validation before release
 
 The recipe adds the GUI after Qt in ORDER. The real backend still installs the
-current live system, including its current labwc/greeter setup; it does not
+current live system. It enables SDDM when present, otherwise the temporary
+greeter when present, otherwise console boot. It does not
 invent a Plasma installation before those packages are available.
 
 Before shipping, test an actual end-to-end install in QEMU with UEFI firmware
@@ -55,3 +56,12 @@ USB/live-medium exclusion, account creation, password login, reboot and boot
 without the live ISO. Source/model tests and UI screenshots do not replace
 that test. No real-disk installation should be represented as verified until
 the live-system VM test passes.
+
+The dedicated `Independent installer VM test` workflow uses the last published
+independent ISO (`independent-2026.10.31-85`), verified against a pinned SHA-256.
+It injects the reviewed backend into the live VM's RAM, verifies those bytes,
+uses the GUI's stdin-password/device-binding protocol, installs onto a new
+32 GiB image, then boots that disk without the ISO and checks user login,
+root/EFI mounts and sudo. The seed predates Qt and the greeter, so this validates
+the backend handoff and installed console system, not the graphical application
+inside the eventual Qt-enabled image or its desktop authentication dialog.

@@ -116,6 +116,7 @@ while [[ -z $user ]]; do
 done
 valid_name "$user" || die "user name $user isn't valid"
 [[ -f "$rootfs/etc/passwd" ]] || die "the live system has no account database"
+grep -q '^wheel:' "$rootfs/etc/group" || die "the live system has no administrator group"
 ! grep -q "^$user:" "$rootfs/etc/passwd" || die "choose a new user name; $user already exists in the live system"
 
 ask_password() {  # PROMPT VAR
@@ -203,11 +204,28 @@ in_target() { chroot "$target" "$@"; }
 # an administrator (wheel), with the screen and input devices (seat) and
 # sound, video and game controllers
 in_target systemd-sysusers
-in_target useradd -m -G wheel,seat,video,input,audio,render -s /bin/bash "$user"
+groups=wheel
+for group in seat video input audio render; do
+    if in_target getent group "$group" >/dev/null; then groups+=,$group; fi
+done
+in_target useradd -m -G "$groups" -s /bin/bash "$user"
 printf 'root:%s\n%s:%s\n' "$root_password" "$user" "$user_password" | in_target chpasswd
 
-# the graphical login screen on the first screen, and seatd for the desktop
-in_target systemctl enable seatd.service yurei-greeter.service
+# Enable the login stack actually present in this image. SDDM takes priority
+# once Plasma ships; older independent images can still install to a console.
+if [[ -f $target/usr/lib/systemd/system/seatd.service ]]; then
+    in_target systemctl enable seatd.service
+fi
+if [[ -f $target/usr/lib/systemd/system/sddm.service ]]; then
+    in_target systemctl disable yurei-greeter.service >/dev/null 2>&1 || true
+    in_target systemctl enable sddm.service
+    in_target systemctl set-default graphical.target
+elif [[ -f $target/usr/lib/systemd/system/yurei-greeter.service ]]; then
+    in_target systemctl enable yurei-greeter.service
+    in_target systemctl set-default graphical.target
+else
+    in_target systemctl set-default multi-user.target
+fi
 
 say "Boot menu (systemd-boot)"
 # with a boot entry in the PC's firmware where it allows one; disks also

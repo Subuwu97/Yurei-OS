@@ -1,0 +1,46 @@
+name: Independent installer VM test
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/installer-gui]
+    paths:
+      - independent/packages/yurei-install/**
+      - independent/bootstrap/install-test.py
+      - .github/workflows/installer-vm.yml
+permissions:
+  contents: read
+jobs:
+  install-and-reboot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SEED_TAG: independent-2026.10.31-85
+      SEED_NAME: yurei-independent-2026.10.31-85-x86_64.iso
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install VM tools
+        run: sudo apt-get update && sudo apt-get install -y qemu-system-x86 ovmf python3
+      - name: Download and verify the pinned independent seed ISO
+        run: |
+          mkdir -p work/installer-vm
+          gh release download "$SEED_TAG" --repo "$GITHUB_REPOSITORY" --dir work/installer-vm --pattern "$SEED_NAME.part*"
+          cat work/installer-vm/"$SEED_NAME".part* > work/installer-vm/"$SEED_NAME"
+          rm work/installer-vm/"$SEED_NAME".part*
+          echo "ba7aadcac1ab7e9bb09ca495fbc16b3f34a038fd133ba83abda3db6fc050f208  work/installer-vm/$SEED_NAME" | sha256sum -c -
+      - name: Install onto a disposable virtual disk and boot it alone
+        run: |
+          firmware=
+          for path in /usr/share/ovmf/OVMF.fd /usr/share/OVMF/OVMF_CODE_4M.fd /usr/share/OVMF/OVMF_CODE.fd; do
+            if [ -f "$path" ]; then firmware=$path; break; fi
+          done
+          test -n "$firmware"
+          python3 independent/bootstrap/install-test.py "work/installer-vm/$SEED_NAME" "$firmware" work/installer-vm/results \
+            --backend independent/packages/yurei-install/yurei-install --gui-protocol --disk-size-gib 32 --expected-session console
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: independent-installer-vm-results
+          path: |
+            work/installer-vm/results/*.log
+            work/installer-vm/results/*.json
