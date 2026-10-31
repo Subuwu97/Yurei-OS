@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Runs the real Plymouth daemon with the Yūrei theme in a virtual X display
+"""Runs the real Plymouth daemon with the YÅ«rei theme in a virtual X display
 and checks what it draws. Also saves screenshots for review.
 
     sudo python3 tests/plymouth_check.py [--out DIR]
@@ -14,12 +14,15 @@ machines - on your own system, preview the installed theme instead
 from __future__ import annotations
 
 import argparse
+import errno
 import os
 import pty
+import select
 import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from pathlib import Path
 
@@ -57,13 +60,39 @@ def client(*args: str, timeout: float = 5) -> None:
 
 class Daemon:
     def __init__(self, logdir: Path, mode: str | None = None):
+        logdir = logdir.resolve()
         master, slave = pty.openpty()
+        self.master = master
+        self.closed = threading.Event()
+        self.terminal_log = logdir / f"terminal-{mode or 'boot'}.log"
+
+        # A PTY has a bounded output buffer. Drain it continuously, as a real
+        # terminal would, so diagnostics cannot block the daemon's event loop.
+        def drain():
+            with self.terminal_log.open("wb") as output:
+                while not self.closed.is_set():
+                    if not select.select([master], [], [], 0.1)[0]:
+                        continue
+                    try:
+                        data = os.read(master, 65536)
+                    except OSError as exc:
+                        if exc.errno == errno.EIO:  # slave closed
+                            break
+                        raise
+                    if not data:
+                        break
+                    output.write(data)
+                    output.flush()
+
+        self.reader = threading.Thread(target=drain, daemon=True)
+        self.reader.start()
         cmd = ["plymouthd", "--no-daemon", "--debug", f"--debug-file={logdir}/plymouthd-{mode or 'boot'}.log",
                f"--tty={os.ttyname(slave)}",
                "--kernel-command-line=quiet splash plymouth.ignore-udev plymouth.ignore-serial-consoles"]
         if mode:
             cmd.append(f"--mode={mode}")
         self.proc = subprocess.Popen(cmd, env=env(), stdin=slave, stdout=slave, stderr=slave)
+        os.close(slave)
         time.sleep(1)
         client("show-splash")
         # the X11 renderer takes a few seconds to open its window
@@ -80,12 +109,18 @@ class Daemon:
         # "plymouth quit" can hang after a prompt under the X11 renderer
         # (not on real hardware, where systemd stops plymouthd itself)
         client("quit", timeout=3)
-        for stop in (self.proc.terminate, self.proc.kill):
-            try:
-                self.proc.wait(timeout=3)
-                return
-            except subprocess.TimeoutExpired:
-                stop()
+        try:
+            for stop in (self.proc.terminate, self.proc.kill):
+                try:
+                    self.proc.wait(timeout=3)
+                    return
+                except subprocess.TimeoutExpired:
+                    stop()
+            self.proc.wait(timeout=3)
+        finally:
+            self.closed.set()
+            self.reader.join(timeout=2)
+            os.close(self.master)
 
 
 def has_text_plugin() -> bool:
@@ -111,7 +146,14 @@ def focus_splash() -> None:
             best, area = wid, size
     subprocess.run(["xdotool", "mousemove", "960", "540"], env=env(), check=False)
     if best:
-        subprocess.run(["xdotool", "windowfocus", "--sync", best], env=env(), check=False)
+        subprocess.run(["xdotool", "windowfocus", "--sync", best], env=env(), check=True, timeout=5)
+        actual = subprocess.run(["xdotool", "getwindowfocus"], env=env(),
+                                check=True, capture_output=True, text=True).stdout.strip()
+        print(f"Plymouth X11 window: {best}; keyboard focus: {actual}", flush=True)
+        if actual != best:
+            raise RuntimeError("Plymouth window did not receive keyboard focus")
+    else:
+        raise RuntimeError("No Plymouth X11 window found")
 
 
 def uniform_row(img: Image.Image, y: int) -> bool:
@@ -186,12 +228,17 @@ def main() -> int:
                 asker.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 asker.kill()
+                asker.wait(timeout=3)
         check("password reaches the caller", answer_file.read_text().strip() == "moonlit",
               answer_file.read_text().strip())
         # the entry box outline is light lavender on the dark background
         box = prompt.crop((700, 850, 1220, 1000))
         check("password box drawn", box.getextrema()[2][1] > 180)
         d.stop()
+        if "password reaches the caller" in failures:
+            for log in sorted(out.glob("*.log")):
+                print(f"--- {log.name} (last 100 lines) ---")
+                print("\n".join(log.read_text(errors="replace").splitlines()[-100:]))
         # plymouthd writes its debug log only when it exits cleanly
         log_file = out / "plymouthd-boot.log"
         if log_file.exists():
