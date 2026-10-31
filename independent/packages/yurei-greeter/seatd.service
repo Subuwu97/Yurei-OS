@@ -1,0 +1,11 @@
+[Unit]
+Description=Seat management (screen and input devices for members of "seat")
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/seatd -g seat
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target

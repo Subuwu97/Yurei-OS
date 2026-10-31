@@ -1,0 +1,6 @@
+g seat - -
+u greeter - "Yūrei login screen" /var/lib/yurei-greeter -
+m greeter seat
+m greeter video
+m greeter input
+m greeter render

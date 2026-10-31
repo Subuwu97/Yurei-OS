@@ -3,7 +3,7 @@
 # puts the live system onto a disk.
 pkgname=yurei-install
 pkgver=0.1
-pkgrel=1
+pkgrel=2
 pkgdesc="Installs Yūrei from the live system onto a disk"
 arch=(any)
 url="https://github.com/Subuwu97/Yurei-OS"

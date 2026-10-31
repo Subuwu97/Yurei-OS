@@ -120,6 +120,11 @@ if pacman -Q dxvk > /dev/null 2>&1; then
     ls /usr/share/dxvk/x64/d3d11.dll /usr/share/dxvk/x32/d3d9.dll
     command -v yurei-dxvk
 fi
+# the login screen: its helper refuses a wrong password, and its services
+if pacman -Q yurei-greeter > /dev/null 2>&1; then
+    ! printf 'root\nnot-the-password\n' | /usr/lib/yurei/yurei-greeter check
+    [[ -f /usr/lib/systemd/system/yurei-greeter.service && -f /usr/lib/systemd/system/seatd.service ]]
+fi
 # Wine, and the linker its Windows side was built with
 if pacman -Q wine > /dev/null 2>&1; then
     wine --version

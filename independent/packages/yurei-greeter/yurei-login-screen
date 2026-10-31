@@ -1,0 +1,37 @@
+#!/bin/sh
+# Yūrei's login screen, on the first screen (yurei-greeter.service runs this
+# as root). The screen itself runs in cage as the unprivileged "greeter"
+# user; what it prints (a name and password, or a power action) comes back
+# here, where the password is checked and the desktop started. When the
+# desktop ends (Log out), the login screen comes back.
+g=/usr/lib/yurei/yurei-greeter
+rt=/run/yurei-greeter
+state=/var/lib/yurei-greeter
+last=$(cat "$state/last-user" 2>/dev/null)
+failed=
+while :; do
+    install -d -m 0700 -o greeter -g greeter "$rt"
+    # shellcheck disable=SC2086
+    if ! reply=$(XDG_RUNTIME_DIR=$rt LIBSEAT_BACKEND=seatd GDK_BACKEND=wayland \
+            "$g" drop greeter cage -s -- "$g" ui ${last:+--user "$last"} $failed); then
+        sleep 2
+        continue
+    fi
+    user=$(printf '%s\n' "$reply" | sed -n 1p)
+    if [ -z "$user" ]; then
+        case $(printf '%s\n' "$reply" | sed -n 2p) in
+            poweroff) systemctl poweroff ;;
+            reboot) systemctl reboot ;;
+        esac
+        continue
+    fi
+    last=$user
+    if printf '%s\n' "$reply" | "$g" check > /dev/null; then
+        failed=
+        printf '%s\n' "$user" > "$state/last-user"
+        "$g" session "$user"
+    else
+        failed=--failed
+        sleep 1
+    fi
+done

@@ -1,0 +1,22 @@
+[Unit]
+Description=Yūrei's login screen
+Documentation=man:yurei-greeter
+Wants=seatd.service
+After=seatd.service systemd-user-sessions.service getty@tty1.service
+Conflicts=getty@tty1.service
+
+[Service]
+ExecStart=/usr/lib/yurei/yurei-login-screen
+Restart=always
+RestartSec=1
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+StandardInput=tty
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+Alias=display-manager.service
+WantedBy=multi-user.target

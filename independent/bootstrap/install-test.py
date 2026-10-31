@@ -101,6 +101,8 @@ if all(results):
     check("/ and /boot mounted from the disk", installed.wait("MOUNTS-END", 30))
     installed.send("echo test | sudo -S id -u; echo SUDO-''END")
     check("the user is an administrator (sudo)", installed.wait("password for tester: 0", 30))
+    installed.send("if id -nG | grep -qw seat && systemctl -q is-enabled seatd yurei-greeter; then echo GREETER-''OK; else echo GREETER-''BAD; fi")
+    check("the user has the seat, and the login screen is on", installed.wait("GREETER-OK", 30, fail="GREETER-BAD"))
     installed.send("exit")
     installed.qemu.kill()
     installed.stop()

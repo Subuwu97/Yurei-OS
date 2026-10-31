@@ -1,0 +1,28 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop): the graphical login screen
+# (a GTK screen in cage, run as the unprivileged "greeter" user, with the
+# password checked by a short root helper), and seatd as a service, which
+# gives members of "seat" the screen and input devices. yurei-install
+# turns both on for an installed system; the live system logs in by itself.
+pkgname=yurei-greeter
+pkgver=0.1
+pkgrel=1
+pkgdesc="Yūrei's graphical login screen"
+arch=(x86_64)
+url="https://github.com/Subuwu97/Yurei-OS"
+license=(GPL-3.0-or-later)
+depends=(gtk3 cage seatd libxcrypt shadow systemd yurei-desktop)
+
+build() {
+    gcc $CFLAGS $LDFLAGS -Wall -Wextra -o yurei-greeter "$startdir/yurei-greeter.c" \
+        $(pkg-config --cflags --libs gtk+-3.0) -lcrypt
+}
+
+package() {
+    install -Dm755 yurei-greeter "$pkgdir/usr/lib/yurei/yurei-greeter"
+    install -Dm755 "$startdir/yurei-login-screen" "$pkgdir/usr/lib/yurei/yurei-login-screen"
+    install -Dm644 "$startdir/yurei-greeter.service" "$pkgdir/usr/lib/systemd/system/yurei-greeter.service"
+    install -Dm644 "$startdir/seatd.service" "$pkgdir/usr/lib/systemd/system/seatd.service"
+    install -Dm644 "$startdir/yurei-greeter.sysusers" "$pkgdir/usr/lib/sysusers.d/yurei-greeter.conf"
+    install -Dm644 "$startdir/yurei-greeter.tmpfiles" "$pkgdir/usr/lib/tmpfiles.d/yurei-greeter.conf"
+}

@@ -8,6 +8,11 @@ if [ -n "$WAYLAND_DISPLAY" ]; then
     exit 1
 fi
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+# without a logind session (a console login), nobody made it: a private one
+if [ ! -d "$XDG_RUNTIME_DIR" ] || [ ! -w "$XDG_RUNTIME_DIR" ]; then
+    XDG_RUNTIME_DIR=/tmp/runtime-$(id -u)
+    mkdir -p -m 0700 "$XDG_RUNTIME_DIR"
+fi
 if [ "$1" = --kiosk ] || ! command -v labwc > /dev/null; then
     [ "$1" = --kiosk ] && shift
     exec cage -- foot "$@"
