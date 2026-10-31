@@ -1,0 +1,8 @@
+post_install() {
+    # sound for every user's session, PulseAudio programs included
+    systemctl --global enable pipewire.socket pipewire-pulse.socket > /dev/null 2>&1 || true
+}
+
+pre_remove() {
+    systemctl --global disable pipewire.socket pipewire-pulse.socket > /dev/null 2>&1 || true
+}

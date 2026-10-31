@@ -1,0 +1,24 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=at-spi2-core
+pkgver=2.56.2
+pkgrel=1
+pkgdesc="Accessibility bus and ATK (GTK needs them)"
+arch=(x86_64)
+url="https://gitlab.gnome.org/GNOME/at-spi2-core"
+license=(LGPL-2.1-or-later)
+depends=(glibc glib dbus libxml2 systemd)
+source=("https://download.gnome.org/sources/at-spi2-core/2.56/at-spi2-core-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    meson setup at-spi2-core-$pkgver build --prefix=/usr --buildtype=release \
+        -D x11=disabled -D introspection=disabled -D docs=false -D use_systemd=true
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

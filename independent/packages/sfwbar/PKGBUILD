@@ -1,0 +1,27 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=sfwbar
+pkgver=1.0_beta16
+pkgrel=1
+pkgdesc="Panel for Wayland: taskbar, app menu, clock, volume and network"
+arch=(x86_64)
+url="https://github.com/LBCrion/sfwbar"
+license=(GPL-3.0-or-later)
+depends=(glibc gtk3 gtk-layer-shell json-c)
+source=("https://github.com/LBCrion/sfwbar/archive/v$pkgver/sfwbar-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    # modules that need libraries Yūrei doesn't have yet are left out
+    meson setup sfwbar-$pkgver build --prefix=/usr --buildtype=release --wrap-mode=nofallback \
+        -D mpd=disabled -D pulse=disabled -D bluez=disabled -D iwd=enabled -D alsa=enabled \
+        -D network=enabled -D idleinhibit=enabled -D xkb=enabled -D nm=disabled \
+        -D upower=disabled -D bsdctl=disabled
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

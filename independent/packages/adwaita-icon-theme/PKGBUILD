@@ -1,0 +1,23 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=adwaita-icon-theme
+pkgver=48.0
+pkgrel=1
+pkgdesc="Adwaita icons: the standard icons GTK programs ask for"
+arch=(any)
+url="https://gitlab.gnome.org/GNOME/adwaita-icon-theme"
+license=(LGPL-3.0-or-later OR CC-BY-SA-3.0)
+depends=(hicolor-icon-theme)
+install=adwaita-icon-theme.install
+source=("https://download.gnome.org/sources/adwaita-icon-theme/48/adwaita-icon-theme-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    meson setup adwaita-icon-theme-$pkgver build --prefix=/usr
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

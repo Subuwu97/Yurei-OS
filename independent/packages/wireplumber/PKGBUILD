@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=wireplumber
+pkgver=0.5.10
+pkgrel=1
+pkgdesc="WirePlumber: PipeWire's session manager (which device plays what)"
+arch=(x86_64)
+url="https://pipewire.pages.freedesktop.org/wireplumber/"
+license=(MIT)
+depends=(glibc pipewire glib lua systemd)
+install=wireplumber.install
+source=("https://gitlab.freedesktop.org/pipewire/wireplumber/-/archive/$pkgver/wireplumber-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    meson setup wireplumber-$pkgver build --prefix=/usr --buildtype=release --wrap-mode=nofallback \
+        -D system-lua=true -D introspection=disabled -D doc=disabled -D tests=false \
+        -D elogind=disabled -D systemd=enabled -D systemd-user-service=true
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

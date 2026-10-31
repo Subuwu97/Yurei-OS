@@ -1,0 +1,9 @@
+post_install() {
+    gtk-query-immodules-3.0 --update-cache > /dev/null 2>&1 || true
+    glib-compile-schemas /usr/share/glib-2.0/schemas > /dev/null 2>&1 || true
+    gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor > /dev/null 2>&1 || true
+}
+
+post_upgrade() {
+    post_install
+}

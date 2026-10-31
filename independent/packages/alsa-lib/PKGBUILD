@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=alsa-lib
+pkgver=1.2.14
+pkgrel=1
+pkgdesc="ALSA: the kernel's sound devices, for PipeWire and programs"
+arch=(x86_64)
+url="https://www.alsa-project.org/"
+license=(LGPL-2.1-or-later)
+depends=(glibc)
+source=("https://www.alsa-project.org/files/pub/lib/alsa-lib-$pkgver.tar.bz2")
+sha256sums=('PIN')
+
+build() {
+    cd alsa-lib-$pkgver
+    ./configure --prefix=/usr --without-debug --disable-python
+    make
+}
+
+package() {
+    cd alsa-lib-$pkgver
+    make DESTDIR="$pkgdir" install
+}

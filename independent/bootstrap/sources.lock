@@ -134,3 +134,15 @@ pango     1.56.3  https://download.gnome.org/sources/pango/1.56/pango-1.56.3.tar
 gdk-pixbuf 2.42.12  https://download.gnome.org/sources/gdk-pixbuf/2.42/gdk-pixbuf-2.42.12.tar.xz  b9505b3445b9a7e48ced34760c3bcb73e966df3ac94c95a148cb669ab748e3c7  repo
 shared-mime-info 2.4  https://gitlab.freedesktop.org/xdg/shared-mime-info/-/archive/2.4/shared-mime-info-2.4.tar.gz  531291d0387eb94e16e775d7e73788d06d2b2fdd8cd2ac6b6b15287593b6a2de  repo
 labwc     0.8.4   https://github.com/labwc/labwc/archive/0.8.4/labwc-0.8.4.tar.gz  2d3ded90f78efb5060f7057ea802c78a79dc9b2e82ae7a2ad902af957b8b9797  repo
+alsa-lib  1.2.14  https://www.alsa-project.org/files/pub/lib/alsa-lib-1.2.14.tar.bz2  -  repo
+lua       5.4.7   https://www.lua.org/ftp/lua-5.4.7.tar.gz  -  repo
+pipewire  1.4.5   https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/1.4.5/pipewire-1.4.5.tar.gz  -  repo
+wireplumber 0.5.10  https://gitlab.freedesktop.org/pipewire/wireplumber/-/archive/0.5.10/wireplumber-0.5.10.tar.gz  -  repo
+at-spi2-core 2.56.2  https://download.gnome.org/sources/at-spi2-core/2.56/at-spi2-core-2.56.2.tar.xz  -  repo
+libepoxy  1.5.10  https://download.gnome.org/sources/libepoxy/1.5/libepoxy-1.5.10.tar.xz  -  repo
+hicolor-icon-theme 0.18  https://icon-theme.freedesktop.org/releases/hicolor-icon-theme-0.18.tar.xz  -  repo
+gtk3      3.24.49  https://download.gnome.org/sources/gtk/3.24/gtk-3.24.49.tar.xz  -  repo
+adwaita-icon-theme 48.0  https://download.gnome.org/sources/adwaita-icon-theme/48/adwaita-icon-theme-48.0.tar.xz  -  repo
+json-c    0.18    https://s3.amazonaws.com/json-c_releases/releases/json-c-0.18.tar.gz  876ab046479166b869afc6896d288183bbc0e5843f141200c677b3e8dfb11724  repo
+gtk-layer-shell 0.9.1  https://github.com/wmww/gtk-layer-shell/archive/v0.9.1/gtk-layer-shell-0.9.1.tar.gz  -  repo
+sfwbar    1.0_beta16  https://github.com/LBCrion/sfwbar/archive/v1.0_beta16/sfwbar-1.0_beta16.tar.gz  -  repo

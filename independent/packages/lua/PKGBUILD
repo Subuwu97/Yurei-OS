@@ -1,0 +1,46 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=lua
+pkgver=5.4.7
+pkgrel=1
+pkgdesc="Lua scripting language (WirePlumber's policies are written in it)"
+arch=(x86_64)
+url="https://www.lua.org/"
+license=(MIT)
+depends=(glibc readline)
+source=("https://www.lua.org/ftp/lua-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    cd lua-$pkgver
+    # Lua's makefile makes only a static library; the shared one, which
+    # WirePlumber links to, is made from the same objects
+    make MYCFLAGS="$CFLAGS -fPIC" MYLDFLAGS="$LDFLAGS" linux-readline
+    cd src
+    gcc -shared -Wl,-soname,liblua.so.5.4 $LDFLAGS -o liblua.so.$pkgver \
+        $(ls *.o | grep -vx 'lua.o\|luac.o') -lm -ldl
+}
+
+package() {
+    cd lua-$pkgver
+    make INSTALL_TOP="$pkgdir/usr" INSTALL_MAN="$pkgdir/usr/share/man/man1" install
+    install -m755 src/liblua.so.$pkgver "$pkgdir/usr/lib/"
+    ln -s liblua.so.$pkgver "$pkgdir/usr/lib/liblua.so.5.4"
+    ln -s liblua.so.$pkgver "$pkgdir/usr/lib/liblua.so"
+    rm -f "$pkgdir/usr/lib/liblua.a"
+    install -Dm644 /dev/stdin "$pkgdir/usr/lib/pkgconfig/lua.pc" <<PC
+prefix=/usr
+libdir=\${prefix}/lib
+includedir=\${prefix}/include
+
+Name: Lua
+Description: Lua scripting language
+Version: $pkgver
+Libs: -L\${libdir} -llua -lm
+Cflags: -I\${includedir}
+PC
+    ln -s lua.pc "$pkgdir/usr/lib/pkgconfig/lua5.4.pc"
+    ln -s lua.pc "$pkgdir/usr/lib/pkgconfig/lua-5.4.pc"
+}

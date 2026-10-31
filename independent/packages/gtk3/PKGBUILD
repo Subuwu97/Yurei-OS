@@ -1,0 +1,29 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=gtk3
+_lockname=gtk3
+pkgver=3.24.49
+pkgrel=1
+pkgdesc="GTK 3: the toolkit of most Linux desktop programs (Wayland only for now)"
+arch=(x86_64)
+url="https://www.gtk.org/"
+license=(LGPL-2.1-or-later)
+depends=(glibc glib cairo pango harfbuzz fribidi gdk-pixbuf libepoxy at-spi2-core wayland libxkbcommon hicolor-icon-theme fontconfig)
+install=gtk3.install
+source=("https://download.gnome.org/sources/gtk/3.24/gtk-$pkgver.tar.xz")
+sha256sums=('PIN')
+
+build() {
+    meson setup gtk-$pkgver build --prefix=/usr --buildtype=release \
+        -D x11_backend=false -D wayland_backend=true -D broadway_backend=false \
+        -D introspection=false -D man=false -D demos=false -D examples=false \
+        -D tests=false -D installed_tests=false -D colord=no -D cloudproviders=false \
+        -D tracker3=false -D print_backends=file
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

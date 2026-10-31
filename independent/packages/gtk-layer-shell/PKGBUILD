@@ -1,0 +1,24 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=gtk-layer-shell
+pkgver=0.9.1
+pkgrel=1
+pkgdesc="Lets GTK programs be panels and docks on Wayland"
+arch=(x86_64)
+url="https://github.com/wmww/gtk-layer-shell"
+license=(MIT)
+depends=(glibc gtk3 wayland)
+source=("https://github.com/wmww/gtk-layer-shell/archive/v$pkgver/gtk-layer-shell-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    meson setup gtk-layer-shell-$pkgver build --prefix=/usr --buildtype=release \
+        -D introspection=false -D vapi=false -D docs=false -D tests=false -D examples=false
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

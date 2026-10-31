@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=json-c
+pkgver=0.18
+pkgrel=1
+pkgdesc="JSON for C (the panel reads its settings with it)"
+arch=(x86_64)
+url="https://github.com/json-c/json-c"
+license=(MIT)
+depends=(glibc)
+source=("https://s3.amazonaws.com/json-c_releases/releases/json-c-$pkgver.tar.gz")
+sha256sums=('876ab046479166b869afc6896d288183bbc0e5843f141200c677b3e8dfb11724')
+
+build() {
+    cmake -S json-c-$pkgver -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DBUILD_STATIC_LIBS=OFF \
+        -DENABLE_THREADING=ON -DDISABLE_WERROR=ON
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}

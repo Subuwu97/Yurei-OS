@@ -1,0 +1,34 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=pipewire
+pkgver=1.4.5
+pkgrel=1
+pkgdesc="PipeWire: sound (and screen sharing) for the desktop; plays PulseAudio and ALSA programs too"
+arch=(x86_64)
+url="https://pipewire.org/"
+license=(MIT)
+depends=(glibc alsa-lib dbus systemd)
+install=pipewire.install
+source=("https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/$pkgver/pipewire-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    # WirePlumber is the session manager (its own package); no Bluetooth,
+    # JACK, camera or GStreamer parts yet
+    meson setup pipewire-$pkgver build --prefix=/usr --buildtype=release --wrap-mode=nofallback \
+        -D session-managers=[] -D systemd=enabled -D alsa=enabled -D pipewire-alsa=enabled \
+        -D jack=disabled -D pipewire-jack=disabled -D bluez5=disabled -D libcamera=disabled \
+        -D gstreamer=disabled -D vulkan=disabled -D x11=disabled -D x11-xfixes=disabled \
+        -D echo-cancel-webrtc=disabled -D roc=disabled -D libffado=disabled -D avahi=disabled \
+        -D raop=disabled -D snap=disabled -D sndfile=disabled -D libcanberra=disabled \
+        -D libpulse=disabled -D readline=disabled -D selinux=disabled -D opus=disabled \
+        -D lv2=disabled -D ebur128=disabled -D man=disabled -D docs=disabled \
+        -D tests=disabled -D examples=disabled
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+}
