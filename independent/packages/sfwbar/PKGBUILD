@@ -14,8 +14,10 @@ source=("https://github.com/LBCrion/sfwbar/archive/v$pkgver/sfwbar-$pkgver.tar.g
 sha256sums=('238d6394650dfdfc2f36374ec25702bbef57e2cff1d9a149ecb9a52f887c3cdf')
 
 build() {
-    # modules that need libraries Yūrei doesn't have yet are left out
+    # modules that need libraries Yūrei doesn't have yet are left out; C17,
+    # since GCC 15's default C23 reads its "()" declarations differently
     meson setup sfwbar-$pkgver build --prefix=/usr --buildtype=release --wrap-mode=nofallback \
+        -D c_std=gnu17 \
         -D mpd=disabled -D pulse=disabled -D bluez=disabled -D iwd=enabled -D alsa=enabled \
         -D network=enabled -D idleinhibit=enabled -D xkb=enabled -D nm=disabled \
         -D bsdctl=disabled
