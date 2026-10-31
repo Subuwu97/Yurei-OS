@@ -59,4 +59,5 @@ for name in order:
 for e in errors:
     print(e, file=sys.stderr)
 print(f"{len(order)} recipes, {len(errors)} problems")
-sys.exit(1 if errors else 0)
+dependency_check = subprocess.run([sys.executable, str(here / "check_build_order.py")])
+sys.exit(1 if errors or dependency_check.returncode else 0)
