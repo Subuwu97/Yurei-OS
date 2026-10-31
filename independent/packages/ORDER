@@ -200,5 +200,5 @@ gnutls
 lld
 wine
 # Nineteenth batch (stage 4, gaming): a MinGW-w64 cross toolchain (for DXVK).
-mingw-w64
+mingw-w64 build-only
 yurei-desktop

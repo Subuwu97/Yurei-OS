@@ -115,16 +115,20 @@ install_here() {
 # Builds every recipe in ORDER. --nodeps: while bootstrapping, everything a
 # recipe needs is in this system already, but not yet known to pacman (from
 # ORDER's "#> install from here on" line, each package is installed here
-# once built, for the ones after it).
+# once built, for the ones after it). A recipe written "NAME build-only" is
+# only there to build the ones after it (a cross compiler): its packages go
+# into the repository, and leave this system again at the end, so the
+# booted system and the ISO don't carry them.
 packages() {
-    local name fpr start hash env install=
+    local name flag fpr start hash env install='' buildonly=()
     fpr=$(fingerprint)
     # the public key, for the yurei-keyring recipe
     as_user gpg --batch --armor --export "$fpr" > "$srv/signing-key.asc"
     env="MAKEPKG_CONF=$srv/makepkg.conf SRCDEST=$srv/sources PKGDEST=$repo YUREI_SIGNING_PUBKEY=$srv/signing-key.asc"
-    while read -r name; do
-        [[ $name == "#> install from here on" ]] && install=1
+    while read -r name flag; do
+        [[ "$name $flag" == "#> install from here on" ]] && install=1
         [[ -z $name || $name == \#* ]] && continue
+        [[ $flag == build-only ]] && buildonly+=("$name")
         msg "$name"
         start=$SECONDS
         hash=$(recipe_hash "$name")
@@ -152,6 +156,11 @@ packages() {
         [[ -z $install ]] || install_here "$name"
         printf '   (%s took %d s)\n' "$name" $((SECONDS - start))
     done < "$recipes/ORDER"
+    for name in "${buildonly[@]}"; do
+        msg "$name: only for building, removed from this system again"
+        # shellcheck disable=SC2046
+        pacman -Rdd --noconfirm --noprogressbar $(sed 's/-[^-]*-[^-]*-[^-]*\.pkg\.tar\.zst$//' "$stamps/$name.files") > /dev/null
+    done
 }
 
 publish() {

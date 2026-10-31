@@ -61,7 +61,7 @@ image=$out/yurei.img
 rm -f "$image"
 echo "making the disk image from $yurei"
 start=$SECONDS
-mke2fs -q -t ext4 -L yurei -d "$yurei" "$image" 10G
+mke2fs -q -t ext4 -L yurei -d "$yurei" "$image" 16G
 echo "  ($((SECONDS - start)) s)"
 
 # --- boot ----------------------------------------------------------------

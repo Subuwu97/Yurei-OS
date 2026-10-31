@@ -20,7 +20,16 @@ def field(text, name):
     return m[1] if m else None
 
 errors = []
-order = [l.strip() for l in (here / "ORDER").read_text().splitlines() if l.strip() and not l.startswith("#")]
+# a line is a recipe's name, then (for a cross compiler) "build-only"
+order = []
+for l in (here / "ORDER").read_text().splitlines():
+    if l.strip() and not l.startswith("#"):
+        words = l.split()
+        if len(words) > 2 or (len(words) == 2 and words[1] != "build-only"):
+            errors_early = f"ORDER line {l!r}: a name, and at most 'build-only'"
+            print(errors_early, file=sys.stderr)
+            sys.exit(1)
+        order.append(words[0])
 for name in order:
     recipe = here / name / "PKGBUILD"
     if not recipe.is_file():
