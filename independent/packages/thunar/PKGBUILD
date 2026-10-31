@@ -1,0 +1,27 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=thunar
+pkgver=4.20.0
+pkgrel=1
+pkgdesc="Thunar, a fast and simple file manager"
+arch=(x86_64)
+url="https://xfce.org/"
+license=(GPL-2.0-or-later)
+depends=(exo libxfce4ui xfconf gtk3 pcre2)
+source=("https://archive.xfce.org/src/xfce/thunar/4.20/thunar-$pkgver.tar.bz2")
+sha256sums=('PIN')
+
+build() {
+    cd thunar-$pkgver
+    # Wayland only, like the rest of Yūrei's GTK
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static \
+        --disable-debug --disable-introspection --disable-x11 --enable-wayland --disable-gudev --disable-notifications --disable-exif --disable-tpa-plugin --disable-wallpaper-plugin --disable-uca-plugin
+    make
+}
+
+package() {
+    cd thunar-$pkgver
+    make DESTDIR="$pkgdir" install
+}

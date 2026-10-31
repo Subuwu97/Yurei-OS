@@ -1,4 +1,11 @@
 # Started with every labwc session (Yūrei's defaults; a user's own
 # ~/.config/labwc/autostart replaces this). The panel: taskbar, app menu,
-# clock, volume and network.
+# clock, volume and network; then sound (PipeWire, its session manager and
+# its PulseAudio layer), unless something already started them.
 sfwbar >/dev/null 2>&1 &
+if command -v pipewire > /dev/null && ! pgrep -u "$(id -u)" -x pipewire > /dev/null; then
+    pipewire >/dev/null 2>&1 &
+    sleep 0.3
+    wireplumber >/dev/null 2>&1 &
+    command -v pipewire-pulse > /dev/null && pipewire-pulse >/dev/null 2>&1 &
+fi

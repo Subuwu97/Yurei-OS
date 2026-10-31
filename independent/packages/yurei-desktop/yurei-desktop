@@ -1,7 +1,7 @@
 #!/bin/sh
 # Starts Yūrei's graphical session from a console login: the labwc window
 # manager with a terminal (foot) open. Right-click the desktop for the menu
-# (Terminal, Exit); Super+Enter opens another terminal. "yurei-desktop
+# (Terminal, Files, Exit); Super+Enter opens another terminal. "yurei-desktop
 # --kiosk" starts one full-screen terminal in cage instead.
 if [ -n "$WAYLAND_DISPLAY" ]; then
     echo "yurei-desktop: already running in a graphical session" >&2
@@ -11,5 +11,9 @@ export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 if [ "$1" = --kiosk ] || ! command -v labwc > /dev/null; then
     [ "$1" = --kiosk ] && shift
     exec cage -- foot "$@"
+fi
+# a D-Bus session bus for the programs in it (Thunar, PipeWire, polkit)
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ] && command -v dbus-run-session > /dev/null; then
+    exec dbus-run-session -- labwc -s foot
 fi
 exec labwc -s foot

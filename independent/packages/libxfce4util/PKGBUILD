@@ -1,0 +1,27 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libxfce4util
+pkgver=4.20.0
+pkgrel=1
+pkgdesc="Xfce's basic utility library"
+arch=(x86_64)
+url="https://xfce.org/"
+license=(LGPL-2.0-or-later)
+depends=(glib)
+source=("https://archive.xfce.org/src/xfce/libxfce4util/4.20/libxfce4util-$pkgver.tar.bz2")
+sha256sums=('PIN')
+
+build() {
+    cd libxfce4util-$pkgver
+    # Wayland only, like the rest of Yūrei's GTK
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static \
+        --disable-debug --disable-introspection --disable-vala
+    make
+}
+
+package() {
+    cd libxfce4util-$pkgver
+    make DESTDIR="$pkgdir" install
+}

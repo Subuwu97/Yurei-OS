@@ -1,0 +1,27 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=xfconf
+pkgver=4.20.0
+pkgrel=1
+pkgdesc="Xfce's settings store (a D-Bus service)"
+arch=(x86_64)
+url="https://xfce.org/"
+license=(GPL-2.0-or-later)
+depends=(libxfce4util dbus)
+source=("https://archive.xfce.org/src/xfce/xfconf/4.20/xfconf-$pkgver.tar.bz2")
+sha256sums=('PIN')
+
+build() {
+    cd xfconf-$pkgver
+    # Wayland only, like the rest of Yūrei's GTK
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static \
+        --disable-debug --disable-introspection --disable-vala --disable-gsettings-backend
+    make
+}
+
+package() {
+    cd xfconf-$pkgver
+    make DESTDIR="$pkgdir" install
+}

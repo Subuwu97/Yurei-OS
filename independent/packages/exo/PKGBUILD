@@ -1,0 +1,27 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=exo
+pkgver=4.20.0
+pkgrel=1
+pkgdesc="Xfce's helper library and preferred-programs tool"
+arch=(x86_64)
+url="https://xfce.org/"
+license=(GPL-2.0-or-later)
+depends=(libxfce4ui)
+source=("https://archive.xfce.org/src/xfce/exo/4.20/exo-$pkgver.tar.bz2")
+sha256sums=('PIN')
+
+build() {
+    cd exo-$pkgver
+    # Wayland only, like the rest of Yūrei's GTK
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static \
+        --disable-debug --disable-x11
+    make
+}
+
+package() {
+    cd exo-$pkgver
+    make DESTDIR="$pkgdir" install
+}

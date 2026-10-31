@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- Yūrei's labwc settings: labwc's own defaults, with Super+Enter opening
-     foot (labwc's default terminal isn't on Yūrei). -->
+     foot (labwc's default terminal isn't on Yūrei) and Super+E opening Thunar. -->
 <labwc_config>
   <theme>
     <cornerRadius>6</cornerRadius>
@@ -9,5 +9,6 @@
   <keyboard>
     <default />
     <keybind key="W-Return"><action name="Execute" command="foot" /></keybind>
+    <keybind key="W-e"><action name="Execute" command="thunar" /></keybind>
   </keyboard>
 </labwc_config>

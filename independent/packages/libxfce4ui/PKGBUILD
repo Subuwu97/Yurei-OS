@@ -1,0 +1,27 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=libxfce4ui
+pkgver=4.20.0
+pkgrel=1
+pkgdesc="Xfce's GTK widgets and dialogs"
+arch=(x86_64)
+url="https://xfce.org/"
+license=(LGPL-2.0-or-later)
+depends=(gtk3 libxfce4util xfconf)
+source=("https://archive.xfce.org/src/xfce/libxfce4ui/4.20/libxfce4ui-$pkgver.tar.bz2")
+sha256sums=('PIN')
+
+build() {
+    cd libxfce4ui-$pkgver
+    # Wayland only, like the rest of Yūrei's GTK
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static \
+        --disable-debug --disable-introspection --disable-vala --disable-x11 --enable-wayland --disable-startup-notification --disable-glibtop --disable-gladeui2
+    make
+}
+
+package() {
+    cd libxfce4ui-$pkgver
+    make DESTDIR="$pkgdir" install
+}

@@ -3,6 +3,7 @@
 <openbox_menu>
   <menu id="root-menu" label="">
     <item label="Terminal"><action name="Execute" command="foot" /></item>
+    <item label="Files"><action name="Execute" command="thunar" /></item>
     <separator />
     <item label="Reload settings"><action name="Reconfigure" /></item>
     <item label="Log out"><action name="Exit" /></item>
