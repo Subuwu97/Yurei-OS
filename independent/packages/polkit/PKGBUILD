@@ -1,0 +1,33 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=polkit
+pkgver=126
+pkgrel=1
+pkgdesc="Lets desktop programs ask for an administrator's password for system tasks"
+arch=(x86_64)
+url="https://github.com/polkit-org/polkit"
+license=(LGPL-2.0-or-later)
+depends=(glibc glib expat duktape systemd)
+source=("https://github.com/polkit-org/polkit/archive/$pkgver/polkit-$pkgver.tar.gz")
+sha256sums=('PIN')
+
+build() {
+    # no PAM yet: passwords are checked against /etc/shadow
+    meson setup polkit-$pkgver build --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
+        --buildtype=release -D authfw=shadow -D js_engine=duktape -D session_tracking=logind \
+        -D introspection=false -D man=false -D examples=false -D tests=false -D gtk_doc=false \
+        -D polkitd_user=polkitd
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+    # the members of wheel are the administrators, as for sudo
+    install -Dm644 /dev/stdin "$pkgdir/etc/polkit-1/rules.d/40-yurei-wheel.rules" <<'RULES'
+polkit.addAdminRule(function(action, subject) {
+    return ["unix-group:wheel"];
+});
+RULES
+}

@@ -146,3 +146,5 @@ adwaita-icon-theme 48.0  https://download.gnome.org/sources/adwaita-icon-theme/4
 json-c    0.18    https://s3.amazonaws.com/json-c_releases/releases/json-c-0.18.tar.gz  876ab046479166b869afc6896d288183bbc0e5843f141200c677b3e8dfb11724  repo
 gtk-layer-shell 0.9.1  https://github.com/wmww/gtk-layer-shell/archive/v0.9.1/gtk-layer-shell-0.9.1.tar.gz  43e2165cf1a9aa8a317b081c2a583648e02389162f1fbbd33836ba27f9ca19fa  repo
 sfwbar    1.0_beta16  https://github.com/LBCrion/sfwbar/archive/v1.0_beta16/sfwbar-1.0_beta16.tar.gz  238d6394650dfdfc2f36374ec25702bbef57e2cff1d9a149ecb9a52f887c3cdf  repo
+duktape   2.7.0   https://github.com/svaarala/duktape/releases/download/v2.7.0/duktape-2.7.0.tar.xz  90f8d2fa8b5567c6899830ddef2c03f3c27960b11aca222fa17aa7ac613c2890  repo
+polkit    126     https://github.com/polkit-org/polkit/archive/126/polkit-126.tar.gz  -  repo

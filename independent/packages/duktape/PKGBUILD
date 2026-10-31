@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 3, the desktop; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=duktape
+pkgver=2.7.0
+pkgrel=1
+pkgdesc="Small JavaScript engine (polkit's rules are written in JavaScript)"
+arch=(x86_64)
+url="https://duktape.org/"
+license=(MIT)
+depends=(glibc)
+source=("https://github.com/svaarala/duktape/releases/download/v$pkgver/duktape-$pkgver.tar.xz")
+sha256sums=('90f8d2fa8b5567c6899830ddef2c03f3c27960b11aca222fa17aa7ac613c2890')
+
+build() {
+    cd duktape-$pkgver
+    make -f Makefile.sharedlibrary INSTALL_PREFIX=/usr LIBDIR=/lib
+}
+
+package() {
+    cd duktape-$pkgver
+    make -f Makefile.sharedlibrary INSTALL_PREFIX=/usr LIBDIR=/lib DESTDIR="$pkgdir" install
+    install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

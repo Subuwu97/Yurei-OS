@@ -3,13 +3,13 @@
 # the system accounts and the files every Yūrei system starts with.
 pkgname=yurei-filesystem
 pkgver=2026.10
-pkgrel=2
+pkgrel=3
 pkgdesc="Yūrei's base directory layout, system accounts and files"
 arch=(any)
 url="https://github.com/Subuwu97/Yurei-OS"
 license=(GPL-3.0-or-later)
 backup=(etc/fstab etc/group etc/gshadow etc/hostname etc/hosts etc/locale.conf etc/passwd
-        etc/shadow etc/shells etc/vconsole.conf)
+        etc/shadow etc/shells etc/vconsole.conf etc/profile)
 
 package() {
     cd "$pkgdir"
@@ -88,6 +88,17 @@ OS
     # once the system is up, only errors reach the screen: driver messages
     # (Wi-Fi, graphics) otherwise print over the login prompt. The start is
     # still shown in full, and everything is in the journal (journalctl -k).
+    # what every login shell reads first; the files in /etc/profile.d add to it
+    install -Dm644 /dev/stdin etc/profile <<'PROFILE'
+# /etc/profile: read by login shells
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin
+umask 022
+for script in /etc/profile.d/*.sh; do
+    [ -r "$script" ] && . "$script"
+done
+unset script
+PROFILE
+    install -d etc/profile.d
     install -Dm644 /dev/stdin usr/lib/sysctl.d/20-yurei-quiet-console.conf <<'SYSCTL'
 kernel.printk = 3 4 1 3
 SYSCTL
