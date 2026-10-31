@@ -4,6 +4,9 @@ objects (see sddm_harness.py). Keyboard input goes through real Qt key events.
     python3 -m pytest tests/test_sddm_theme.py
 """
 
+import os
+from pathlib import Path
+
 import pytest
 
 pytest.importorskip("PySide6")
@@ -234,14 +237,24 @@ def test_keyboard_layout_button(theme):
     assert objects["keyboard"].property("currentLayout") == 1
 
 
-@pytest.mark.parametrize("theme", [{"width": 1280, "height": 1024}, {"width": 3440, "height": 1440},
-                                   {"width": 1080, "height": 1920}], indirect=True)
+@pytest.mark.parametrize("theme", [
+    {"width": width, "height": height}
+    for width, height in ((1280, 720), (1366, 768), (1920, 1080), (2560, 1440),
+                          (3840, 2160), (1280, 1024), (3440, 1440),
+                          (5120, 1440), (1080, 1920))
+], indirect=True)
 def test_login_column_stays_on_screen(theme):
     app, view, objects, find = theme
     root = view.rootObject()
-    for name in ("password", "avatar", "session", "powerButton"):
+    for name in ("password", "avatar", "submit", "switchUser", "session",
+                 "layoutButton", "suspendButton", "rebootButton", "powerButton"):
         item = find(name)
         top_left = item.mapToItem(root, 0, 0)
         assert top_left.x() >= 0 and top_left.y() >= 0, name
         assert top_left.x() + item.width() <= root.width() + 1, name
         assert top_left.y() + item.height() <= root.height() + 1, name
+    if directory := os.environ.get("YUREI_SCREENSHOTS"):
+        out = Path(directory)
+        out.mkdir(parents=True, exist_ok=True)
+        target = out / f"sddm-{view.width()}x{view.height()}.png"
+        assert view.grabWindow().save(str(target)), f"could not save {target}"

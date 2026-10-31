@@ -331,6 +331,9 @@ Run it again whenever the source art changes.
 
 ## Art that would improve this
 
+For package asset parity and the live/installed appearance acceptance checklist,
+see [APPEARANCE-VALIDATION.md](APPEARANCE-VALIDATION.md).
+
 * **Clean login artwork** with no mock-up UI, at least 3840 px wide, ideally
   with the mascot on a separate transparent layer. The current background is
   the 1672×941 design, upscaled. The repaired spots are hidden behind the
