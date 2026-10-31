@@ -1,0 +1,58 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 4, gaming; docs/INDEPENDENT.md). DXVK runs
+# Direct3D 8, 9, 10 and 11 games on Vulkan, inside Wine; it's built for
+# 64- and 32-bit Windows with the MinGW-w64 cross compilers. Its GitHub
+# archive has no submodules, so the four it uses come as their own
+# archives, at the commits DXVK 2.6.2 records. The source addresses and
+# sums are the ones in independent/bootstrap/sources.lock; check-recipes.py
+# checks the first.
+pkgname=dxvk
+pkgver=2.6.2
+_directx=9df86f2341616ef1888ae59919feaa6d4fad693d
+_vulkan=234c4b7370a8ea3239a214c9e871e4b17c89f4ab
+_spirv=8b246ff75c6615ba4532fe4fde20f1be090c3764
+_displayinfo=275e6459c7ab1ddd4b125f28d0440716e4888078
+pkgrel=1
+pkgdesc="Direct3D 8-11 on Vulkan, for Windows games in Wine (yurei-dxvk sets it up)"
+arch=(x86_64)
+url="https://github.com/doitsujin/dxvk"
+license=(Zlib)
+depends=(wine vulkan-icd-loader)
+makedepends=(mingw-w64 glslang meson hwdata)
+# Windows DLLs: stripped by the cross tools, built without the host's flags
+options=(!strip !buildflags !lto !debug)
+source=("dxvk-$pkgver.tar.gz::https://github.com/doitsujin/dxvk/archive/v$pkgver.tar.gz"
+        "dxvk-directx-headers-$_directx.tar.gz::https://github.com/Joshua-Ashton/mingw-directx-headers/archive/$_directx.tar.gz"
+        "dxvk-vulkan-headers-$_vulkan.tar.gz::https://github.com/KhronosGroup/Vulkan-Headers/archive/$_vulkan.tar.gz"
+        "dxvk-spirv-headers-$_spirv.tar.gz::https://github.com/KhronosGroup/SPIRV-Headers/archive/$_spirv.tar.gz"
+        "dxvk-libdisplay-info-$_displayinfo.tar.gz::https://github.com/doitsujin/libdisplay-info/archive/$_displayinfo.tar.gz"
+        yurei-dxvk)
+sha256sums=('PIN' 'PIN' 'PIN' 'PIN' 'PIN' 'SKIP')
+
+prepare() {
+    cd dxvk-$pkgver
+    rm -rf include/native/directx include/vulkan include/spirv subprojects/libdisplay-info
+    mv "$srcdir/mingw-directx-headers-$_directx" include/native/directx
+    mv "$srcdir/Vulkan-Headers-$_vulkan" include/vulkan
+    mv "$srcdir/SPIRV-Headers-$_spirv" include/spirv
+    mv "$srcdir/libdisplay-info-$_displayinfo" subprojects/libdisplay-info
+}
+
+build() {
+    local bits
+    for bits in 64 32; do
+        meson setup "build$bits" dxvk-$pkgver --cross-file "dxvk-$pkgver/build-win$bits.txt" \
+            --buildtype release --prefix /usr/share/dxvk --bindir x$bits --libdir x$bits \
+            -D build_id=false --strip
+        ninja -C "build$bits"
+    done
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build64 install
+    DESTDIR="$pkgdir" ninja -C build32 install
+    # import libraries aren't needed to use the DLLs
+    find "$pkgdir/usr/share/dxvk" -name '*.a' -delete
+    install -Dm755 yurei-dxvk "$pkgdir/usr/bin/yurei-dxvk"
+    install -Dm644 dxvk-$pkgver/LICENSE "$pkgdir/usr/share/licenses/dxvk/LICENSE"
+}
