@@ -1,15 +1,16 @@
 # Maintainer: Yūrei Linux project
 # Yūrei's own recipe (stage 3): the yurei-desktop command, which starts the
-# first graphical session (a terminal in the cage compositor).
+# graphical session: labwc with a terminal (or one terminal in cage).
 pkgname=yurei-desktop
-pkgver=0.1
+pkgver=0.2
 pkgrel=1
 pkgdesc="Starts Yūrei's graphical session from the console"
 arch=(any)
 url="https://github.com/Subuwu97/Yurei-OS"
 license=(GPL-3.0-or-later)
-depends=(cage foot)
+depends=(labwc cage foot)
 
 package() {
     install -Dm755 "$startdir/yurei-desktop" "$pkgdir/usr/bin/yurei-desktop"
+    install -Dm644 -t "$pkgdir/etc/xdg/labwc" "$startdir/labwc/rc.xml" "$startdir/labwc/menu.xml"
 }

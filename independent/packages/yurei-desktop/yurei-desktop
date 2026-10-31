@@ -1,10 +1,15 @@
 #!/bin/sh
-# Starts Yūrei's first graphical session from a console login: a terminal
-# (foot), full screen, in the cage compositor. Leave it with "exit" in the
-# terminal. The full desktop replaces this later.
+# Starts Yūrei's graphical session from a console login: the labwc window
+# manager with a terminal (foot) open. Right-click the desktop for the menu
+# (Terminal, Exit); Super+Enter opens another terminal. "yurei-desktop
+# --kiosk" starts one full-screen terminal in cage instead.
 if [ -n "$WAYLAND_DISPLAY" ]; then
     echo "yurei-desktop: already running in a graphical session" >&2
     exit 1
 fi
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
-exec cage -- foot "$@"
+if [ "$1" = --kiosk ] || ! command -v labwc > /dev/null; then
+    [ "$1" = --kiosk ] && shift
+    exec cage -- foot "$@"
+fi
+exec labwc -s foot

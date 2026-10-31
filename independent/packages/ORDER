@@ -120,4 +120,17 @@ ttf-dejavu
 tllist
 fcft
 foot
+# Tenth batch (stage 3): the toolkit base and labwc.
+libpng
+libjpeg-turbo
+pcre2
+glib
+libxml2
+harfbuzz
+fribidi
+cairo
+pango
+shared-mime-info
+gdk-pixbuf
+labwc
 yurei-desktop

@@ -11,7 +11,7 @@ url="https://labwc.github.io/"
 license=(GPL-2.0-only)
 depends=(glibc wlroots wayland libinput libxkbcommon libxml2 glib cairo pango libpng)
 source=("https://github.com/labwc/labwc/archive/$pkgver/labwc-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('2d3ded90f78efb5060f7057ea802c78a79dc9b2e82ae7a2ad902af957b8b9797')
 
 build() {
     # no X11 programs (Xwayland), SVG icons or window icons (libsfdo) yet

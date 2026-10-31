@@ -11,7 +11,7 @@ url="https://cairographics.org/"
 license=(LGPL-2.1-or-later OR MPL-1.1)
 depends=(glibc pixman freetype fontconfig libpng zlib glib)
 source=("https://cairographics.org/releases/cairo-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('445ed8208a6e4823de1226a74ca319d3600e83f6369f99b14265006599c32ccb')
 
 build() {
     meson setup cairo-$pkgver build --prefix=/usr --buildtype=release \

@@ -63,6 +63,13 @@ if pacman -Q cage > /dev/null 2>&1; then
     fc-list | grep -qi dejavu || { echo "fontconfig doesn't see the DejaVu fonts"; exit 1; }
     echo "cage, foot and fonts installed"
 fi
+# the desktop session: labwc on the toolkit base
+if pacman -Q labwc > /dev/null 2>&1; then
+    labwc --version
+    pkg-config --modversion glib-2.0 cairo pango harfbuzz | tr '\n' ' '; echo
+    [[ -f /etc/xdg/labwc/menu.xml && -f /etc/xdg/labwc/rc.xml ]]
+    echo "labwc installed, with Yūrei's menu"
+fi
 echo "firmware $(du -sh /usr/lib/firmware | cut -f1), iwd works"
 
 # every program and library finds what it links to

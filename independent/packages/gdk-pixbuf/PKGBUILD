@@ -12,7 +12,7 @@ license=(LGPL-2.1-or-later)
 depends=(glibc glib libpng libjpeg-turbo shared-mime-info)
 install=gdk-pixbuf.install
 source=("https://download.gnome.org/sources/gdk-pixbuf/2.42/gdk-pixbuf-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('b9505b3445b9a7e48ced34760c3bcb73e966df3ac94c95a148cb669ab748e3c7')
 
 build() {
     meson setup gdk-pixbuf-$pkgver build --prefix=/usr --buildtype=release \

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!-- Yūrei's labwc settings: labwc's own defaults, with Super+Enter opening
+     foot (labwc's default terminal isn't on Yūrei). -->
+<labwc_config>
+  <theme>
+    <cornerRadius>6</cornerRadius>
+    <font place=""><name>DejaVu Sans</name><size>10</size></font>
+  </theme>
+  <keyboard>
+    <default />
+    <keybind key="W-Return"><action name="Execute" command="foot" /></keybind>
+  </keyboard>
+</labwc_config>

@@ -11,7 +11,7 @@ url="https://pango.gnome.org/"
 license=(LGPL-2.1-or-later)
 depends=(glibc glib harfbuzz fribidi cairo fontconfig freetype)
 source=("https://download.gnome.org/sources/pango/1.56/pango-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('2606252bc25cd8d24e1b7f7e92c3a272b37acd6734347b73b47a482834ba2491')
 
 build() {
     meson setup pango-$pkgver build --prefix=/usr --buildtype=release \

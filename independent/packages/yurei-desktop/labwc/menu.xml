@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- The menu a right-click on the desktop opens. -->
+<openbox_menu>
+  <menu id="root-menu" label="">
+    <item label="Terminal"><action name="Execute" command="foot" /></item>
+    <separator />
+    <item label="Reload settings"><action name="Reconfigure" /></item>
+    <item label="Log out"><action name="Exit" /></item>
+  </menu>
+</openbox_menu>

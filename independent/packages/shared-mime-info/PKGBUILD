@@ -12,7 +12,7 @@ license=(GPL-2.0-or-later)
 depends=(glibc glib libxml2)
 install=shared-mime-info.install
 source=("https://gitlab.freedesktop.org/xdg/shared-mime-info/-/archive/$pkgver/shared-mime-info-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('531291d0387eb94e16e775d7e73788d06d2b2fdd8cd2ac6b6b15287593b6a2de')
 
 build() {
     meson setup shared-mime-info-$pkgver build --prefix=/usr --buildtype=release \
