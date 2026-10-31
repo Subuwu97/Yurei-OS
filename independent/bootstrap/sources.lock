@@ -177,8 +177,8 @@ libxfont2 2.0.7  https://www.x.org/releases/individual/lib/libXfont2-2.0.7.tar.x
 xkbcomp   1.4.7  https://www.x.org/releases/individual/app/xkbcomp-1.4.7.tar.xz  0a288114e5f44e31987042c79aecff1ffad53a8154b8ec971c24a69a80f81f77  repo
 libxcvt   0.1.2  https://www.x.org/releases/individual/lib/libxcvt-0.1.2.tar.xz  0561690544796e25cfbd71806ba1b0d797ffe464e9796411123e79450f71db38  repo
 xwayland  24.1.6  https://www.x.org/releases/individual/xserver/xwayland-24.1.6.tar.xz  737e612ca36bbdf415a911644eb7592cf9389846847b47fa46dc705bd754d2d7  repo
-libxfce4util 4.20.0  https://archive.xfce.org/src/xfce/libxfce4util/4.20/libxfce4util-4.20.0.tar.bz2  -  repo
-xfconf    4.20.0  https://archive.xfce.org/src/xfce/xfconf/4.20/xfconf-4.20.0.tar.bz2  -  repo
-libxfce4ui 4.20.0  https://archive.xfce.org/src/xfce/libxfce4ui/4.20/libxfce4ui-4.20.0.tar.bz2  -  repo
-exo       4.20.0  https://archive.xfce.org/src/xfce/exo/4.20/exo-4.20.0.tar.bz2  -  repo
-thunar    4.20.0  https://archive.xfce.org/src/xfce/thunar/4.20/thunar-4.20.0.tar.bz2  -  repo
+libxfce4util 4.20.0  https://archive.xfce.org/src/xfce/libxfce4util/4.20/libxfce4util-4.20.0.tar.bz2  21493f9c9995a282823db93839f6b9f06ae31edb094191ba9acf04d932a2b592  repo
+xfconf    4.20.0  https://archive.xfce.org/src/xfce/xfconf/4.20/xfconf-4.20.0.tar.bz2  8bc43c60f1716b13cf35fc899e2a36ea9c6cdc3478a8f051220eef0f53567efd  repo
+libxfce4ui 4.20.0  https://archive.xfce.org/src/xfce/libxfce4ui/4.20/libxfce4ui-4.20.0.tar.bz2  75e8996984f20375aadecd5c16f5147c211ed0bd26d7861ab0257561eb76eaee  repo
+exo       4.20.0  https://archive.xfce.org/src/xfce/exo/4.20/exo-4.20.0.tar.bz2  4277f799245f1efde01cd917fd538ba6b12cf91c9f8a73fe2035fd5456ec078d  repo
+thunar    4.20.0  https://archive.xfce.org/src/xfce/thunar/4.20/thunar-4.20.0.tar.bz2  27731a76f3aecf3752b1ca35afad89e264c52244f70083d933507dd4a17548b0  repo

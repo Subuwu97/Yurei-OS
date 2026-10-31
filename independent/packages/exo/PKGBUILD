@@ -11,7 +11,7 @@ url="https://xfce.org/"
 license=(GPL-2.0-or-later)
 depends=(libxfce4ui)
 source=("https://archive.xfce.org/src/xfce/exo/4.20/exo-$pkgver.tar.bz2")
-sha256sums=('PIN')
+sha256sums=('4277f799245f1efde01cd917fd538ba6b12cf91c9f8a73fe2035fd5456ec078d')
 
 build() {
     cd exo-$pkgver

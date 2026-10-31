@@ -11,7 +11,7 @@ url="https://xfce.org/"
 license=(GPL-2.0-or-later)
 depends=(libxfce4util dbus)
 source=("https://archive.xfce.org/src/xfce/xfconf/4.20/xfconf-$pkgver.tar.bz2")
-sha256sums=('PIN')
+sha256sums=('8bc43c60f1716b13cf35fc899e2a36ea9c6cdc3478a8f051220eef0f53567efd')
 
 build() {
     cd xfconf-$pkgver

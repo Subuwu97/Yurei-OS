@@ -180,4 +180,10 @@ xwayland
 wlroots
 cage
 labwc
+# Fifteenth batch (stage 3): Thunar, the file manager.
+libxfce4util
+xfconf
+libxfce4ui
+exo
+thunar
 yurei-desktop

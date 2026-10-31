@@ -92,6 +92,9 @@ if pacman -Q xwayland > /dev/null 2>&1; then
     Xwayland -version 2>&1 | head -3
     [[ -x /usr/bin/xkbcomp ]]
 fi
+if pacman -Q thunar > /dev/null 2>&1; then
+    thunar --version | head -1
+fi
 echo "firmware $(du -sh /usr/lib/firmware | cut -f1), iwd works"
 
 # every program and library finds what it links to
