@@ -23,19 +23,32 @@ mirrors() {
             ;;
     esac
     echo "$url"
+    # zlib.net keeps only the newest release in place and answers old
+    # addresses with a web page; zlib's GitHub releases keep them all
+    case $url in
+        https://zlib.net/*/zlib-*.tar.gz|https://zlib.net/zlib-*.tar.gz)
+            local v=${url##*/zlib-}; v=${v%.tar.gz}
+            echo "https://github.com/madler/zlib/releases/download/v$v/zlib-$v.tar.gz"
+            ;;
+    esac
 }
 
-# download URL FILE: tries each mirror; gives up on a stalled transfer
-# (under 10 kB/s for a minute) instead of waiting for a timeout
+# download URL FILE SUM: tries each mirror until one gives a file with SUM
+# (any file, while SUM is "-"); gives up on a stalled transfer (under
+# 10 kB/s for a minute) instead of waiting for a timeout
 download() {
-    local url=$1 file=$2 try
+    local url=$1 file=$2 sum=$3 try
     while read -r try; do
         if curl -fL --connect-timeout 30 --speed-limit 10000 --speed-time 60 \
                 --retry 2 --retry-delay 5 --retry-all-errors -o "$file.part" "$try"; then
-            mv "$file.part" "$file"
-            return 0
+            if [[ $sum == - || $(sha256sum "$file.part" | cut -d' ' -f1) == "$sum" ]]; then
+                mv "$file.part" "$file"
+                return 0
+            fi
+            echo "  ($try gave a different file, trying the next source)" >&2
+        else
+            echo "  ($try didn't work, trying the next source)" >&2
         fi
-        echo "  ($try didn't work, trying the next source)" >&2
     done < <(mirrors "$url")
     rm -f "$file.part"
     echo "couldn't download $url" >&2
@@ -55,7 +68,7 @@ while read -r name version url sum _step; do
     if [[ ! -f $file ]]; then
         echo "fetching $name $version"
         # keep going, so one run lists every source that can't be had
-        download "$url" "$file" || { missing+=("$name $version"); continue; }
+        download "$url" "$file" "$sum" || { missing+=("$name $version"); continue; }
     fi
     actual=$(sha256sum "$file" | cut -d' ' -f1)
     if [[ $sum == - ]]; then

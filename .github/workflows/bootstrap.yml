@@ -336,9 +336,12 @@ jobs:
           KEEP_SOURCES: yurei-sources-${{ hashFiles('independent/bootstrap/sources.lock') }}
         run: |
           command -v gh > /dev/null || { echo "no gh here; leaving the caches"; exit 0; }
-          for prefix in yurei-pkgs- yurei-sources-; do
-            gh cache list --repo "$GITHUB_REPOSITORY" --key "$prefix" --limit 100 --json key --jq '.[].key'
-          done | grep -vx -e "$KEEP_PKGS" -e "$KEEP_SOURCES" | while read -r key; do
+          # (the newest sources are kept as well: this run saves its own only
+          # if it succeeds)
+          { gh cache list --repo "$GITHUB_REPOSITORY" --key yurei-pkgs- --limit 100 --json key --jq '.[].key'
+            gh cache list --repo "$GITHUB_REPOSITORY" --key yurei-sources- --limit 100 \
+              --sort created_at --order desc --json key --jq '.[1:][].key'
+          } | grep -vx -e "$KEEP_PKGS" -e "$KEEP_SOURCES" | while read -r key; do
             echo "dropping $key"
             gh cache delete "$key" --repo "$GITHUB_REPOSITORY" || true
           done
