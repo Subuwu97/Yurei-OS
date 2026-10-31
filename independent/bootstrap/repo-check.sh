@@ -122,7 +122,10 @@ if pacman -Q dxvk > /dev/null 2>&1; then
 fi
 # the login screen: its helper refuses a wrong password, and its services
 if pacman -Q yurei-greeter > /dev/null 2>&1; then
-    ! printf 'root\nnot-the-password\n' | /usr/lib/yurei/yurei-greeter check
+    if printf 'root\nnot-the-password\n' | /usr/lib/yurei/yurei-greeter check; then
+        echo "the login screen took a wrong password" >&2
+        exit 1
+    fi
     [[ -f /usr/lib/systemd/system/yurei-greeter.service && -f /usr/lib/systemd/system/seatd.service ]]
 fi
 # Wine, and the linker its Windows side was built with
