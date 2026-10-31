@@ -11,7 +11,7 @@ url="https://www.freedesktop.org/wiki/Software/libinput/"
 license=(MIT)
 depends=(glibc systemd mtdev libevdev)
 source=("https://gitlab.freedesktop.org/libinput/libinput/-/archive/$pkgver/libinput-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('a13f8c9a7d93df3c85c66afd135f0296701d8d32f911991b7aa4273fdd6a42a3')
 
 build() {
     # no libwacom (tablet details) or debug GUI (GTK) yet

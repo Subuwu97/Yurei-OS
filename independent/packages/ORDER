@@ -107,3 +107,17 @@ spirv-llvm-translator
 libclc
 glslang
 mesa
+# Ninth batch (stage 3): a compositor, a terminal and fonts.
+libinput
+seatd
+hwdata
+libdisplay-info
+wlroots
+cage
+freetype
+fontconfig
+ttf-dejavu
+tllist
+fcft
+foot
+yurei-desktop

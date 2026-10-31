@@ -56,6 +56,13 @@ if pacman -Q mesa > /dev/null 2>&1; then
     done
     echo "Mesa: OpenGL (iris, radeonsi, nouveau, llvmpipe) and Vulkan (anv, radv) installed"
 fi
+# the first graphical session: cage, foot and fonts
+if pacman -Q cage > /dev/null 2>&1; then
+    command -v cage yurei-desktop
+    foot --version
+    fc-list | grep -qi dejavu || { echo "fontconfig doesn't see the DejaVu fonts"; exit 1; }
+    echo "cage, foot and fonts installed"
+fi
 echo "firmware $(du -sh /usr/lib/firmware | cut -f1), iwd works"
 
 # every program and library finds what it links to

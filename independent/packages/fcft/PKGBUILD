@@ -11,7 +11,7 @@ url="https://codeberg.org/dnkl/fcft"
 license=(MIT)
 depends=(glibc freetype fontconfig pixman)
 source=("fcft-$pkgver.tar.gz::https://codeberg.org/dnkl/fcft/archive/$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('9949fbce0826669369c3b9361ac04b0459fdc51037e2ccf2e2483794909903f4')
 
 build() {
     # no HarfBuzz/utf8proc text shaping yet

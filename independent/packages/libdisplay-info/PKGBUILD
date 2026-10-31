@@ -11,7 +11,7 @@ url="https://gitlab.freedesktop.org/emersion/libdisplay-info"
 license=(MIT)
 depends=(glibc)
 source=("https://gitlab.freedesktop.org/emersion/libdisplay-info/-/releases/$pkgver/downloads/libdisplay-info-$pkgver.tar.xz")
-sha256sums=('PIN')
+sha256sums=('5a2f002a16f42dd3540c8846f80a90b8f4bdcd067a94b9d2087bc2feae974176')
 
 build() {
     meson setup libdisplay-info-$pkgver build --prefix=/usr --buildtype=release

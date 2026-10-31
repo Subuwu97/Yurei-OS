@@ -74,6 +74,7 @@ ISSUE
                    name, then "station NAME connect NETWORK" (a wired
                    connection works by itself)
   ip addr          shows the network connections
+  yurei-desktop    starts a graphical terminal (leave it with exit)
   poweroff         shuts down
 
 MOTD

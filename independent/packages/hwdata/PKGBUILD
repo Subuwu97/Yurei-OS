@@ -10,7 +10,7 @@ arch=(any)
 url="https://github.com/vcrhonek/hwdata"
 license=(GPL-2.0-or-later)
 source=("https://github.com/vcrhonek/hwdata/archive/v$pkgver/hwdata-$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('f10684093d2a7780de8a96d3dd8a2dd544ed6136dd359197750c42bb08ce526f')
 
 build() {
     cd hwdata-$pkgver
