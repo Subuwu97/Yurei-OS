@@ -236,6 +236,27 @@ Each stage ends in something testable, built automatically in CI.
   hasn't changed isn't rebuilt: the last run's package is reused. Packages are signed with a
   throwaway key per run until Yūrei's own signing key is set up
 
+## Building on your own machine
+
+The bootstrap workflow runs on GitHub's machines by default. It can run on
+your own instead, which is several times faster on a recent PC and keeps
+its files between runs (it needs about 150 GB of disk and 16 GB of RAM or
+more; on Windows 11, inside WSL2 with Ubuntu 24.04):
+
+1. In Ubuntu, use the user name `runner` (the workflow's paths expect it),
+   allow it passwordless sudo, and add it to the `kvm` group so the boot
+   tests run at full speed (`/dev/kvm` must exist; on Windows set
+   `nestedVirtualization=true` in `.wslconfig`).
+2. In the repository's Settings → Actions → Runners, add a self-hosted
+   Linux x64 runner with the label `yurei-pc`, and install it as a service
+   (`sudo ./svc.sh install && sudo ./svc.sh start`).
+3. In Settings → Secrets and variables → Actions → Variables, set
+   `YUREI_RUNNER` to `yurei-pc`. Delete the variable to go back to
+   GitHub's machines.
+
+The workflow only runs for pushes to main and manual starts, never for
+pull requests, so only the repository's own changes run there.
+
 ## Naming
 
 The system is simply **Yūrei** ("Yūrei Linux" in full), like Debian, Arch

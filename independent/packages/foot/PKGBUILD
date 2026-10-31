@@ -14,7 +14,9 @@ source=("foot-$pkgver.tar.gz::https://codeberg.org/dnkl/foot/archive/$pkgver.tar
 sha256sums=('18044ce49099b01ca1db3c6b1b23300fdaa23848577835a72ec9481f9713b4fe')
 
 build() {
-    meson setup foot build --prefix=/usr --buildtype=release \
+    # newer wayland-protocols add window states foot doesn't name yet;
+    # its warnings-as-errors would stop the build on that alone
+    meson setup foot build --prefix=/usr --buildtype=release -D werror=false \
         -D docs=disabled -D grapheme-clustering=disabled -D tests=false -D themes=true
     ninja -C build
 }

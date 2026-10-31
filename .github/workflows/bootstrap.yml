@@ -17,7 +17,9 @@ permissions:
 
 jobs:
   toolchain:
-    runs-on: ubuntu-24.04
+    # GitHub's machines, or your own when the repository variable
+    # YUREI_RUNNER names its runner label (docs/INDEPENDENT.md)
+    runs-on: ${{ vars.YUREI_RUNNER || 'ubuntu-24.04' }}
     timeout-minutes: 300
     env:
       # outside the checkout, and without "..": the cache refuses such paths
@@ -26,6 +28,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Your own machine keeps its disk between runs: take away what an
+      # earlier run left (mounts first), but keep the downloaded sources
+      - name: Clean up after earlier runs (own machine only)
+        if: runner.environment == 'self-hosted'
+        run: |
+          findmnt -rno TARGET | grep '^/home/runner/yurei' | sort -r | while read -r m; do
+            sudo umount -l "$m" || true
+          done
+          sudo rm -rf /home/runner/yurei-root /home/runner/yurei-iso /home/runner/yurei-esp \
+            /home/runner/yurei-boot /home/runner/yurei-pkgcache /home/runner/yurei-repo
+
       - name: Build tools from the host (only used to build, never shipped)
         run: |
           sudo apt-get update
@@ -33,6 +46,7 @@ jobs:
             squashfs-tools xorriso mtools dosfstools cpio ovmf
 
       - name: Make room (the system, its archives, LLVM's build and a disk image need about 30 GB)
+        if: runner.environment == 'github-hosted'
         run: |
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
           # LLVM's build needs several GB more
