@@ -12,7 +12,7 @@ url="https://gitlab.freedesktop.org/glvnd/libglvnd"
 license=(MIT)
 depends=(glibc libx11 libxext)
 source=("https://gitlab.freedesktop.org/glvnd/libglvnd/-/archive/v$pkgver/libglvnd-v$pkgver.tar.gz")
-sha256sums=('PIN')
+sha256sums=('2b6e15b06aafb4c0b6e2348124808cbd9b291c647299eaaba2e3202f51ff2f3d')
 
 build() {
     meson setup libglvnd-v$pkgver build --prefix=/usr --buildtype=release \

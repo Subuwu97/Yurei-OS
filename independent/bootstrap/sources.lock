@@ -203,8 +203,8 @@ vkd3d-proton-spirv-headers ec59c77  vkd3d-proton-spirv-headers-ec59c77a3bb5c747a
 vkd3d-proton-vulkan-headers 29f979e  vkd3d-proton-vulkan-headers-29f979ee5aa58b7b005f805ea8df7a855c39ff37.tar.gz::https://github.com/KhronosGroup/Vulkan-Headers/archive/29f979ee5aa58b7b005f805ea8df7a855c39ff37.tar.gz  dfc96c55d7e481c42b917706ff52205d47c0f0957c8c2a60766ee781f16d18bd  repo
 gamemode  1.8.2   https://github.com/FeralInteractive/gamemode/releases/download/1.8.2/gamemode-1.8.2.tar.xz  98cd1bcf6101c92fe87f974c7776af23c7e18f29ce6ecfe572b1c39dcde5c181  repo
 mangohud  0.8.1   https://github.com/flightlessmango/MangoHud/releases/download/v0.8.1/MangoHud-v0.8.1-Source.tar.xz  4c8d8098f5deff7737978d792eef909b7469933f456a47132dccc06804825482  repo
-nvidia-open 595.112.07  open-gpu-kernel-modules-595.112.07.tar.gz::https://github.com/NVIDIA/open-gpu-kernel-modules/archive/595.112.07.tar.gz  -  repo
-nvidia-utils 595.112.07  https://download.nvidia.com/XFree86/Linux-x86_64/595.112.07/NVIDIA-Linux-x86_64-595.112.07.run  -  repo
+nvidia-open 595.112.07  open-gpu-kernel-modules-595.112.07.tar.gz::https://github.com/NVIDIA/open-gpu-kernel-modules/archive/595.112.07.tar.gz  6bf8f19b9d7fa6ca0029100fe09f8a72d413df67e08ad4428b1b358ec10d28c0  repo
+nvidia-utils 595.112.07  https://download.nvidia.com/XFree86/Linux-x86_64/595.112.07/NVIDIA-Linux-x86_64-595.112.07.run  1a38ecd538a2da6232a7330184063af59e9fc946c908cca555bd07909848b9f0  repo
 sof-firmware 2025.12.2  https://github.com/thesofproject/sof-bin/releases/download/v2025.12.2/sof-bin-2025.12.2.tar.gz  533f63e3a6d94c09ce05a782657b675fa683ff20787c0979226cf563ec79f517  repo
-alsa-ucm-conf 1.2.14  https://www.alsa-project.org/files/pub/lib/alsa-ucm-conf-1.2.14.tar.bz2  -  repo
-libglvnd  1.7.0   https://gitlab.freedesktop.org/glvnd/libglvnd/-/archive/v1.7.0/libglvnd-v1.7.0.tar.gz  -  repo
+alsa-ucm-conf 1.2.14  https://www.alsa-project.org/files/pub/lib/alsa-ucm-conf-1.2.14.tar.bz2  32e9809f592d92b978aa1032e35293c33b8d0f1ec475f937022c3ee9a3069c21  repo
+libglvnd  1.7.0   https://gitlab.freedesktop.org/glvnd/libglvnd/-/archive/v1.7.0/libglvnd-v1.7.0.tar.gz  2b6e15b06aafb4c0b6e2348124808cbd9b291c647299eaaba2e3202f51ff2f3d  repo

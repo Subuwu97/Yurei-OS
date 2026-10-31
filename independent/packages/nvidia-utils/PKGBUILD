@@ -19,7 +19,7 @@ depends=(glibc linux libdrm wayland mesa vulkan-icd-loader)
 options=(!strip !debug)
 source=("https://download.nvidia.com/XFree86/Linux-x86_64/$pkgver/NVIDIA-Linux-x86_64-$pkgver.run")
 noextract=("NVIDIA-Linux-x86_64-$pkgver.run")
-sha256sums=('PIN')
+sha256sums=('1a38ecd538a2da6232a7330184063af59e9fc946c908cca555bd07909848b9f0')
 
 prepare() {
     rm -rf NVIDIA-Linux-x86_64-$pkgver

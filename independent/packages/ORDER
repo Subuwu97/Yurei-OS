@@ -132,6 +132,7 @@ spirv-tools
 spirv-llvm-translator
 libclc
 glslang
+libglvnd
 mesa
 # Ninth batch (stage 3): a compositor, a terminal and fonts.
 libinput
@@ -203,5 +204,12 @@ wine
 mingw-w64 build-only
 # Twentieth batch (stage 4, gaming): DXVK (Direct3D 8-11 on Vulkan).
 dxvk
+# Twenty-first batch (stage 4, gaming): Direct3D 12, GameMode, MangoHud, NVIDIA's driver, laptop sound.
+vkd3d-proton
+gamemode
+mangohud
+nvidia-utils
+sof-firmware
+alsa-ucm-conf
 yurei-desktop
 yurei-greeter

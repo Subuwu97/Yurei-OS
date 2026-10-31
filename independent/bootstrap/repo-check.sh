@@ -120,6 +120,23 @@ if pacman -Q dxvk > /dev/null 2>&1; then
     ls /usr/share/dxvk/x64/d3d11.dll /usr/share/dxvk/x32/d3d9.dll
     command -v yurei-dxvk
 fi
+# Direct3D 12, GameMode, MangoHud, NVIDIA's driver, laptop sound
+if pacman -Q vkd3d-proton > /dev/null 2>&1; then
+    ls /usr/share/vkd3d-proton/x64/d3d12.dll /usr/share/vkd3d-proton/x86/d3d12.dll
+fi
+if pacman -Q gamemode > /dev/null 2>&1; then command -v gamemoderun; fi
+if pacman -Q mangohud > /dev/null 2>&1; then
+    command -v mangohud
+    ls /usr/share/vulkan/implicit_layer.d/
+fi
+if pacman -Q nvidia-utils > /dev/null 2>&1; then
+    ls /usr/lib/modules/*/kernel/drivers/video/nvidia/nvidia.ko /usr/share/vulkan/icd.d/nvidia_icd.json
+    command -v nvidia-smi prime-run
+fi
+if pacman -Q sof-firmware > /dev/null 2>&1; then
+    [[ -d /usr/lib/firmware/intel/sof || -d /usr/lib/firmware/intel/sof-ipc4 ]]
+fi
+if pacman -Q alsa-ucm-conf > /dev/null 2>&1; then [[ -d /usr/share/alsa/ucm2 ]]; fi
 # the login screen: its helper refuses a wrong password, and its services
 if pacman -Q yurei-greeter > /dev/null 2>&1; then
     if printf 'root\nnot-the-password\n' | /usr/lib/yurei/yurei-greeter check; then

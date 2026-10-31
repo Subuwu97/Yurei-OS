@@ -381,9 +381,16 @@ jobs:
 
           - Wi-Fi: iwctl, then "station list" and "station NAME connect NETWORK";
             a wired connection works by itself.
-          - Windows programs: wine program.exe (64- and 32-bit). For Direct3D 8-11
-            games, run yurei-dxvk once for the Wine prefix (DXVK on Vulkan).
-          - Graphics: Mesa for Intel (Arc included) and AMD, OpenGL and Vulkan.
+          - Windows programs: wine program.exe (64- and 32-bit). For games, run
+            yurei-dxvk once for the Wine prefix: Direct3D 8-11 (DXVK) and 12
+            (vkd3d-proton), on Vulkan.
+          - Games: gamemoderun GAME (full CPU speed while it runs), mangohud GAME
+            (frame rate and temperatures over it); Xbox, PlayStation, Switch and
+            Steam controllers.
+          - Graphics: Mesa for Intel (Arc included) and AMD, OpenGL and Vulkan;
+            NVIDIA's own driver for RTX 20-series and newer. On a laptop with two
+            GPUs, prime-run GAME runs a game on the NVIDIA one.
+          - Installed systems start at a graphical login screen.
           - Installing: yurei-install puts Yūrei onto a whole disk, which it
             ERASES (it asks first). UEFI only.
 

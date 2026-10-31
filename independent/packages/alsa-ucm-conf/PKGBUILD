@@ -12,7 +12,7 @@ arch=(any)
 url="https://www.alsa-project.org/"
 license=(BSD-3-Clause)
 source=("https://www.alsa-project.org/files/pub/lib/alsa-ucm-conf-$pkgver.tar.bz2")
-sha256sums=('PIN')
+sha256sums=('32e9809f592d92b978aa1032e35293c33b8d0f1ec475f937022c3ee9a3069c21')
 
 package() {
     cd alsa-ucm-conf-$pkgver
