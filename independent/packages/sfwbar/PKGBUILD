@@ -18,7 +18,7 @@ build() {
     meson setup sfwbar-$pkgver build --prefix=/usr --buildtype=release --wrap-mode=nofallback \
         -D mpd=disabled -D pulse=disabled -D bluez=disabled -D iwd=enabled -D alsa=enabled \
         -D network=enabled -D idleinhibit=enabled -D xkb=enabled -D nm=disabled \
-        -D upower=disabled -D bsdctl=disabled
+        -D bsdctl=disabled
     ninja -C build
 }
 
