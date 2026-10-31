@@ -166,6 +166,7 @@ public:
         setWindowTitle("Install Yūrei"); resize(1100, 720); setMinimumSize(960, 680);
         setStyleSheet("QWidget{color:#e6e1ff;font-family:sans-serif;font-size:14px;}"
             "QLineEdit,QComboBox,QPlainTextEdit{background:#111831;border:1px solid #72658e;border-radius:8px;padding:9px;color:#f1e9ff;}"
+            "QLineEdit:disabled{background:#0b1023;color:#847c96;border-color:#443c56;}"
             "QComboBox QAbstractItemView{background:#111831;color:#f1e9ff;}"
             "QPushButton{background:#b9aaff;color:#060c1f;border:0;border-radius:8px;padding:10px 20px;font-weight:600;}"
             "QPushButton:disabled{background:#454257;color:#aaa4bc;}"
@@ -183,7 +184,7 @@ public:
         auto *refresh = new QPushButton("Refresh disks"); diskPage->addWidget(refresh, 0, Qt::AlignLeft); diskPage->addStretch();
         connect(refresh, &QPushButton::clicked, this, [this] { inventory(); });
         connect(diskChoice, &QComboBox::currentIndexChanged, this, [this] { acknowledge->setChecked(false); confirmation->clear(); updateButtons(); });
-        auto *account = newPage("Make it your system", "Create your login account and computer name. Passwords are passed privately to the installer through standard input.");
+        auto *account = newPage("Make it your system", "Create your login account and computer name. You can use a separate administrator password if you prefer.");
         auto *form = new QFormLayout;
         user = field(); hostname = field(); password = field(true); repeat = field(true);
         rootPassword = field(true); rootRepeat = field(true);

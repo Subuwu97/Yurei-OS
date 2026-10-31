@@ -39,7 +39,8 @@ lsblk() {
     esac
 }
 '''
-    env = dict(os.environ, disk="/dev/vda", expected_disk_bytes="1000",
+    env = dict(os.environ, TEST_RO="0", TEST_MOUNTS="", TEST_LIVE="", TEST_TYPE="disk",
+               disk="/dev/vda", expected_disk_bytes="1000",
                expected_disk_device="252:0", required_bytes="100")
     env.update(changes)
     result = subprocess.run(["bash", "-c", stubs + function + "\ncheck_target\n"],
