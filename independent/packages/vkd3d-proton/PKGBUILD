@@ -12,7 +12,9 @@ _dxilspirv=33cd5b2eee8a27da50ad7ed2762e56cca3a7b2c9
 _dxilspirv_headers=ec59c77a3bb5c747a369931ef101ac7c14823f2f
 _vulkan=29f979ee5aa58b7b005f805ea8df7a855c39ff37
 _spirv=8b246ff75c6615ba4532fe4fde20f1be090c3764
-pkgrel=1
+# the v2.14.1 commit: the build number git describe gives in a checkout
+_commit=0d66699b1b1e250ef19d793f2649d9288b0808ff
+pkgrel=2
 pkgdesc="Direct3D 12 on Vulkan, for Windows games in Wine (yurei-dxvk sets it up too)"
 arch=(x86_64)
 url="https://github.com/HansKristian-Work/vkd3d-proton"
@@ -39,6 +41,9 @@ prepare() {
     mv "$srcdir/SPIRV-Headers-$_dxilspirv_headers" subprojects/dxil-spirv/third_party/spirv-headers
     mv "$srcdir/Vulkan-Headers-$_vulkan" khronos/Vulkan-Headers
     mv "$srcdir/SPIRV-Headers-$_spirv" khronos/SPIRV-Headers
+    # an archive isn't a git checkout, so meson's vcs_tag would fall back to
+    # the version (0x2.14.1, not a number); give it the commit, as git would
+    sed -i "s/@VCS_TAG@/${_commit:0:15}/" vkd3d_build.h.in
 }
 
 build() {

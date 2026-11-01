@@ -7,8 +7,13 @@ name: Independent bootstrap
 # script and its sources, so changing a later step doesn't rebuild it.
 on:
   workflow_dispatch:
+    inputs:
+      use_pc:
+        description: Build on the registered yurei-pc runner (owner, trusted refs only)
+        type: boolean
+        default: false
   push:
-    branches: [main, codex/qt6-bootstrap, codex/installer-gui]
+    branches: [main, codex/qt6-bootstrap]
     paths: ["independent/**", ".github/workflows/bootstrap.yml"]
 
 # contents: write publishes the live ISO as a test release; actions: write
@@ -19,9 +24,9 @@ permissions:
 
 jobs:
   toolchain:
-    # GitHub's machines, or your own when the repository variable
-    # YUREI_RUNNER names its runner label (docs/INDEPENDENT.md)
-    runs-on: ${{ github.ref == 'refs/heads/main' && vars.YUREI_RUNNER || 'ubuntu-24.04' }}
+    # A PC run is an explicit owner dispatch, never a push or pull request.
+    if: ${{ !inputs.use_pc || (github.event_name == 'workflow_dispatch' && github.actor == 'Subuwu97' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/codex/qt6-bootstrap' || github.ref == 'refs/heads/codex/installer-gui')) }}
+    runs-on: ${{ github.event_name == 'workflow_dispatch' && inputs.use_pc && 'yurei-pc' || 'ubuntu-24.04' }}
     timeout-minutes: 300
     env:
       # outside the checkout, and without "..": the cache refuses such paths
@@ -29,6 +34,22 @@ jobs:
       SOURCES: /home/runner/yurei-sources
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check the build PC before cleanup or downloads
+        if: runner.environment == 'self-hosted'
+        run: |
+          test "$(id -un)" = runner
+          sudo -n true
+          test -w /dev/kvm
+          test "$(findmnt -nro FSTYPE -T /home/runner)" = ext4
+          # WSL's sparse virtual disk can report more free space than C: has.
+          available=$(df -Pk /mnt/c | awk 'END {print $4}')
+          if (( available < 150 * 1024 * 1024 )); then
+            echo "Free at least 150 GiB on C: before starting this build."
+            exit 1
+          fi
+          free -h
+          df -h /home/runner /mnt/c
 
       # Your own machine keeps its disk between runs: take away what an
       # earlier run left (mounts first), but keep the downloaded sources

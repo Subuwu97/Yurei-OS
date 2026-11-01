@@ -150,6 +150,27 @@ if pacman -Q wine > /dev/null 2>&1; then
     wine --version
     [[ -x /usr/bin/lld-link && -d /usr/lib/wine/x86_64-windows && -d /usr/lib/wine/i386-windows ]]
 fi
+# Qt 6: its paths, the Wayland and X11 screen plugins, and a QML scene with
+# the imports Plasma's QML uses (drawn off screen, in software)
+if pacman -Q qt6-base > /dev/null 2>&1; then
+    /usr/lib/qt6/bin/qtpaths --qt-version
+    [[ -f /usr/lib/qt6/plugins/platforms/libqxcb.so ]]
+    if pacman -Q qt6-wayland > /dev/null 2>&1; then
+        [[ -f /usr/lib/qt6/plugins/platforms/libqwayland-generic.so ]]
+    fi
+fi
+if pacman -Q qt6-declarative qt6-5compat qt6-svg > /dev/null 2>&1; then
+    qmltest=$(mktemp --suffix=.qml)
+    printf '%s\n' 'import QtQuick' 'import Qt5Compat.GraphicalEffects' \
+        'Item { width: 64; height: 64; Rectangle { id: r; anchors.fill: parent; color: "#7c5cff" }' \
+        '  Glow { anchors.fill: r; source: r; radius: 4 }' \
+        '  Component.onCompleted: { console.log("QML-OK"); Qt.quit() } }' > "$qmltest"
+    qmlout=$(QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software timeout 60 \
+        /usr/lib/qt6/bin/qml "$qmltest" 2>&1) || true
+    printf '%s\n' "$qmlout"
+    [[ $qmlout == *QML-OK* ]]
+    rm -f "$qmltest"
+fi
 echo "firmware $(du -sh /usr/lib/firmware | cut -f1), iwd works"
 
 # every program and library finds what it links to

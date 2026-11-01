@@ -73,3 +73,24 @@ This uses Qt's offscreen platform: it checks runtime linkage and rendering,
 not compositor integration, mouse interaction or authentication cancellation.
 After the boot tests pass, `installer-test-iso` retains the ISO and checksum
 for three days as an Actions artifact. Branch builds never publish a release.
+
+## Build on the owner's Windows PC
+
+Run the bootstrap manually on `codex/installer-gui`, with `use_pc` selected,
+after registering the Ubuntu 24.04 WSL2 runner with the custom label
+`yurei-pc`. This branch's workflow allows that option only for the repository
+owner on main, the Qt branch or the installer branch. Push builds continue
+to use GitHub-hosted runners; the installer branch itself builds on demand.
+The legacy `YUREI_RUNNER` variable is not used by this workflow revision.
+
+The account must be `runner`, with passwordless sudo and write access to
+`/dev/kvm`. Keep the build on `/home/runner`'s ext4 filesystem. Before cleanup
+or downloads, the workflow checks these conditions and at least 150 GiB of
+actual Windows free space through `/mnt/c`; 200 GiB is preferable. The WSL
+virtual disk's advertised capacity does not establish host free space.
+
+A registered runner executes repository code with this account's sudo
+privileges. WSL can also access Windows-mounted files. The custom runner
+label and dispatch guard reduce accidental scheduling; they do not isolate
+untrusted code. Only run reviewed commits, and stop the runner service when
+it is not needed. Pull-request jobs remain on GitHub-hosted runners.
