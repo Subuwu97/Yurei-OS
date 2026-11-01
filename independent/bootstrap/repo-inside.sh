@@ -58,6 +58,23 @@ setup() {
             "/sources/pyelftools-$(version pyelftools).tar.gz"
     rm -rf "$repo" "$srv/sources" "$stamps"
     install -d -o "$user" "$repo" "$srv/sources"
+    # ninja runs a job per core (and two more) unless told otherwise, and a
+    # C++ job of LLVM's or Qt's can take 2.5 GB: on a machine with many
+    # cores and less memory, the compiler is killed. Recipes' ninja gets
+    # at most one job per 2.5 GB available. (Not in makepkg.conf: that is
+    # part of every recipe's hash, and the packages are the same either way.)
+    local mem
+    mem=$(awk '/^MemAvailable:/ {print int($2 / 2621440)}' /proc/meminfo)
+    jobs=$(( $(nproc) + 2 ))
+    (( mem >= 1 && mem < jobs )) && jobs=$mem
+    install -d "$srv/bin"
+    cat > "$srv/bin/ninja" <<'NINJA'
+#!/bin/sh
+for a in "$@"; do case $a in -j*) exec /usr/bin/ninja "$@";; esac; done
+exec /usr/bin/ninja -j"${YUREI_JOBS:?}" "$@"
+NINJA
+    chmod 755 "$srv/bin/ninja"
+    echo "recipes' ninja runs $jobs jobs at a time"
     install -d "$stamps"
     # makepkg wants a download folder it can write to; /sources is mounted
     # read-only, so it gets one with links to the verified files
@@ -144,7 +161,7 @@ packages() {
         as_user mkdir -p build
         cp -r "$recipes/$name" "$(home)/build/"
         chown -R "$user:" "$(home)/build/$name"
-        as_user sh -c "cd build/$name && $env makepkg --nodeps --sign --key $fpr --noconfirm --noprogressbar"
+        as_user sh -c "cd build/$name && PATH=$srv/bin:\$PATH YUREI_JOBS=$jobs $env makepkg --nodeps --sign --key $fpr --noconfirm --noprogressbar"
         as_user sh -c "cd build/$name && $env makepkg --packagelist" | xargs -n1 basename > "$stamps/$name.files"
         # Yūrei's libraries live in /usr/lib (/usr/lib64 is a link to it)
         while read -r file; do
