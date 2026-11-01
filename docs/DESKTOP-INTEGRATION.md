@@ -16,6 +16,8 @@ Current build milestone:
 - Build ECM, Plasma Wayland protocols and the first Frameworks tiers.
 - The next 19 Frameworks recipes use dependencies read from the verified 6.18
   upstream CMake files; runtime compilation is still being validated.
+- Qt Sensors, Positioning and Location 6.9.3 recipes are pinned for KWin and
+  Plasma workspace; these still need compilation on the runner.
 - Recheck clean installation, shared libraries, ISO boot and installation.
 
 Remaining before the target image can be called Plasma-ready:
