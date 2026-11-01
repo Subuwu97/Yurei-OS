@@ -65,3 +65,11 @@ uses the GUI's stdin-password/device-binding protocol, installs onto a new
 root/EFI mounts and sudo. The seed predates Qt and the greeter, so this validates
 the backend handoff and installed console system, not the graphical application
 inside the eventual Qt-enabled image or its desktop authentication dialog.
+
+The bootstrap workflow also builds `codex/installer-gui` on a GitHub-hosted
+runner. That branch must render all six previews with the actual live image's
+GUI binary and Qt libraries before its stdin-protocol installation/reboot test.
+This uses Qt's offscreen platform: it checks runtime linkage and rendering,
+not compositor integration, mouse interaction or authentication cancellation.
+After the boot tests pass, `installer-test-iso` retains the ISO and checksum
+for three days as an Actions artifact. Branch builds never publish a release.

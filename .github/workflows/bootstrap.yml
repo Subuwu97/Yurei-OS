@@ -8,7 +8,7 @@ name: Independent bootstrap
 on:
   workflow_dispatch:
   push:
-    branches: [main, codex/qt6-bootstrap]
+    branches: [main, codex/qt6-bootstrap, codex/installer-gui]
     paths: ["independent/**", ".github/workflows/bootstrap.yml"]
 
 # contents: write publishes the live ISO as a test release; actions: write
@@ -359,7 +359,18 @@ jobs:
           sudo YUREI="$YUREI" OUT=/home/runner/yurei-boot independent/bootstrap/boot-test.sh
 
       - name: Boot the live ISO on UEFI (as a PC would)
-        run: sudo ISO="$(ls /home/runner/yurei-iso/*.iso)" ESP=/home/runner/yurei-esp OUT=/home/runner/yurei-boot independent/bootstrap/iso-test.sh
+        run: sudo ISO="$(ls /home/runner/yurei-iso/*.iso)" ESP=/home/runner/yurei-esp OUT=/home/runner/yurei-boot YUREI_TEST_INSTALLER_GUI="${{ github.ref == 'refs/heads/codex/installer-gui' && '1' || '0' }}" independent/bootstrap/iso-test.sh
+
+      - name: Keep the installer branch test ISO
+        if: github.ref == 'refs/heads/codex/installer-gui'
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-test-iso
+          path: |
+            /home/runner/yurei-iso/*.iso
+            /home/runner/yurei-iso/*.sha256
+          compression-level: 0
+          retention-days: 3
 
       # Every ISO that boots in the test above is published as a test release.
       - name: Publish the live ISO as a test release
@@ -416,7 +427,9 @@ jobs:
         if: always()
         with:
           name: boot-log
-          path: /home/runner/yurei-boot/*.log
+          path: |
+            /home/runner/yurei-boot/*.log
+            /home/runner/yurei-boot/*.json
           if-no-files-found: ignore
 
       - name: Source checksums (to pin in sources.lock)

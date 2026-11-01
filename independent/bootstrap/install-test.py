@@ -25,6 +25,7 @@ parser.add_argument("firmware")
 parser.add_argument("out")
 parser.add_argument("--backend", type=Path, help="inject this backend into the live VM's RAM")
 parser.add_argument("--gui-protocol", action="store_true", help="test the GUI's stdin-password/device-binding protocol")
+parser.add_argument("--gui-preview-check", action="store_true", help="render the installed GUI in the live guest before installation")
 parser.add_argument("--disk-size-gib", type=int, default=16)
 parser.add_argument("--expected-session", choices=("greeter", "console"), default="greeter")
 args = parser.parse_args()
@@ -119,6 +120,18 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
             live.send(f"base64 -d /run/yurei-backend.b64 > {backend} && chmod 700 {backend} && "
                       f"echo '{digest}  {backend}' | sha256sum -c - && echo BACKEND-''READY || echo BACKEND-''BAD")
             ready = check("injected backend matches the reviewed source", ready and live.wait("BACKEND-READY", 60, fail="BACKEND-BAD"))
+        if ready and args.gui_preview_check:
+            # Execute Yurei's own binary and Qt libraries, not the host's Qt.
+            # Offscreen preview does not inventory disks or launch the backend.
+            live.send("mkdir -p /run/yurei-gui-check && "
+                      "for page in 0 1 2 3 4 5; do "
+                      "QT_QPA_PLATFORM=offscreen /usr/bin/yurei-install-gui --preview "
+                      "--page \"$page\" --screenshot /run/yurei-gui-check/page-$page.png "
+                      "&& test -s /run/yurei-gui-check/page-$page.png || break; "
+                      "done; "
+                      "if [ \"$(find /run/yurei-gui-check -name 'page-*.png' -size +0c | wc -l)\" -eq 6 ]; "
+                      "then echo GUI-''READY; else echo GUI-''FAILED; fi")
+            ready = check("all six GUI previews render with the live image's Qt", live.wait("GUI-READY", 180, fail="GUI-FAILED"))
         if ready:
             command = backend + " --disk /dev/vda --hostname yurei-installed --user tester --yes "
             command += "--kernel-options 'console=ttyS0,115200 systemd.tty.term.ttyS0=dumb' "
@@ -162,7 +175,8 @@ if all(results):
 os.remove(disk)
 Path(out, "install-result.json").write_text(json.dumps({
     "iso": Path(iso).name, "backend_sha256": hashlib.sha256(args.backend.read_bytes()).hexdigest() if args.backend else None,
-    "gui_protocol": args.gui_protocol, "disposable_disk_gib": args.disk_size_gib,
+    "gui_protocol": args.gui_protocol, "gui_preview_check": args.gui_preview_check,
+    "disposable_disk_gib": args.disk_size_gib,
     "expected_session": args.expected_session, "checks": checks,
 }, indent=2) + "\n", encoding="utf-8")
 sys.exit(0 if results and all(results) else 1)
