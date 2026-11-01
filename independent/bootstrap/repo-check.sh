@@ -165,7 +165,9 @@ if pacman -Q qt6-declarative qt6-5compat qt6-svg > /dev/null 2>&1; then
         'Item { width: 64; height: 64; Rectangle { id: r; anchors.fill: parent; color: "#7c5cff" }' \
         '  Glow { anchors.fill: r; source: r; radius: 4 }' \
         '  Component.onCompleted: { console.log("QML-OK"); Qt.quit() } }' > "$qmltest"
-    qmlout=$(QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software timeout 60 \
+    # Qt is built with journald support. Force diagnostics into this captured
+    # stream rather than a journal socket outside the fresh chroot.
+    qmlout=$(QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software timeout 60 \
         /usr/lib/qt6/bin/qml "$qmltest" 2>&1) || true
     printf '%s\n' "$qmlout"
     [[ $qmlout == *QML-OK* ]]
