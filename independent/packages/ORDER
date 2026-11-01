@@ -226,3 +226,27 @@ qt6-wayland
 qt6-5compat
 qt6-imageformats
 qt6-tools
+# Twenty-third batch (stage 5, KDE Plasma): KDE's CMake modules, Plasma's
+# Wayland protocols, and KDE Frameworks 6.18's first tier.
+extra-cmake-modules
+plasma-wayland-protocols
+karchive
+kcodecs
+kconfig
+kcoreaddons
+kdbusaddons
+kguiaddons
+ki18n
+kidletime
+kitemmodels
+kitemviews
+kwidgetsaddons
+kwindowsystem
+solid
+sonnet
+threadweaver
+syntax-highlighting
+kirigami
+breeze-icons
+attica
+kplotting
