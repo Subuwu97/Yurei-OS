@@ -1,0 +1,62 @@
+name: Plasma protocol package check
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/plasma-bootstrap-fixes]
+    paths:
+      - independent/packages/plasma-wayland-protocols/**
+      - .github/workflows/plasma-protocols.yml
+  pull_request:
+    paths:
+      - independent/packages/plasma-wayland-protocols/**
+      - .github/workflows/plasma-protocols.yml
+
+permissions:
+  contents: read
+
+jobs:
+  protocols-without-qt:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install host build tools (no Qt)
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++ curl xz-utils
+      - name: Build the pinned ECM and the actual protocol recipe
+        shell: bash
+        run: |
+          set -euo pipefail
+          checkout=$PWD
+          work=$(mktemp -d)
+          fetch_recipe() {
+            local recipe=$1
+            source "$checkout/independent/packages/$recipe/PKGBUILD"
+            curl --fail --location --retry 3 "${source[0]}" -o source.tar.xz
+            printf '%s  source.tar.xz\n' "${sha256sums[0]}" | sha256sum --check -
+            tar xf source.tar.xz
+          }
+          mkdir "$work/ecm"
+          cd "$work/ecm"
+          fetch_recipe extra-cmake-modules
+          build
+          pkgdir="$work/ecm-root"
+          package
+          export CMAKE_PREFIX_PATH="$pkgdir/usr"
+          mkdir "$work/protocols"
+          cd "$work/protocols"
+          fetch_recipe plasma-wayland-protocols
+          build
+          pkgdir="$work/protocol-package"
+          package
+          test -f "$pkgdir/usr/lib/cmake/PlasmaWaylandProtocols/PlasmaWaylandProtocolsConfig.cmake"
+          python3 - "$pkgdir" <<'PY'
+          import sys
+          from pathlib import Path
+          from xml.etree import ElementTree
+          protocols = list(Path(sys.argv[1], 'usr/share/plasma-wayland-protocols').glob('*.xml'))
+          assert protocols, 'Protocol XML payload is missing'
+          for path in protocols:
+              assert ElementTree.parse(path).getroot().tag == 'protocol', path
+          print(f'Installed and parsed {len(protocols)} protocol XML files without a Qt dependency')
+          PY
