@@ -231,6 +231,9 @@ CONF
         exit 1
     fi
     umount "$root/proc" "$root/dev"
+    if [[ -d $root/tmp/yurei-gui-previews ]]; then
+        cp -r "$root/tmp/yurei-gui-previews" "$srv/gui-previews"
+    fi
     gpgconf --homedir "$gnupg" --kill all
     as_user gpgconf --kill all
     rm -rf "$root" "$gnupg" "$srv/cache" "$srv/pacman.conf" "$srv/sources"

@@ -173,6 +173,24 @@ if pacman -Q qt6-declarative qt6-5compat qt6-svg > /dev/null 2>&1; then
     [[ $qmlout == *QML-OK* ]]
     rm -f "$qmltest"
 fi
+if pacman -Q yurei-install-gui > /dev/null 2>&1; then
+    mkdir -p /tmp/yurei-gui-previews
+    for page in 0 1 2 3 4 5; do
+        QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen timeout 30 \
+            yurei-install-gui --preview --page "$page" \
+            --screenshot "/tmp/yurei-gui-previews/installer-$page.png"
+    done
+    python3 - <<'PY'
+from pathlib import Path
+import struct
+for page in range(6):
+    image = Path(f'/tmp/yurei-gui-previews/installer-{page}.png').read_bytes()
+    assert image[:8] == b'\x89PNG\r\n\x1a\n'
+    width, height = struct.unpack('>II', image[16:24])
+    assert width >= 800 and height >= 600, (page, width, height)
+print('All six native installer screens render with Yurei Qt')
+PY
+fi
 echo "firmware $(du -sh /usr/lib/firmware | cut -f1), iwd works"
 
 # every program and library finds what it links to

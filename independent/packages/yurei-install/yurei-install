@@ -14,6 +14,7 @@ set -euo pipefail
 target=/mnt/yurei-target
 rootfs=/run/live/rootfs
 disk='' hostname='' user='' yes='' kernel_options=''
+passwords_stdin='' expected_disk_bytes='' expected_disk_device=''
 
 die() { echo "yurei-install: $*" >&2; exit 1; }
 say() { printf '\n== %s\n' "$*"; }
@@ -25,6 +26,9 @@ while (( $# )); do
         --user) user=$2; shift ;;
         --kernel-options) kernel_options=$2; shift ;;
         --yes) yes=1 ;;
+        --passwords-stdin) passwords_stdin=1 ;;
+        --expected-disk-bytes) expected_disk_bytes=$2; shift ;;
+        --expected-disk-device) expected_disk_device=$2; shift ;;
         -h|--help) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) die "unknown option $1 (see --help)" ;;
     esac
@@ -34,6 +38,8 @@ done
 [[ $EUID -eq 0 ]] || die "run as root"
 [[ -d /sys/firmware/efi ]] || die "this PC started in legacy BIOS mode; Yūrei installs for UEFI only (start the live system in UEFI mode)"
 mountpoint -q "$rootfs" || die "run from the Yūrei live system ($rootfs isn't there)"
+exec 9>/run/yurei-install.lock
+flock -n 9 || die "another installation is already running"
 
 # --- which disk ------------------------------------------------------------
 
@@ -73,6 +79,28 @@ found=
 for d in "${disks[@]}"; do [[ $d == "$disk" ]] && found=1; done
 [[ -n $found ]] || die "$disk isn't a disk Yūrei can install to (choose from: ${disks[*]})"
 
+check_target() {
+    local bytes device mounts l
+    [[ $(lsblk -dn -o TYPE "$disk") == disk ]] || die "the selected device is no longer a whole disk"
+    [[ $(lsblk -dn -o RO "$disk" | tr -d '[:space:]') == 0 ]] || die "the selected disk is read-only"
+    for l in $(live_disk); do [[ $disk != "$l" ]] || die "the selected disk holds the live system"; done
+    mounts=$(lsblk -n -o MOUNTPOINTS "$disk" | sed '/^[[:space:]]*$/d')
+    [[ -z $mounts ]] || die "unmount the selected disk's filesystems before installing"
+    bytes=$(blockdev --getsize64 "$disk")
+    device=$(lsblk -dn -o MAJ:MIN "$disk" | tr -d ' ')
+    if [[ -n $expected_disk_bytes ]]; then
+        [[ $expected_disk_bytes =~ ^[0-9]+$ && $bytes == "$expected_disk_bytes" ]] || die "the selected disk's size changed; select it again"
+    fi
+    if [[ -n $expected_disk_device ]]; then
+        [[ $expected_disk_device =~ ^[0-9]+:[0-9]+$ && $device == "$expected_disk_device" ]] || die "the selected device changed; select it again"
+    fi
+    (( bytes >= required_bytes )) || die "the selected disk is too small for this live system"
+}
+live_bytes=$(du -sb "$rootfs" | cut -f1)
+[[ $live_bytes =~ ^[0-9]+$ ]] || die "couldn't determine the live system's size"
+required_bytes=$(( live_bytes + live_bytes / 5 + 1073741824 ))
+check_target
+
 # --- names and passwords ----------------------------------------------------
 
 valid_name() { [[ $1 =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]; }
@@ -81,11 +109,15 @@ while [[ -z $hostname ]]; do
     hostname=${hostname:-yurei}
     [[ $hostname =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]{0,62})$ ]] || { echo "Letters, digits and - only."; hostname=; }
 done
+[[ $hostname =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]{0,62})$ ]] || die "invalid computer name"
 while [[ -z $user ]]; do
     read -rp "Your user name (lower case): " user
     valid_name "$user" || { echo "Lower-case letters, digits, - and _ only, starting with a letter."; user=; }
 done
 valid_name "$user" || die "user name $user isn't valid"
+[[ -f "$rootfs/etc/passwd" ]] || die "the live system has no account database"
+grep -q '^wheel:' "$rootfs/etc/group" || die "the live system has no administrator group"
+! grep -q "^$user:" "$rootfs/etc/passwd" || die "choose a new user name; $user already exists in the live system"
 
 ask_password() {  # PROMPT VAR
     local a b
@@ -99,6 +131,11 @@ ask_password() {  # PROMPT VAR
 }
 user_password=${YUREI_USER_PASSWORD:-}
 root_password=${YUREI_ROOT_PASSWORD:-}
+if [[ -n $passwords_stdin ]]; then
+    IFS= read -r user_password || die "missing user password on standard input"
+    IFS= read -r root_password || die "missing administrator password on standard input"
+    [[ -n $user_password && -n $root_password ]] || die "passwords must not be empty"
+fi
 [[ -n $user_password ]] || ask_password "Password for $user" user_password
 [[ -n $root_password ]] || ask_password "Password for root (administrator)" root_password
 
@@ -113,6 +150,8 @@ fi
 
 # --- partitions -------------------------------------------------------------
 
+# Recheck after account entry and authorization, immediately before writing.
+check_target
 say "Partitioning $disk"
 umount -R "$target" 2>/dev/null || true
 for p in $(lsblk -lnpo NAME "$disk" | tail -n +2); do umount "$p" 2>/dev/null || true; done
@@ -165,11 +204,28 @@ in_target() { chroot "$target" "$@"; }
 # an administrator (wheel), with the screen and input devices (seat) and
 # sound, video and game controllers
 in_target systemd-sysusers
-in_target useradd -m -G wheel,seat,video,input,audio,render -s /bin/bash "$user"
+groups=wheel
+for group in seat video input audio render; do
+    if in_target getent group "$group" >/dev/null; then groups+=,$group; fi
+done
+in_target useradd -m -G "$groups" -s /bin/bash "$user"
 printf 'root:%s\n%s:%s\n' "$root_password" "$user" "$user_password" | in_target chpasswd
 
-# the graphical login screen on the first screen, and seatd for the desktop
-in_target systemctl enable seatd.service yurei-greeter.service
+# Enable the login stack actually present in this image. SDDM takes priority
+# once Plasma ships; older independent images can still install to a console.
+if [[ -f $target/usr/lib/systemd/system/seatd.service ]]; then
+    in_target systemctl enable seatd.service
+fi
+if [[ -f $target/usr/lib/systemd/system/sddm.service ]]; then
+    in_target systemctl disable yurei-greeter.service >/dev/null 2>&1 || true
+    in_target systemctl enable sddm.service
+    in_target systemctl set-default graphical.target
+elif [[ -f $target/usr/lib/systemd/system/yurei-greeter.service ]]; then
+    in_target systemctl enable yurei-greeter.service
+    in_target systemctl set-default graphical.target
+else
+    in_target systemctl set-default multi-user.target
+fi
 
 say "Boot menu (systemd-boot)"
 # with a boot entry in the PC's firmware where it allows one; disks also

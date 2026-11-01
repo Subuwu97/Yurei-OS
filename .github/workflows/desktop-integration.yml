@@ -1,0 +1,97 @@
+name: Desktop integration test ISO
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/desktop-integration]
+    paths:
+      - independent/**
+      - .github/workflows/desktop-integration.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: yurei-pc-iso-recovery
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    if: github.actor == 'Subuwu97'
+    runs-on: yurei-pc
+    timeout-minutes: 150
+    env:
+      YUREI: /home/runner/yurei-root
+      SOURCES: /home/runner/yurei-sources
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require the previous build and complete local package cache
+        run: |
+          set -euo pipefail
+          test "$(id -un)" = runner
+          sudo -n true
+          test -w /dev/kvm
+          sudo test -x "$YUREI/usr/bin/gcc"
+          test -d "$SOURCES"
+          test -f /home/runner/yurei-pkgcache/stamps/qt6-tools.hash
+          test -f /home/runner/yurei-pkgcache/stamps/nvidia-utils.hash
+          free -h
+          df -h /home/runner /mnt/c
+      - name: Verify sources and package recipes
+        run: |
+          independent/bootstrap/fetch.sh
+          independent/packages/check-recipes.py
+      - name: Reuse the existing system and rebuild only changed packages
+        run: |
+          set -euo pipefail
+          # The previous run copied every completed package here before it
+          # removed /srv/yurei. Never discard this local cache at startup.
+          sudo rm -rf "$YUREI/srv/yurei"
+          sudo mkdir -p "$YUREI/srv/yurei/previous/stamps"
+          sudo cp -r independent/packages "$YUREI/srv/yurei/recipes"
+          sudo cp -r /home/runner/yurei-pkgcache/. "$YUREI/srv/yurei/previous/"
+          # The failed repository check left its temporary build account.
+          # Reset that account so setup can make a fresh throwaway signing key.
+          if sudo chroot "$YUREI" /usr/bin/getent passwd yurei-builder >/dev/null; then
+            sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh repo-inside.sh cleanup
+          fi
+          sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh repo-inside.sh
+      - name: Create the test ISO
+        run: |
+          sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh iso-inside.sh
+          sudo YUREI="$YUREI" OUT=/home/runner/yurei-iso \
+            ISO_NAME="yurei-independent-desktop-${GITHUB_RUN_ID}-x86_64.iso" independent/bootstrap/iso.sh
+          sudo chown -R "$(id -u):$(id -g)" /home/runner/yurei-iso
+      - name: Boot the ISO as DVD and USB, install and reboot a virtual disk
+        run: |
+          sudo ISO="/home/runner/yurei-iso/yurei-independent-desktop-${GITHUB_RUN_ID}-x86_64.iso" \
+            OUT=/home/runner/yurei-boot independent/bootstrap/iso-test.sh
+      - name: Downloadable tested ISO and checksum
+        uses: actions/upload-artifact@v4
+        with:
+          name: yurei-desktop-integration-iso
+          path: |
+            /home/runner/yurei-iso/yurei-independent-desktop-${{ github.run_id }}-x86_64.iso
+            /home/runner/yurei-iso/yurei-independent-desktop-${{ github.run_id }}-x86_64.iso.sha256
+          compression-level: 0
+          retention-days: 3
+      - name: Preserve completed packages locally for the next attempt
+        if: always()
+        run: |
+          if sudo test -d "$YUREI/srv/yurei/stamps"; then
+            sudo cp "$YUREI"/srv/yurei/repo/*.pkg.tar.zst /home/runner/yurei-pkgcache/
+            sudo cp -r "$YUREI/srv/yurei/stamps/." /home/runner/yurei-pkgcache/stamps/
+            sudo chown -R "$(id -u):$(id -g)" /home/runner/yurei-pkgcache
+          fi
+      - name: Make boot diagnostics readable
+        if: always()
+        run: sudo chmod -R a+rX /home/runner/yurei-boot 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: desktop-integration-diagnostics
+          path: |
+            /home/runner/yurei-boot/*.log
+            /home/runner/yurei-boot/*.json
+            /home/runner/yurei-root/srv/yurei/gui-previews/*.png
+          if-no-files-found: ignore

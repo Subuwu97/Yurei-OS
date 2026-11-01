@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Install Yūrei
+Comment=Install the independent Yūrei system
+Exec=yurei-install-gui
+TryExec=/run/live/rootfs/usr/bin/yurei-install-gui
+Icon=system-software-install
+Categories=System;
+Terminal=false
