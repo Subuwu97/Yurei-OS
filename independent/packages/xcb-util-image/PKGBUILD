@@ -1,0 +1,23 @@
+# Maintainer: Yurei Linux project
+# XCB helpers required by Qt's X11 platform plugin.
+pkgname=xcb-util-image
+pkgver=0.4.1
+pkgrel=1
+pkgdesc="XCB helpers for Qt: xcb-util-image"
+arch=(x86_64)
+url="https://www.x.org/"
+license=(MIT)
+depends=(libxcb xcb-util)
+source=("https://www.x.org/releases/individual/lib/xcb-util-image-$pkgver.tar.xz")
+sha256sums=('ccad8ee5dadb1271fd4727ad14d9bd77a64e505608766c4e98267d9aede40d3d')
+
+build() {
+    cd xcb-util-image-$pkgver
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static
+    make
+}
+
+package() {
+    cd xcb-util-image-$pkgver
+    make DESTDIR="$pkgdir" install
+}

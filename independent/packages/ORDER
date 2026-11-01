@@ -96,7 +96,6 @@ mtdev
 libevdev
 xkeyboard-config
 libxml2
-libxkbcommon
 # Thirteenth batch (stage 3): the X11 client libraries (for Xwayland and Mesa's X11 drivers).
 util-macros
 xorgproto
@@ -122,6 +121,7 @@ libxshmfence
 libxxf86vm
 xcb-util-wm
 xcb-util-keysyms
+libxkbcommon
 # Eighth batch (stage 3): the graphics drivers (Mesa), and what builds them.
 cmake
 python-mako
@@ -213,3 +213,16 @@ sof-firmware
 alsa-ucm-conf
 yurei-desktop
 yurei-greeter
+# Twenty-second batch: Qt 6 and the XCB helpers its X11 plugin requires.
+xcb-util
+xcb-util-image
+xcb-util-renderutil
+xcb-util-cursor
+qt6-base
+qt6-shadertools
+qt6-svg
+qt6-declarative
+qt6-wayland
+qt6-5compat
+qt6-imageformats
+qt6-tools

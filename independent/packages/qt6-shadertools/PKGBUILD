@@ -11,12 +11,12 @@ url="https://www.qt.io/"
 license=(LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only)
 depends=(qt6-base)
 options=(!lto)
-source=("https://download.qt.io/official_releases/qt/6.9/$pkgver/submodules/qtshadertools-everywhere-src-$pkgver.tar.xz")
-sha256sums=('PIN')
+source=("https://download.qt.io/archive/qt/6.9/$pkgver/submodules/qtshadertools-everywhere-src-$pkgver.tar.xz")
+sha256sums=('629804ee86a35503e4b616f9ab5175caef3da07bd771cf88a24da3b5d4284567')
 
 build() {
     cmake -S qtshadertools-everywhere-src-$pkgver -B build -G Ninja \
-        -DCMAKE_INSTALL_PREFIX=/usr -DINSTALL_PUBLICBINDIR=usr/bin -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr -DINSTALL_PUBLICBINDIR=bin -DCMAKE_BUILD_TYPE=Release \
         -DQT_BUILD_TESTS=OFF -DQT_BUILD_EXAMPLES=OFF
     cmake --build build
 }
@@ -25,10 +25,12 @@ package() {
     DESTDIR="$pkgdir" cmake --install build
     # the tools people run also in /usr/bin, as Qt lists them
     if [[ -f "$srcdir/build/user_facing_tool_links.txt" ]]; then
-        cd "$pkgdir"
-        mkdir -p usr/bin
+        mkdir -p "$pkgdir/usr/bin"
+        cd "$pkgdir/usr"
+        # Qt emits a target relative to /usr/bin and a link relative to /usr.
         while read -r target link; do
-            ln -s "/$target" "$link"
+            [[ -n $target && -n $link ]] || continue
+            ln -s "$target" "$link"
         done < "$srcdir/build/user_facing_tool_links.txt"
     fi
 }
