@@ -226,3 +226,5 @@ qt6-wayland
 qt6-5compat
 qt6-imageformats
 qt6-tools
+# Graphical front end for the independent installer (the CLI stays available).
+yurei-install-gui

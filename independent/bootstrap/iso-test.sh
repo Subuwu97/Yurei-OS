@@ -82,7 +82,11 @@ else
 fi
 
 # install onto a blank disk with yurei-install, then start from that disk
-"$(dirname "$0")/install-test.py" "$iso" "$firmware" "$out" || fail=1
+install_args=()
+if [[ ${YUREI_TEST_INSTALLER_GUI:-0} == 1 ]]; then
+    install_args=(--gui-preview-check --gui-protocol --disk-size-gib 32)
+fi
+"$(dirname "$0")/install-test.py" "$iso" "$firmware" "$out" "${install_args[@]}" || fail=1
 for log in "$out"/install-*.log; do
     [[ -f $log ]] && { echo "-- ${log##*/}"; cat -v "$log" | tail -n 40; }
 done
