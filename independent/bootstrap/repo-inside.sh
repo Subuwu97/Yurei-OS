@@ -58,23 +58,6 @@ setup() {
             "/sources/pyelftools-$(version pyelftools).tar.gz"
     rm -rf "$repo" "$srv/sources" "$stamps"
     install -d -o "$user" "$repo" "$srv/sources"
-    # ninja runs a job per core (and two more) unless told otherwise, and a
-    # C++ job of LLVM's or Qt's can take 2.5 GB: on a machine with many
-    # cores and less memory, the compiler is killed. Recipes' ninja gets
-    # at most one job per 2.5 GB available. (Not in makepkg.conf: that is
-    # part of every recipe's hash, and the packages are the same either way.)
-    local mem
-    mem=$(awk '/^MemAvailable:/ {print int($2 / 2621440)}' /proc/meminfo)
-    jobs=$(( $(nproc) + 2 ))
-    (( mem >= 1 && mem < jobs )) && jobs=$mem
-    install -d "$srv/bin"
-    cat > "$srv/bin/ninja" <<'NINJA'
-#!/bin/sh
-for a in "$@"; do case $a in -j*) exec /usr/bin/ninja "$@";; esac; done
-exec /usr/bin/ninja -j"${YUREI_JOBS:?}" "$@"
-NINJA
-    chmod 755 "$srv/bin/ninja"
-    echo "recipes' ninja runs $jobs jobs at a time"
     install -d "$stamps"
     # makepkg wants a download folder it can write to; /sources is mounted
     # read-only, so it gets one with links to the verified files
@@ -96,6 +79,28 @@ CONF
 }
 
 # The recipe's files and the build settings, as one hash.
+# ninja_jobs: sets $jobs and writes the ninja recipes run (each step of
+# this script runs on its own, so packages calls it)
+ninja_jobs() {
+    # ninja runs a job per core (and two more) unless told otherwise, and a
+    # C++ job of LLVM's or Qt's can take 2.5 GB: on a machine with many
+    # cores and less memory, the compiler is killed. Recipes' ninja gets
+    # at most one job per 2.5 GB available. (Not in makepkg.conf: that is
+    # part of every recipe's hash, and the packages are the same either way.)
+    local mem
+    mem=$(awk '/^MemAvailable:/ {print int($2 / 2621440)}' /proc/meminfo)
+    jobs=$(( $(nproc) + 2 ))
+    (( mem >= 1 && mem < jobs )) && jobs=$mem
+    install -d "$srv/bin"
+    cat > "$srv/bin/ninja" <<'NINJA'
+#!/bin/sh
+for a in "$@"; do case $a in -j*) exec /usr/bin/ninja "$@";; esac; done
+exec /usr/bin/ninja -j"${YUREI_JOBS:?}" "$@"
+NINJA
+    chmod 755 "$srv/bin/ninja"
+    echo "recipes' ninja runs $jobs jobs at a time"
+}
+
 recipe_hash() {
     { cd "$recipes/$1" && find . -type f -print0 | sort -z | xargs -0 sha256sum
       cat "$srv/makepkg.conf"; } | sha256sum | cut -c1-64
@@ -140,6 +145,7 @@ install_here() {
 # booted system and the ISO don't carry them.
 packages() {
     local name flag fpr start hash env install='' buildonly=()
+    ninja_jobs
     fpr=$(fingerprint)
     # the public key, for the yurei-keyring recipe
     as_user gpg --batch --armor --export "$fpr" > "$srv/signing-key.asc"
