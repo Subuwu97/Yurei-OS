@@ -68,7 +68,9 @@ source /etc/makepkg.conf
 CFLAGS="-march=x86-64 -mtune=generic -O2 -pipe"
 CXXFLAGS="\$CFLAGS"
 LDFLAGS="-Wl,-O1 -Wl,--sort-common -Wl,--as-needed"
-MAKEFLAGS="-j$(nproc)"
+# (as written, not this machine's number: the settings are part of each
+# recipe's hash, and a package built with -j4 is the same as one with -j20)
+MAKEFLAGS="-j\$(nproc)"
 OPTIONS=(strip docs !libtool !staticlibs emptydirs zipman purge !debug !lto)
 BUILDENV=(!distcc color !ccache !check !sign)
 PACKAGER="Yūrei build <build@yurei.invalid>"

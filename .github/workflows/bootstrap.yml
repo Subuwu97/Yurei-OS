@@ -347,11 +347,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           KEEP_PKGS: yurei-pkgs-${{ github.run_id }}
           KEEP_SOURCES: yurei-sources-${{ hashFiles('independent/bootstrap/sources.lock') }}
+          RESULT: ${{ job.status }}
         run: |
           command -v gh > /dev/null || { echo "no gh here; leaving the caches"; exit 0; }
-          # (the newest sources are kept as well: this run saves its own only
-          # if it succeeds)
-          { gh cache list --repo "$GITHUB_REPOSITORY" --key yurei-pkgs- --limit 100 --json key --jq '.[].key'
+          # a run that failed may have rebuilt only a few packages before it
+          # stopped, so the newest earlier package cache stays as well; and
+          # the newest sources are kept (this run saves its own only if it
+          # succeeds)
+          skip=1; [[ $RESULT == success ]] || skip=2
+          { gh cache list --repo "$GITHUB_REPOSITORY" --key yurei-pkgs- --limit 100 \
+              --sort created_at --order desc --json key --jq '.[].key' |
+              grep -vx -e "$KEEP_PKGS" | tail -n +"$skip"
             gh cache list --repo "$GITHUB_REPOSITORY" --key yurei-sources- --limit 100 \
               --sort created_at --order desc --json key --jq '.[1:][].key'
           } | grep -vx -e "$KEEP_PKGS" -e "$KEEP_SOURCES" | while read -r key; do
