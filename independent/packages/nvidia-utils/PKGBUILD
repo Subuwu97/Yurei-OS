@@ -4,18 +4,18 @@
 # kernel modules as source (built with Yūrei's kernel, in the linux recipe,
 # at this same version) and the rest only as its own installer, which this
 # unpacks: the Vulkan driver, GBM and EGL for Wayland, the GPU firmware and
-# nvidia-smi. OpenGL through it needs libglvnd, which Yūrei doesn't have
-# yet; Vulkan games (DXVK, vkd3d-proton) don't. The source address and sum
+# nvidia-smi. Vendor-neutral OpenGL/EGL loaders come from libglvnd;
+# this package supplies NVIDIA's vendor libraries. The source address and sum
 # are the ones in independent/bootstrap/sources.lock; check-recipes.py
 # keeps them the same.
 pkgname=nvidia-utils
 pkgver=595.112.07
-pkgrel=1
+pkgrel=2
 pkgdesc="NVIDIA's driver (Vulkan, Wayland, firmware) for RTX 20-series and newer; prime-run runs a program on it"
 arch=(x86_64)
 url="https://www.nvidia.com/"
 license=(LicenseRef-NVIDIA)
-depends=(glibc linux libdrm wayland mesa vulkan-icd-loader)
+depends=(glibc linux libdrm wayland mesa libglvnd vulkan-icd-loader)
 options=(!strip !debug)
 source=("https://download.nvidia.com/XFree86/Linux-x86_64/$pkgver/NVIDIA-Linux-x86_64-$pkgver.run")
 noextract=("NVIDIA-Linux-x86_64-$pkgver.run")
@@ -34,6 +34,9 @@ package() {
     # GTK parts aren't used here); ldconfig makes the soname links
     for f in lib*.so.*; do
         case $f in
+            # NVIDIA bundles libglvnd too; its loaders belong to libglvnd,
+            # otherwise pacman refuses to install the two packages together.
+            libEGL.so.*|libGL.so.*|libGLESv1_CM.so.*|libGLESv2.so.*|libGLX.so.*|libGLdispatch.so.*|libOpenGL.so.*) continue ;;
             libglxserver_nvidia*|libnvidia-gtk*|libnvidia-wayland-client*) continue ;;
         esac
         install -m755 "$f" "$lib/"
