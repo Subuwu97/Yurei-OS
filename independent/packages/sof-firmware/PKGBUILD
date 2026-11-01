@@ -6,7 +6,7 @@
 # them the same.
 pkgname=sof-firmware
 pkgver=2025.12.2
-pkgrel=1
+pkgrel=2
 pkgdesc="Sound Open Firmware: laptop speakers and microphones on Intel's sound DSP"
 arch=(any)
 url="https://www.sofproject.org/"
@@ -18,6 +18,9 @@ sha256sums=('533f63e3a6d94c09ce05a782657b675fa683ff20787c0979226cf563ec79f517')
 package() {
     cd sof-bin-$pkgver
     install -d "$pkgdir/usr/lib/firmware/intel"
-    FW_DEST="$pkgdir/usr/lib/firmware/intel" TOOLS_DEST="$srcdir/tools-unused" ./install.sh
+    # what install.sh does (with rsync, which Yūrei doesn't have): the sof*
+    # folders, their version links kept, into the firmware folder
+    cp -a --no-preserve=ownership sof* "$pkgdir/usr/lib/firmware/intel/"
+    [[ -n $(ls "$pkgdir/usr/lib/firmware/intel") ]]
     install -Dm644 LICENCE.Intel "$pkgdir/usr/share/licenses/sof-firmware/LICENCE.Intel"
 }
