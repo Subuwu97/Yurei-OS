@@ -6,6 +6,7 @@ on:
     branches: [codex/test-iso-recovery]
     paths:
       - independent/packages/nvidia-utils/**
+      - independent/bootstrap/**
       - .github/workflows/recover-test-iso.yml
 
 permissions:

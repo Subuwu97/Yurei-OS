@@ -238,8 +238,20 @@ CONF
 }
 
 cleanup() {
+    local builder_home status=0
+    builder_home=$(home)
     as_user gpgconf --kill all 2>/dev/null || true
-    userdel -r "$user"
+    userdel -r "$user" || status=$?
+    # Shadow can remove the account and home, yet return 12 because an old
+    # root-owned mail spool was deliberately left alone. Verify both removals
+    # before accepting that specific partial-cleanup status.
+    if (( status != 0 )); then
+        if (( status == 12 )) && ! getent passwd "$user" >/dev/null && [[ ! -e $builder_home ]]; then
+            echo "build account and home removed; unrelated mail spool retained"
+        else
+            return "$status"
+        fi
+    fi
 }
 
 STEPS=(setup packages publish check cleanup)
