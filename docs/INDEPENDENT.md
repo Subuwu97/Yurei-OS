@@ -248,7 +248,10 @@ more; on Windows 11, inside WSL2 with Ubuntu 24.04):
    tests run at full speed (`/dev/kvm` must exist; on Windows set
    `nestedVirtualization=true` in `.wslconfig`).
 2. In the repository's Settings → Actions → Runners, add a self-hosted
-   Linux x64 runner with the label `yurei-pc`, and install it as a service
+   Linux x64 runner with the label `yurei-pc` and the work folder
+   `/home/runner/work` (`./config.sh ... --labels yurei-pc --work
+   /home/runner/work`, as on GitHub's machines: the caches keep paths
+   relative to the checkout), and install it as a service
    (`sudo ./svc.sh install && sudo ./svc.sh start`).
 3. In Settings → Secrets and variables → Actions → Variables, set
    `YUREI_RUNNER` to `yurei-pc`. Delete the variable to go back to

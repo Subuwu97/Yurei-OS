@@ -35,6 +35,15 @@ jobs:
       - name: Clean up after earlier runs (own machine only)
         if: runner.environment == 'self-hosted'
         run: |
+          # actions/cache keeps paths relative to the checkout, so the
+          # caches made on GitHub's machines only land in /home/runner when
+          # the checkout is where theirs is: the runner's work folder must
+          # be /home/runner/work (docs/INDEPENDENT.md)
+          if [[ $GITHUB_WORKSPACE != /home/runner/work/* ]]; then
+            echo "::error::this runner's work folder isn't /home/runner/work; caches would land elsewhere."
+            echo "In the runner's folder: sudo ./svc.sh stop; set \"workFolder\" in .runner to /home/runner/work; sudo ./svc.sh start"
+            exit 1
+          fi
           findmnt -rno TARGET | grep '^/home/runner/yurei' | sort -r | while read -r m; do
             sudo umount -l "$m" || true
           done
