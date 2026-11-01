@@ -17,9 +17,10 @@ def test_nvidia_leaves_dispatch_loaders_to_libglvnd(tmp_path):
     source.mkdir()
     loaders = ['libEGL.so.1', 'libGL.so.1', 'libGLESv1_CM.so.1',
                'libGLESv2.so.2', 'libGLX.so.0', 'libGLdispatch.so.0', 'libOpenGL.so.0']
-    vendors = ['libEGL_nvidia.so.1', 'libGLX_nvidia.so.1',
+    legacy = ['libnvidia-pkcs11.so.595.112.07']
+    vendors = ['libEGL_nvidia.so.1', 'libGLX_nvidia.so.1', 'libnvidia-pkcs11-openssl3.so.595.112.07',
                'libnvidia-glcore.so.595.112.07', 'libnvidia-allocator.so.1']
-    for name in loaders + vendors + ['nvidia-smi', 'nvidia-modprobe', 'LICENSE', 'nvidia_icd.json']:
+    for name in loaders + legacy + vendors + ['nvidia-smi', 'nvidia-modprobe', 'LICENSE', 'nvidia_icd.json']:
         (source / name).write_text('fixture\n')
     (source / 'firmware').mkdir()
     (source / 'firmware/gsp.bin').write_text('fixture\n')
@@ -37,4 +38,6 @@ def test_nvidia_leaves_dispatch_loaders_to_libglvnd(tmp_path):
         assert not (lib / name.split('.so.')[0]).with_suffix('.so').is_symlink(), name
     for name in vendors:
         assert (lib / name).is_file(), name
+    for name in legacy:
+        assert not (lib / name).exists(), name
     assert (lib / 'gbm/nvidia-drm_gbm.so').is_symlink()

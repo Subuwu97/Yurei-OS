@@ -226,7 +226,7 @@ CONF
     echo "installed $("${p[@]}" -Qq | wc -l) packages"
     mount --bind /dev "$root/dev"
     mount -t proc proc "$root/proc"
-    if ! chroot "$root" /usr/bin/bash -eux < /bootstrap/repo-check.sh; then
+    if ! chroot "$root" /usr/bin/bash -eu < /bootstrap/repo-check.sh; then
         umount "$root/proc" "$root/dev"
         exit 1
     fi

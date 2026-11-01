@@ -10,12 +10,12 @@
 # keeps them the same.
 pkgname=nvidia-utils
 pkgver=595.112.07
-pkgrel=2
+pkgrel=3
 pkgdesc="NVIDIA's driver (Vulkan, Wayland, firmware) for RTX 20-series and newer; prime-run runs a program on it"
 arch=(x86_64)
 url="https://www.nvidia.com/"
 license=(LicenseRef-NVIDIA)
-depends=(glibc linux libdrm wayland mesa libglvnd vulkan-icd-loader)
+depends=(glibc linux libdrm wayland mesa libglvnd openssl vulkan-icd-loader)
 options=(!strip !debug)
 source=("https://download.nvidia.com/XFree86/Linux-x86_64/$pkgver/NVIDIA-Linux-x86_64-$pkgver.run")
 noextract=("NVIDIA-Linux-x86_64-$pkgver.run")
@@ -37,6 +37,9 @@ package() {
             # NVIDIA bundles libglvnd too; its loaders belong to libglvnd,
             # otherwise pacman refuses to install the two packages together.
             libEGL.so.*|libGL.so.*|libGLESv1_CM.so.*|libGLESv2.so.*|libGLX.so.*|libGLdispatch.so.*|libOpenGL.so.*) continue ;;
+            # Keep the parallel -openssl3 variant. The legacy variant links
+            # libcrypto.so.1.1, which is not part of this OpenSSL 3 system.
+            libnvidia-pkcs11.so.*) continue ;;
             libglxserver_nvidia*|libnvidia-gtk*|libnvidia-wayland-client*) continue ;;
         esac
         install -m755 "$f" "$lib/"
