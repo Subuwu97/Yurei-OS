@@ -8,7 +8,7 @@ name: Independent bootstrap
 on:
   workflow_dispatch:
   push:
-    branches: [main, codex/qt6-bootstrap]
+    branches: [main, codex/qt6-bootstrap, claude/shiro-nas-yurei-gaming-os-xhfh33]
     paths: ["independent/**", ".github/workflows/bootstrap.yml"]
 
 # contents: write publishes the live ISO as a test release; actions: write
