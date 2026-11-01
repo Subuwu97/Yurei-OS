@@ -52,11 +52,12 @@ jobs:
 
       - name: Build tools from the host (only used to build, never shipped)
         run: |
-          sudo apt-get update
+          # (on your own machine apt may be busy with something else: wait)
+          sudo apt-get -o DPkg::Lock::Timeout=900 update
           # GitHub's machines have a compiler, zstd (which the caches are
           # packed with: without it a cache made there isn't found) and gh
           # already; your own machine needs them too
-          sudo apt-get install -y build-essential zstd curl git patch file gh \
+          sudo apt-get -o DPkg::Lock::Timeout=900 install -y build-essential zstd curl git patch file gh \
             bison gawk texinfo m4 xz-utils python3 qemu-system-x86 e2fsprogs \
             squashfs-tools xorriso mtools dosfstools cpio ovmf
 
