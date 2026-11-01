@@ -329,9 +329,8 @@ pulseaudio-qt  1.7.0  https://download.kde.org/stable/pulseaudio-qt/pulseaudio-q
 qcoro  0.12.0  qcoro-0.12.0.tar.gz::https://github.com/qcoro/qcoro/archive/v0.12.0.tar.gz  809afafab61593f994c005ca6e242300e1e3e7f4db8b5d41f8c642aab9450fbc  repo
 linux-pam  1.7.1  https://github.com/linux-pam/linux-pam/releases/download/v1.7.1/Linux-PAM-1.7.1.tar.xz  21dbcec6e01dd578f14789eac9024a18941e6f2702a05cf91b28c232eeb26ab0  repo
 lcms2  2.17  https://github.com/mm2/Little-CMS/releases/download/lcms2.17/lcms2-2.17.tar.gz  d11af569e42a1baa1650d20ad61d12e41af4fead4aa7964a01f93b08b53ab074  repo
-lmdb  0.9.33  https://git.openldap.org/openldap/openldap/-/archive/LMDB_0.9.33/openldap-LMDB_0.9.33.tar.gz  476801f5239c88c7de61c3390502a5d13965ecedef80105b5fb0fcb8373d1e53  repo
 libpulse  17.0  https://www.freedesktop.org/software/pulseaudio/releases/pulseaudio-17.0.tar.xz  053794d6671a3e397d849e478a80b82a63cb9d8ca296bd35b73317bb5ceb87b5  repo
-networkmanager  1.54.1  NetworkManager-1.54.1.tar.gz::https://github.com/NetworkManager/NetworkManager/archive/1.54.1.tar.gz  -  repo
+networkmanager  1.54.1  NetworkManager-1.54.1.tar.gz::https://github.com/NetworkManager/NetworkManager/archive/1.54.1.tar.gz  3bec7f01698e416c58fe823d042de87fdc0e5ddf54d1871a8b65216070eb9a93  repo
 upower  1.90.9  https://gitlab.freedesktop.org/upower/upower/-/archive/v1.90.9/upower-v1.90.9.tar.bz2  ca6018535817c2ea687e389e6b47583342154123c0eea0497b409c49dff319b6  repo
 sddm  0.21.0  sddm-0.21.0.tar.gz::https://github.com/sddm/sddm/archive/v0.21.0.tar.gz  f895de2683627e969e4849dbfbbb2b500787481ca5ba0de6d6dfdae5f1549abf  repo
 plymouth  24.004.60  https://www.freedesktop.org/software/plymouth/releases/plymouth-24.004.60.tar.xz  f3f7841358c98f5e7b06a9eedbdd5e6882fd9f38bbd14a767fb083e3b55b1c34  repo
