@@ -5,7 +5,7 @@
 pkgname=plasma-wayland-protocols
 _lockname=plasma-wayland-protocols
 pkgver=1.18.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Plasma's own Wayland protocols"
 arch=(any)
 url="https://kde.org/"
@@ -16,8 +16,11 @@ source=("https://download.kde.org/stable/plasma-wayland-protocols/plasma-wayland
 sha256sums=('2567472671ad5d989f88b51baef9dd59353a5e7c3f2ed7e6b989755cb9004233')
 
 build() {
+    # This package installs XML protocols and CMake metadata, not Qt plugins.
+    # Its old KDEInstallDirs wrapper defaults to Qt 5; do not query Qt paths.
     cmake -S plasma-wayland-protocols-$pkgver -B build -G Ninja \
-        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_USE_QT_SYS_PATHS=ON
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+        -DKDE_INSTALL_USE_QT_SYS_PATHS=OFF -DKDE_INSTALL_LIBDIR=lib
     cmake --build build
 }
 
