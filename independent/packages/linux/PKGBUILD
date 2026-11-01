@@ -4,7 +4,7 @@
 # keeps them the same.
 pkgname=linux
 pkgver=6.18
-pkgrel=5
+pkgrel=6
 # NVIDIA's open kernel modules (MIT/GPL), built here against this kernel so
 # their versions always match; nvidia-utils brings the matching driver
 _nvidia=595.112.07
@@ -13,7 +13,9 @@ arch=(x86_64)
 url="https://www.kernel.org/"
 license=(GPL-2.0-only)
 depends=(kmod)
-options=(!strip)
+# NVIDIA invokes ld directly; makepkg's compiler-driver LDFLAGS (-Wl,...)
+# are invalid there. Use the kernel and NVIDIA build systems' own flags.
+options=(!strip !buildflags)
 source=("https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-$pkgver.tar.xz"
         "open-gpu-kernel-modules-$_nvidia.tar.gz::https://github.com/NVIDIA/open-gpu-kernel-modules/archive/$_nvidia.tar.gz")
 sha256sums=('9106a4605da9e31ff17659d958782b815f9591ab308d03b0ee21aad6c7dced4b'

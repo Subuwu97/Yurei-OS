@@ -8,7 +8,7 @@ name: Independent bootstrap
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, codex/qt6-bootstrap]
     paths: ["independent/**", ".github/workflows/bootstrap.yml"]
 
 # contents: write publishes the live ISO as a test release; actions: write
@@ -21,7 +21,7 @@ jobs:
   toolchain:
     # GitHub's machines, or your own when the repository variable
     # YUREI_RUNNER names its runner label (docs/INDEPENDENT.md)
-    runs-on: ${{ vars.YUREI_RUNNER || 'ubuntu-24.04' }}
+    runs-on: ${{ github.ref == 'refs/heads/main' && vars.YUREI_RUNNER || 'ubuntu-24.04' }}
     timeout-minutes: 300
     env:
       # outside the checkout, and without "..": the cache refuses such paths
@@ -329,7 +329,7 @@ jobs:
       # caches, and every stage would be built again. Only the newest of
       # each is kept.
       - name: Drop older package and source caches
-        if: always() && steps.keep.outputs.save == 'true'
+        if: always() && github.ref == 'refs/heads/main' && steps.keep.outputs.save == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           KEEP_PKGS: yurei-pkgs-${{ github.run_id }}
