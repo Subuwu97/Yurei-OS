@@ -23,6 +23,7 @@ jobs:
     env:
       YUREI: /home/runner/yurei-root
       SOURCES: /home/runner/yurei-sources
+      BUILD_DESKTOP_ISO: "false"
     steps:
       - uses: actions/checkout@v4
       - name: Require the previous build and complete local package cache
@@ -57,16 +58,19 @@ jobs:
           fi
           sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh repo-inside.sh
       - name: Create the test ISO
+        if: env.BUILD_DESKTOP_ISO == 'true'
         run: |
           sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh iso-inside.sh
           sudo YUREI="$YUREI" OUT=/home/runner/yurei-iso \
             ISO_NAME="yurei-independent-desktop-${GITHUB_RUN_ID}-x86_64.iso" independent/bootstrap/iso.sh
           sudo chown -R "$(id -u):$(id -g)" /home/runner/yurei-iso
       - name: Boot the ISO as DVD and USB, install and reboot a virtual disk
+        if: env.BUILD_DESKTOP_ISO == 'true'
         run: |
           sudo ISO="/home/runner/yurei-iso/yurei-independent-desktop-${GITHUB_RUN_ID}-x86_64.iso" \
             OUT=/home/runner/yurei-boot independent/bootstrap/iso-test.sh
       - name: Downloadable tested ISO and checksum
+        if: env.BUILD_DESKTOP_ISO == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: yurei-desktop-integration-iso

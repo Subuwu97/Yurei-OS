@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=kdeclarative
+_lockname=kf6-kdeclarative
+pkgver=6.18.0
+pkgrel=1
+pkgdesc="KDE Frameworks: kdeclarative"
+arch=(x86_64)
+url="https://kde.org/"
+license=(CC0-1.0 GPL-2.0-only GPL-3.0-only LGPL-2.0-or-later LGPL-2.1-or-later MIT)
+depends=(qt6-base qt6-declarative ki18n kconfig kguiaddons kglobalaccel kwidgetsaddons)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/frameworks/6.18/kdeclarative-$pkgver.tar.xz")
+sha256sums=('dc42a74c64281e6798d07cd9ed5326f6f3d82247f2e29e7ca9855a36cb3a1e6c')
+
+build() {
+    cmake -S kdeclarative-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a kdeclarative-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

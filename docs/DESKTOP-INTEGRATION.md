@@ -13,7 +13,9 @@ Current build milestone:
 - Keep the already-built Qt/labwc/gaming packages and their cached recipes.
 - Compile and package the native installer with Yurei's own Qt.
 - Render all six installer screens inside the freshly installed Yurei root.
-- Build ECM, Plasma Wayland protocols and the first Frameworks tier.
+- Build ECM, Plasma Wayland protocols and the first Frameworks tiers.
+- The next 19 Frameworks recipes use dependencies read from the verified 6.18
+  upstream CMake files; runtime compilation is still being validated.
 - Recheck clean installation, shared libraries, ISO boot and installation.
 
 Remaining before the target image can be called Plasma-ready:
@@ -29,3 +31,7 @@ Remaining before the target image can be called Plasma-ready:
 No KDE binaries are taken from Arch or CachyOS. Source release archives and
 checksums stay pinned in sources.lock. Existing users' personal desktop
 configuration must be preserved.
+
+During dependency bring-up, BUILD_DESKTOP_ISO is false in the integration
+workflow: package/GUI validation and cached results are produced each cycle.
+Enable it for the final combined image after the Plasma session is assembled.

@@ -5,7 +5,7 @@
 pkgname=kguiaddons
 _lockname=kf6-kguiaddons
 pkgver=6.18.0
-pkgrel=1
+pkgrel=2
 pkgdesc="KDE Frameworks: GUI additions to Qt"
 arch=(x86_64)
 url="https://kde.org/"
@@ -17,7 +17,7 @@ sha256sums=('2e2b872802d1b27b185512ffa9895906e7aa3438cbf137846ccff8216bbec466')
 
 build() {
     cmake -S kguiaddons-$pkgver -B build -G Ninja \
-        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_USE_QT_SYS_PATHS=ON -DWITH_X11=ON -DWITH_WAYLAND=ON
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_USE_QT_SYS_PATHS=ON -DKDE_INSTALL_LIBDIR=lib -DWITH_X11=ON -DWITH_WAYLAND=ON
     cmake --build build
 }
 

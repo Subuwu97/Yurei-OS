@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=kuserfeedback
+_lockname=kf6-kuserfeedback
+pkgver=6.18.0
+pkgrel=1
+pkgdesc="KDE Frameworks: kuserfeedback"
+arch=(x86_64)
+url="https://kde.org/"
+license=(BSD-3-Clause CC0-1.0 MIT)
+depends=(qt6-base qt6-declarative qt6-svg)
+makedepends=(extra-cmake-modules qt6-tools bison flex)
+source=("https://download.kde.org/stable/frameworks/6.18/kuserfeedback-$pkgver.tar.xz")
+sha256sums=('b623ab51a5b692b1b385d940cb4c00ae010dcdd8c2a2d6e23159ff815b8f1e52')
+
+build() {
+    cmake -S kuserfeedback-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF -DENABLE_DOCS=OFF -DENABLE_PHP=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a kuserfeedback-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

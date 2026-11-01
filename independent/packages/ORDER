@@ -253,3 +253,24 @@ kirigami
 breeze-icons
 attica
 kplotting
+
+# Next KDE Frameworks tier, in upstream dependency order.
+kcrash
+kcompletion
+kcolorscheme
+kconfigwidgets
+kservice
+kglobalaccel
+kpackage
+kpty
+kstatusnotifieritem
+kholidays
+kiconthemes
+ksvg
+kquickcharts
+kunitconversion
+kuserfeedback
+kimageformats
+kdesu
+kdeclarative
+kxmlgui

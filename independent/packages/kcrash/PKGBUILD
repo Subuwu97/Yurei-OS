@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=kcrash
+_lockname=kf6-kcrash
+pkgver=6.18.0
+pkgrel=1
+pkgdesc="KDE Frameworks: kcrash"
+arch=(x86_64)
+url="https://kde.org/"
+license=(CC0-1.0 LGPL-2.0-or-later)
+depends=(qt6-base kcoreaddons libx11)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/frameworks/6.18/kcrash-$pkgver.tar.xz")
+sha256sums=('a66293821b151f575fcfb59848578749e248c5baa2f262ac86725d0f64b324e0')
+
+build() {
+    cmake -S kcrash-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a kcrash-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

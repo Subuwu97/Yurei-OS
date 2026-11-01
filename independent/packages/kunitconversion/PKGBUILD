@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=kunitconversion
+_lockname=kf6-kunitconversion
+pkgver=6.18.0
+pkgrel=1
+pkgdesc="KDE Frameworks: kunitconversion"
+arch=(x86_64)
+url="https://kde.org/"
+license=(CC0-1.0 LGPL-2.0-or-later)
+depends=(qt6-base ki18n)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/frameworks/6.18/kunitconversion-$pkgver.tar.xz")
+sha256sums=('23a4a5d994666f9db2a5a3c251038f2ef1d978411950925702fb79060ced31c8')
+
+build() {
+    cmake -S kunitconversion-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a kunitconversion-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}
