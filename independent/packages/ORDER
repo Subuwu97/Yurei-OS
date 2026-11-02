@@ -293,3 +293,12 @@ knotifications
 kjobwidgets
 kbookmarks
 kded
+
+# File operations, settings modules, desktop search and controls
+kio
+kparts
+kcmutils
+krunner
+knewstuff
+qqc2-desktop-style
+purpose

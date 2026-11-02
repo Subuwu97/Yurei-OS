@@ -40,3 +40,9 @@ configuration must be preserved.
 During dependency bring-up, BUILD_DESKTOP_ISO is false in the integration
 workflow: package/GUI validation and cached results are produced each cycle.
 Enable it for the final combined image after the Plasma session is assembled.
+
+Validated milestone: all 262 packages in the previous batch installed cleanly,
+all six native installer screens rendered, and the shared-library audit passed.
+The next seven recipes add KIO, KParts, KCMUtils, KRunner, KNewStuff, the
+Qt Quick desktop style and Purpose. Their builds remain to be validated.
+KIO will need rebuilding with Wallet once the wallet runtime dependencies land.
