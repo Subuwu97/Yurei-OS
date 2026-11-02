@@ -1,0 +1,7 @@
+This package contains Mozilla's official, unmodified x86-64 Linux Firefox ESR
+153.6.0esr distribution, rather than a Yurei source build. This application
+exception was explicitly approved to supply a usable browser promptly.
+Official archive and checksums:
+https://archive.mozilla.org/pub/firefox/releases/153.6.0esr/
+Licensing and third-party notices are available inside Firefox at about:license.
+No browser sandbox, TLS, or security checks are disabled by this package.

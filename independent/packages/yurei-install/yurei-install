@@ -186,6 +186,9 @@ install -m644 "$kernel" "$target/boot/vmlinuz-yurei"
 say "Settings"
 # the live settings out, the installed system's in
 rm -rf "$target/etc/systemd/system/getty@tty1.service.d"
+for unit in pipewire.service pipewire.socket pipewire-pulse.service pipewire-pulse.socket; do
+    rm -f "$target/etc/systemd/user/$unit.d/90-yurei-live-root.conf"
+done
 if [[ -f $target/etc/pam.d/system-login ]]; then
     # The live console permits its blank root password. Never carry that
     # live-only nullok policy into the installed system.

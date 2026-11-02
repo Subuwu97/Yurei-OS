@@ -19,6 +19,8 @@ import socket
 import subprocess
 import sys
 import time
+import wave
+import struct
 from pathlib import Path
 
 parser = argparse.ArgumentParser(description=__doc__)
@@ -33,6 +35,7 @@ parser.add_argument("--expected-session", choices=("greeter", "console", "sddm")
 parser.add_argument("--desktop-check", action="store_true", help="verify real KWin/Plasma startup and SDDM login in the disposable VM")
 args = parser.parse_args()
 iso, firmware, out = args.iso, args.firmware, args.out
+audio_enabled = args.desktop_check
 if not 16 <= args.disk_size_gib <= 128:
     parser.error("the disposable disk must be between 16 and 128 GiB")
 os.makedirs(out, exist_ok=True)
@@ -62,11 +65,16 @@ class Machine:
         self.qmp_path = log + ".qmp"
         if os.path.exists(self.qmp_path):
             os.unlink(self.qmp_path)
+        self.audio_path = log + ".wav"
+        audio_devices = [
+            "-audiodev", f"wav,id=yureiaudio,path={self.audio_path},out.frequency=8000,out.channels=1,out.format=s16",
+            "-device", "intel-hda,id=yureihda", "-device", "hda-duplex,bus=yureihda.0,audiodev=yureiaudio",
+        ] if audio_enabled else []
         self.qemu = subprocess.Popen(
             ["qemu-system-x86_64", *accel, "-m", "4096", "-smp", "2", "-bios", firmware,
              "-display", "none", "-vga", "virtio", "-serial", "stdio", "-monitor", "none", "-no-reboot",
              "-qmp", f"unix:{self.qmp_path},server=on,wait=off",
-             "-nic", "user,model=virtio-net-pci", *args],
+             "-nic", "user,model=virtio-net-pci", *audio_devices, *args],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         machines.append(self)
         os.set_blocking(self.qemu.stdout.fileno(), False)
@@ -140,6 +148,39 @@ def check(what, ok):
     print(("ok   " if ok else "FAIL ") + "install: " + what, flush=True)
     return ok
 
+def check_audio(machine, label):
+    machine.send("for n in $(seq 1 60); do if pactl info >/dev/null 2>&1 && wpctl inspect @DEFAULT_AUDIO_SINK@ 2>/dev/null | grep -q alsa_output; then echo AUDIO-SINK-''READY; break; fi; sleep 1; done")
+    ok = check(label + " detects an ALSA output through PipeWire", machine.wait("AUDIO-SINK-READY", 90))
+    if ok:
+        program = "import math,struct,wave;w=wave.open('/tmp/yurei-tone.wav','wb');w.setparams((1,2,48000,0,'NONE','not compressed'));w.writeframes(b''.join(struct.pack('<h',int(12000*math.sin(2*math.pi*440*n/48000))) for n in range(48000)));w.close()"
+        machine.send("python3 -c " + shlex.quote(program) + " && wpctl set-mute @DEFAULT_AUDIO_SINK@ 0 && wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.5 && timeout 15 paplay /tmp/yurei-tone.wav && echo AUDIO-PLAY-''OK || echo AUDIO-PLAY-''BAD")
+        ok = check(label + " plays a tone through PulseAudio compatibility", machine.wait("AUDIO-PLAY-OK", 45, fail="AUDIO-PLAY-BAD"))
+    if not ok:
+        machine.send("cat /proc/asound/cards; wpctl status; systemctl --user status pipewire pipewire-pulse wireplumber --no-pager; journalctl --user -u pipewire -u pipewire-pulse -u wireplumber -n 60 --no-pager; echo AUDIO-DIAG-''DONE")
+        machine.wait("AUDIO-DIAG-DONE", 45)
+    return ok
+
+
+def check_recorded_audio(machine, label):
+    try:
+        maximum = 0
+        with wave.open(machine.audio_path, "rb") as recording:
+            if recording.getsampwidth() != 2:
+                raise ValueError("Unexpected capture sample format")
+            while data := recording.readframes(65536):
+                maximum = max(maximum, max((abs(v[0]) for v in struct.iter_unpack("<h", data)), default=0))
+        check(label + " delivered non-silent PCM to the emulated sound device", maximum > 300)
+    except (OSError, EOFError, wave.Error, ValueError) as error:
+        print("Audio capture error:", error, flush=True)
+        check(label + " captured sound output", False)
+
+
+def check_browser(machine, label):
+    command = "timeout 90 firefox --headless --no-remote --profile /tmp/yurei-firefox-test --screenshot /tmp/yurei-browser.png " + shlex.quote("data:text/html,<html><body><h1>Yurei Firefox test</h1></body></html>")
+    machine.send(command + " && test -s /tmp/yurei-browser.png && echo BROWSER-''OK || echo BROWSER-''BAD")
+    return check(label + " Firefox renders a local page without sandbox overrides", machine.wait("BROWSER-OK", 120, fail="BROWSER-BAD"))
+
+
 with open(disk, "xb") as f:
     f.truncate(args.disk_size_gib * 1024**3)
 def cleanup_test_disk():
@@ -194,6 +235,10 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
             if not ready:
                 live.send("journalctl -b --no-pager -n 120; journalctl --user -b --no-pager -n 120; echo DESKTOP-DIAG-''DONE")
                 live.wait("DESKTOP-DIAG-DONE", 60)
+        if ready and args.desktop_check:
+            ready = check_audio(live, "live session")
+            if ready:
+                ready = check_browser(live, "live session")
         if ready and args.gui_preview_check:
             # Execute Yurei's own binary and Qt libraries, not the host's Qt.
             # Offscreen preview does not inventory disks or launch the backend.
@@ -219,6 +264,8 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
             check("yurei-install finished", live.wait("INSTALL-DONE", 1800, fail="INSTALL-FAILED"))
     live.send("poweroff")
 live.stop()
+if audio_enabled:
+    check_recorded_audio(live, "live session")
 
 if all(results):
     print("== install: the installed system, from the disk alone", flush=True)
@@ -256,12 +303,17 @@ if all(results):
                 installed.screenshot("installed-plasma.png")
                 installed.send("if loginctl list-sessions --no-legend | awk '{print $1}' | xargs -r -n1 loginctl show-session -p Type --value | grep -qx wayland; then echo LOGIND-''WAYLAND; else echo LOGIND-''BAD; fi")
                 check("logind registered a Wayland session", installed.wait("LOGIND-WAYLAND", 30, fail="LOGIND-BAD"))
+                installed.send("if [ ! -e /etc/systemd/user/pipewire.service.d/90-yurei-live-root.conf ]; then echo AUDIO-POLICY-''OK; else echo AUDIO-POLICY-''BAD; fi")
+                check("installed audio keeps normal upstream user policy", installed.wait("AUDIO-POLICY-OK", 30, fail="AUDIO-POLICY-BAD"))
+                check_audio(installed, "installed user")
+                check_browser(installed, "installed user")
     else:
         installed.send("if [ \"$(systemctl get-default)\" = multi-user.target ]; then echo CONSOLE-''OK; else echo CONSOLE-''BAD; fi")
         check("older seed image retains console boot", installed.wait("CONSOLE-OK", 30, fail="CONSOLE-BAD"))
-    installed.send("exit")
-    installed.qemu.kill()
+    installed.send("printf '%s\\n' " + shlex.quote(password) + " | sudo -S poweroff")
     installed.stop()
+    if audio_enabled:
+        check_recorded_audio(installed, "installed user")
 
 os.remove(disk)
 Path(out, "install-result.json").write_text(json.dumps({

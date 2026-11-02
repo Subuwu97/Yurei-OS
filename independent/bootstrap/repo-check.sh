@@ -282,4 +282,16 @@ if pacman -Q fastfetch >/dev/null 2>&1; then
     echo "Fastfetch renders the Yurei mascot and detects the distro"
 fi
 
+if pacman -Q konsole >/dev/null 2>&1; then
+    QT_QPA_PLATFORM=offscreen timeout 20 konsole --version
+    QT_QPA_PLATFORM=offscreen timeout 20 dolphin --version
+    timeout 20 firefox --version
+    test -s /usr/share/applications/org.kde.konsole.desktop
+    test -s /usr/share/applications/org.kde.dolphin.desktop
+    test -s /usr/share/applications/firefox.desktop
+    grep -qx 'inode/directory=org.kde.dolphin.desktop' /etc/xdg/mimeapps.list
+    grep -qx 'x-scheme-handler/https=firefox.desktop' /etc/xdg/mimeapps.list
+    echo "Konsole, Dolphin and Firefox start and their default applications are configured"
+fi
+
 echo "all libraries found"

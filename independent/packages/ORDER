@@ -372,6 +372,13 @@ plasma-workspace
 plasma-desktop
 sddm
 
+# KDE default applications and browser
+kfilemetadata
+konsole
+dolphin
+libxt
+firefox
+
 # Reuse the shared Yurei visual assets without CachyOS dependencies.
 yurei-appearance
 

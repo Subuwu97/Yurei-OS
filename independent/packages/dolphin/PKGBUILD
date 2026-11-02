@@ -1,0 +1,27 @@
+# Maintainer: Yurei Linux project
+pkgname=dolphin
+pkgver=25.08.3
+pkgrel=1
+pkgdesc="Yurei KDE desktop: dolphin"
+arch=(x86_64)
+url="https://kde.org/"
+license=(BSD-2-Clause BSD-3-Clause CC0-1.0 GPL-2.0-only GPL-2.0-or-later GPL-3.0-only LGPL-2.0-only LGPL-2.0-or-later LGPL-2.1-only LGPL-3.0-only LicenseRef-KDE-Accepted-GPL LicenseRef-KDE-Accepted-LGPL MIT)
+depends=(qt6-base kcmutils knewstuff kcoreaddons ki18n kdbusaddons kbookmarks kconfig kio kparts solid kiconthemes kcompletion ktextwidgets knotifications kcrash kwindowsystem kwidgetsaddons kcodecs kguiaddons kcolorscheme kfilemetadata konsole kuserfeedback)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/release-service/25.08.3/src/dolphin-$pkgver.tar.xz")
+sha256sums=('1abd632ebe3837df5616216f69c3ca9f6240165f9f84502422203275eaa8ee09')
+
+build() {
+    cmake -S dolphin-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a dolphin-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

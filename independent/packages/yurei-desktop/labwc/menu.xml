@@ -2,8 +2,8 @@
 <!-- The menu a right-click on the desktop opens. -->
 <openbox_menu>
   <menu id="root-menu" label="">
-    <item label="Terminal"><action name="Execute" command="foot" /></item>
-    <item label="Files"><action name="Execute" command="thunar" /></item>
+    <item label="Terminal"><action name="Execute" command="yurei-terminal" /></item>
+    <item label="Files"><action name="Execute" command="yurei-files" /></item>
     <item label="Install Yurei"><action name="Execute" command="yurei-install-gui" /></item>
     <separator />
     <item label="Reload settings"><action name="Reconfigure" /></item>

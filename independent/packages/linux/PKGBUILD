@@ -4,7 +4,7 @@
 # keeps them the same.
 pkgname=linux
 pkgver=6.18
-pkgrel=7
+pkgrel=8
 # NVIDIA's open kernel modules (MIT/GPL), built here against this kernel so
 # their versions always match; nvidia-utils brings the matching driver
 _nvidia=595.112.07
@@ -39,7 +39,7 @@ build() {
     make kvm_guest.config
     scripts/config \
         -e DEVTMPFS -e DEVTMPFS_MOUNT -e CGROUPS -e MEMCG -e FHANDLE -e AUTOFS_FS \
-        -e TMPFS_POSIX_ACL -e TMPFS_XATTR -e SECCOMP -e BPF_SYSCALL -e CGROUP_BPF -e PSI \
+        -e TMPFS_POSIX_ACL -e TMPFS_XATTR -e SECCOMP -e SECCOMP_FILTER -e NAMESPACES -e USER_NS -e PID_NS -e NET_NS -e IPC_NS -e UTS_NS -e BPF_SYSCALL -e CGROUP_BPF -e PSI \
         -e DMIID -e INOTIFY_USER -d UEVENT_HELPER -d SYSFS_DEPRECATED \
         -e EFI -e EFI_STUB -e EFIVAR_FS -e EFI_PARTITION \
         -e BLK_DEV_NVME -e ATA -e SATA_AHCI -e BLK_DEV_LOOP -e BLK_DEV_SD -e BLK_DEV_SR \
@@ -77,6 +77,9 @@ build() {
         -m SND_SOC_SOF_LUNARLAKE -e SND_SOC_SOF_HDA_LINK -e SND_SOC_SOF_HDA_AUDIO_CODEC \
         -e SND_SOC_INTEL_MACH -m SND_SOC_INTEL_SKL_HDA_DSP_GENERIC_MACH \
         -m SND_SOC_INTEL_SOF_RT5682_MACH -m SND_SOC_INTEL_SOF_SSP_AMP_MACH -m SND_SOC_DMIC \
+        -e SPI -e SPI_MASTER -e I2C -m SOUNDWIRE -m SOUNDWIRE_INTEL \
+        -e SND_SOC_INTEL_USER_FRIENDLY_LONG_NAMES -m SND_SOC_SOF_INTEL_SOUNDWIRE \
+        -m SND_SOC_INTEL_SOUNDWIRE_SOF_MACH -m SND_HDA_GENERIC \
         -m SND_HDA_CODEC_CONEXANT -m SND_USB_AUDIO -m SND_SOC_AMD_ACP6x -m SND_SOC_AMD_PS \
         -e INPUT_JOYSTICK -m INPUT_JOYDEV -m JOYSTICK_XPAD -e JOYSTICK_XPAD_FF -m HID_SONY \
         -e SONY_FF -m HID_PLAYSTATION -e PLAYSTATION_FF -m HID_NINTENDO -m HID_STEAM \
@@ -91,6 +94,9 @@ build() {
     # drivers must work before the squashfs can be located.
     for option in HYPERV HYPERV_VMBUS HYPERV_STORAGE SCSI BLK_DEV_SD BLK_DEV_SR HYPERV_NET DRM_HYPERV HYPERV_KEYBOARD HID_HYPERV_MOUSE; do
         grep -qx "CONFIG_${option}=y" .config || { echo "Missing built-in $option" >&2; return 1; }
+    done
+    for option in SOUNDWIRE SOUNDWIRE_INTEL SND_SOC_SOF_INTEL_SOUNDWIRE SND_SOC_INTEL_SOUNDWIRE_SOF_MACH SND_SOC_RT711_SDCA_SDW SND_SOC_RT1316_SDW; do
+        grep -Eq "^CONFIG_${option}=[ym]$" .config || { echo "Missing laptop audio driver $option" >&2; return 1; }
     done
     make
     make -C "$srcdir/open-gpu-kernel-modules-$_nvidia" modules SYSSRC="$PWD" SYSOUT="$PWD"

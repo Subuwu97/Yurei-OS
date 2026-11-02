@@ -36,5 +36,5 @@ export XDG_CURRENT_DESKTOP=labwc XDG_SESSION_DESKTOP=labwc
 if [ "$session" = kiosk ] || ! command -v labwc >/dev/null; then
     exec cage -- foot "$@"
 fi
-if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then exec dbus-run-session -- labwc -s foot "$@"; fi
-exec labwc -s foot "$@"
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then exec dbus-run-session -- labwc -s yurei-terminal "$@"; fi
+exec labwc -s yurei-terminal "$@"

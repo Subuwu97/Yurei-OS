@@ -37,6 +37,11 @@ def test_initial_layout_and_updates_have_different_override_policy(tmp_path):
     update = payload / "usr/share/plasma/shells/org.kde.plasma.desktop/contents/updates/yurei-desktop-layout.js"
     assert initial.read_text().splitlines()[0] == 'var yureiLayout = "dock";'
     assert update.read_text().splitlines()[0] == 'var yureiLayout = undefined;'
-    assert "applications:foot.desktop" in update.read_text()
+    assert "applications:org.kde.konsole.desktop" in update.read_text()
+    assert "applications:org.kde.dolphin.desktop" in update.read_text()
+    assert "applications:firefox.desktop" in update.read_text()
+    defaults = (payload / "etc/xdg/mimeapps.list").read_text()
+    assert "inode/directory=org.kde.dolphin.desktop" in defaults
+    assert "x-scheme-handler/https=firefox.desktop" in defaults
     assert "applications:yurei-install-gui.desktop" in update.read_text()
     assert not (payload / "etc/sudoers.d").exists()

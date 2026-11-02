@@ -2,12 +2,12 @@
 # stage-appearance.py copies shared visual assets here before recipe hashing.
 pkgname=yurei-appearance
 pkgver=0.5.1
-pkgrel=3
+pkgrel=4
 pkgdesc="Independent Yurei desktop and login appearance"
 arch=(any)
 url="https://github.com/Subuwu97/Yurei-OS"
 license=(GPL-3.0-or-later CC-BY-SA-4.0)
-depends=(plasma-desktop breeze breeze-icons sddm qt6-svg qt6-declarative plasma-integration noto-sans)
+depends=(plasma-desktop breeze breeze-icons sddm qt6-svg qt6-declarative plasma-integration noto-sans konsole dolphin firefox)
 backup=(etc/xdg/kdeglobals etc/xdg/ksplashrc etc/xdg/kscreenlockerrc etc/xdg/konsolerc etc/xdg/mimeapps.list)
 
 package() {
@@ -17,9 +17,9 @@ package() {
     install -d "$(dirname "$layout")"
     # The layout is reused; only launchers change to match the independent image.
     { echo 'var yureiLayout = "dock";'
-      sed -e 's/org.kde.konsole.desktop/foot.desktop/g' \
-          -e 's/yurei-install.desktop/yurei-install-gui.desktop/g' \
-          -e '\|"preferred://browser",|d' "$startdir/assets/usr/share/yurei/desktop-layout.js"
+      sed -e 's/yurei-install.desktop/yurei-install-gui.desktop/g' \
+          -e 's|preferred://filemanager|applications:org.kde.dolphin.desktop|g' \
+          -e 's|preferred://browser|applications:firefox.desktop|g' "$startdir/assets/usr/share/yurei/desktop-layout.js"
     } > "$layout"
     local update="$pkgdir/usr/share/plasma/shells/org.kde.plasma.desktop/contents/updates/yurei-desktop-layout.js"
     install -d "$(dirname "$update")"
@@ -29,8 +29,12 @@ package() {
     } > "$update"
     install -Dm644 /dev/stdin "$pkgdir/etc/xdg/mimeapps.list" <<'APPS'
 [Default Applications]
-inode/directory=thunar.desktop
+inode/directory=org.kde.dolphin.desktop
+text/html=firefox.desktop
+application/xhtml+xml=firefox.desktop
+x-scheme-handler/http=firefox.desktop
+x-scheme-handler/https=firefox.desktop
 APPS
-    sed -i '/ColorScheme=Yurei/a TerminalApplication=foot\nTerminalService=foot.desktop' "$pkgdir/etc/xdg/kdeglobals"
+    sed -i '/ColorScheme=Yurei/a TerminalApplication=konsole\nTerminalService=org.kde.konsole.desktop\nBrowserApplication=firefox.desktop' "$pkgdir/etc/xdg/kdeglobals"
     find "$pkgdir" -type d -exec chmod 755 {} + -o -type f -exec chmod 644 {} +
 }

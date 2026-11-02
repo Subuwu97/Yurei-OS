@@ -63,6 +63,15 @@ password include system-login
 session include system-login
 PAM
     fi
+    # Upstream refuses root for desktop PipeWire units. This image's live
+    # session is root; allow only that live session, keeping all other unit
+    # sandboxing intact. The installed system removes these exact overrides.
+    for unit in pipewire.service pipewire.socket pipewire-pulse.service pipewire-pulse.socket; do
+        install -Dm644 /dev/stdin "$live/etc/systemd/user/$unit.d/90-yurei-live-root.conf" <<'AUDIO'
+[Unit]
+ConditionUser=
+AUDIO
+    done
     install -d "$live/etc/systemd/system/getty@tty1.service.d"
     cat > "$live/etc/systemd/system/getty@tty1.service.d/autologin.conf" <<'UNIT'
 [Service]
