@@ -33,6 +33,11 @@ added, and it keeps track of which version is current.
 |---|---|---|---|---|
 | 2026-10 | (initial set above) | ChatGPT | *(add prompts if you still have them)* | Selection; mock-up UI and captions removed in `build-assets.py` |
 
+The colored Unicode girl-and-ghost artwork in `independent/packages/fastfetch/yurei-logo.txt`
+is sampled from the existing Plasma splash by `branding/generate_fastfetch_logo.py`
+(2026-11-02; Python/Pillow). No new raster artwork was generated for Fastfetch.
+It credits Yūrei Linux and carries the same CC BY-SA 4.0 terms.
+
 ## Licence
 
 To the extent that copyright or similar rights exist in this artwork, it is

@@ -273,4 +273,13 @@ if pacman -Q tzdata >/dev/null 2>&1; then
     echo "Timezone database handles winter, summer and fractional offsets"
 fi
 
+if pacman -Q fastfetch >/dev/null 2>&1; then
+    timeout 30 fastfetch --config /etc/xdg/fastfetch/config.jsonc --pipe false > /tmp/yurei-fastfetch.txt
+    grep -q 'Y U R E I' /tmp/yurei-fastfetch.txt
+    grep -q 'Yūrei' /tmp/yurei-fastfetch.txt
+    test -s /usr/share/fastfetch/yurei-logo.txt
+    rm -f /tmp/yurei-fastfetch.txt
+    echo "Fastfetch renders the Yurei mascot and detects the distro"
+fi
+
 echo "all libraries found"

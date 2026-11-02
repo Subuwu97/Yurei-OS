@@ -1,0 +1,30 @@
+# Maintainer: Yurei Linux project
+pkgname=fastfetch
+pkgver=2.70.0
+pkgrel=1
+pkgdesc="System information with Yurei's anime mascot and ghost terminal artwork"
+arch=(x86_64)
+url="https://github.com/fastfetch-cli/fastfetch"
+license=(MIT CC-BY-SA-4.0)
+depends=(glibc gcc-libs zlib hwdata libdrm wayland libxcb libxrandr dbus glib lua libelf)
+makedepends=(cmake pkgconf)
+backup=(etc/xdg/fastfetch/config.jsonc)
+source=("fastfetch-$pkgver.tar.gz::https://github.com/fastfetch-cli/fastfetch/archive/refs/tags/$pkgver.tar.gz")
+sha256sums=('8aa01bd3faff2be1d94f231d76489ce6d9f781f51f6e93eafe82359d6d8669af')
+
+build() {
+    cmake -S fastfetch-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_SYSCONFDIR=/etc \
+        -DCMAKE_BUILD_TYPE=Release -DBUILD_FLASHFETCH=OFF -DBUILD_TESTS=OFF \
+        -DENABLE_SQLITE3=OFF -DENABLE_IMAGE_LOGO=OFF -DENABLE_LTO=OFF -DSET_TWEAK=OFF \
+        -DENABLE_EMBEDDED_PCIIDS=OFF -DENABLE_EMBEDDED_AMDGPUIDS=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 "$startdir/ARTWORK.md" "$pkgdir/usr/share/licenses/$pkgname/ARTWORK.md"
+    install -Dm644 "$startdir/config.jsonc" "$pkgdir/etc/xdg/fastfetch/config.jsonc"
+    install -Dm644 "$startdir/yurei-logo.txt" "$pkgdir/usr/share/fastfetch/yurei-logo.txt"
+    install -Dm644 "$startdir/README" "$pkgdir/usr/share/doc/fastfetch/yurei.txt"
+}
