@@ -2,7 +2,7 @@
 pkgname=modemmanager
 _lockname=modemmanager
 pkgver=1.24.2
-pkgrel=1
+pkgrel=2
 pkgdesc="modemmanager: independent Plasma desktop support"
 arch=(x86_64)
 url="https://github.com/Subuwu97/Yurei-OS"
@@ -19,5 +19,6 @@ build() {
 
 package() {
     DESTDIR="$pkgdir" ninja -C build install
+    install -Dm644 "$srcdir/ModemManager-$pkgver/COPYING.LIB" "$pkgdir/usr/share/licenses/$pkgname/COPYING.LIB"
     install -Dm644 "$srcdir/ModemManager-$pkgver/COPYING" "$pkgdir/usr/share/licenses/$pkgname/COPYING"
 }

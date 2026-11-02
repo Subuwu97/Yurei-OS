@@ -1,0 +1,19 @@
+# Maintainer: Yurei Linux project
+# Font assets come directly from the upstream Noto release.
+pkgname=noto-sans
+pkgver=2.015
+pkgrel=1
+pkgdesc="Noto Sans desktop font family"
+arch=(any)
+url="https://github.com/notofonts/latin-greek-cyrillic"
+license=(OFL-1.1)
+depends=(fontconfig)
+source=("https://github.com/notofonts/latin-greek-cyrillic/releases/download/NotoSans-v$pkgver/NotoSans-v$pkgver.zip")
+sha256sums=('0c34df072a3fa7efbb7cbf34950e1f971a4447cffe365d3a359e2d4089b958f5')
+
+package() {
+    for style in Regular Italic Bold BoldItalic Medium MediumItalic SemiBold SemiBoldItalic; do
+        install -Dm644 "NotoSans/hinted/ttf/NotoSans-$style.ttf" "$pkgdir/usr/share/fonts/noto/NotoSans-$style.ttf"
+    done
+    install -Dm644 OFL.txt "$pkgdir/usr/share/licenses/$pkgname/OFL.txt"
+}

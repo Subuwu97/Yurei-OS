@@ -361,3 +361,4 @@ lm-sensors  3.6.0  lm-sensors-3.6.0.tar.gz::https://github.com/lm-sensors/lm-sen
 libgudev  238  https://download.gnome.org/sources/libgudev/238/libgudev-238.tar.xz  61266ab1afc9d73dbc60a8b2af73e99d2fdff47d99544d085760e4fa667b5dd1  repo
 libndp  1.9  libndp-1.9.tar.gz::https://github.com/jpirko/libndp/archive/refs/tags/v1.9.tar.gz  e564f5914a6b1b799c3afa64c258824a801c1b79a29e2fe6525b682249c65261  repo
 modemmanager  1.24.2  ModemManager-1.24.2.tar.gz::https://github.com/linux-mobile-broadband/ModemManager/archive/refs/tags/1.24.2.tar.gz  fbc75adcc0d7b0565f256e7ff4e8872b0a37c4413ff576665f7470932d9c1b68  repo
+noto-sans  2.015  https://github.com/notofonts/latin-greek-cyrillic/releases/download/NotoSans-v2.015/NotoSans-v2.015.zip  0c34df072a3fa7efbb7cbf34950e1f971a4447cffe365d3a359e2d4089b958f5  repo

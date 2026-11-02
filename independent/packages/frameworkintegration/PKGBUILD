@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=frameworkintegration
+_lockname=kf6-frameworkintegration
+pkgver=6.18.0
+pkgrel=1
+pkgdesc="frameworkintegration: consistent KDE application appearance"
+arch=(x86_64)
+url="https://kde.org/"
+license=(CC0-1.0 LGPL-2.0-only LGPL-2.0-or-later LGPL-3.0-only)
+depends=(qt6-base kconfig kcolorscheme kiconthemes knotifications kwidgetsaddons knewstuff kpackage ki18n)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/frameworks/6.18/frameworkintegration-$pkgver.tar.xz")
+sha256sums=('cc5336f8ed19da061f766d4854d76e9cd424ac4082cb44dfb4e7cf136aeab454')
+
+build() {
+    cmake -S frameworkintegration-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_KPACKAGE_INSTALL_HANDLERS=OFF -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a frameworkintegration-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

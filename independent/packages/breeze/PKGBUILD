@@ -3,12 +3,12 @@
 pkgname=breeze
 _lockname=plasma-breeze
 pkgver=6.4.5
-pkgrel=1
+pkgrel=2
 pkgdesc="Breeze widgets cursors and window decorations"
 arch=(x86_64)
 url="https://kde.org/"
 license=(BSD-3-Clause CC0-1.0 GPL-2.0-only GPL-2.0-or-later GPL-3.0-only MIT)
-depends=(qt6-base qt6-svg qt6-declarative kcoreaddons kcolorscheme kconfig kguiaddons ki18n kiconthemes kwindowsystem kirigami kcmutils kdecoration)
+depends=(qt6-base qt6-svg qt6-declarative kcoreaddons kcolorscheme kconfig kguiaddons ki18n kiconthemes kwindowsystem kirigami kcmutils kdecoration frameworkintegration)
 makedepends=(extra-cmake-modules qt6-tools)
 source=("https://download.kde.org/stable/plasma/6.4.5/breeze-$pkgver.tar.xz")
 sha256sums=('dcb8433d399511546958f4c8c1a8fae5ed22f2a698f053968d410ee75bd6d8b4')

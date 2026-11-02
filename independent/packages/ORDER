@@ -1,4 +1,4 @@
-# The order YÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â«rei's packages are built in: each after what it needs to build.
+# The order YÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â«rei's packages are built in: each after what it needs to build.
 # First batch: enough for a system installed by pacman to run a shell.
 yurei-filesystem
 linux-api-headers
@@ -346,7 +346,10 @@ pulseaudio-qt
 kirigami-addons
 plasma5support
 kactivitymanagerd
+frameworkintegration
+noto-sans
 breeze
+plasma-integration
 systemsettings
 kde-cli-tools
 kscreenlocker

@@ -2,12 +2,12 @@
 # stage-appearance.py copies shared visual assets here before recipe hashing.
 pkgname=yurei-appearance
 pkgver=0.5.1
-pkgrel=2
+pkgrel=3
 pkgdesc="Independent Yurei desktop and login appearance"
 arch=(any)
 url="https://github.com/Subuwu97/Yurei-OS"
 license=(GPL-3.0-or-later CC-BY-SA-4.0)
-depends=(plasma-desktop breeze breeze-icons sddm qt6-svg qt6-declarative)
+depends=(plasma-desktop breeze breeze-icons sddm qt6-svg qt6-declarative plasma-integration noto-sans)
 backup=(etc/xdg/kdeglobals etc/xdg/ksplashrc etc/xdg/kscreenlockerrc etc/xdg/konsolerc etc/xdg/mimeapps.list)
 
 package() {
