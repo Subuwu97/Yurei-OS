@@ -339,6 +339,7 @@ libplasma
 libgudev
 libndp
 modemmanager
+mobile-broadband-provider-info
 networkmanager
 upower
 networkmanager-qt

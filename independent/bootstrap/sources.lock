@@ -364,3 +364,4 @@ modemmanager  1.24.2  ModemManager-1.24.2.tar.gz::https://github.com/linux-mobil
 noto-sans  2.015  https://github.com/notofonts/latin-greek-cyrillic/releases/download/NotoSans-v2.015/NotoSans-v2.015.zip  0c34df072a3fa7efbb7cbf34950e1f971a4447cffe365d3a359e2d4089b958f5  repo
 icu  77.1  https://github.com/unicode-org/icu/releases/download/release-77-1/icu4c-77_1-src.tgz  588e431f77327c39031ffbb8843c0e3bc122c211374485fa87dc5f3faff24061  repo
 libxslt  1.1.43  https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.43.tar.xz  5a3d6b383ca5afc235b171118e90f5ff6aa27e9fea3303065231a6d403f0183a  repo
+mobile-broadband-provider-info  20250613  mobile-broadband-provider-info-20250613.tar.bz2::https://deb.debian.org/debian/pool/main/m/mobile-broadband-provider-info/mobile-broadband-provider-info_20250613.orig.tar.bz2  7bf72daee64895c77c0f0d2f2b96c4117be3c063292a6d522392946b303cb841  repo

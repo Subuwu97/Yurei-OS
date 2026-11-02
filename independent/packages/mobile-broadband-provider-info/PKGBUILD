@@ -1,0 +1,22 @@
+# Maintainer: Yurei Linux project
+pkgname=mobile-broadband-provider-info
+pkgver=20250613
+pkgrel=1
+pkgdesc="Mobile broadband provider and access point database"
+arch=(any)
+url="https://gitlab.gnome.org/GNOME/mobile-broadband-provider-info"
+license=(LicenseRef-Public-Domain)
+makedepends=(libxml2 libxslt)
+# Original upstream source archive preserved by Debian; no Debian packaging or binaries.
+source=("mobile-broadband-provider-info-$pkgver.tar.bz2::https://deb.debian.org/debian/pool/main/m/mobile-broadband-provider-info/mobile-broadband-provider-info_$pkgver.orig.tar.bz2")
+sha256sums=('7bf72daee64895c77c0f0d2f2b96c4117be3c063292a6d522392946b303cb841')
+
+build() {
+    meson setup mobile-broadband-provider-info-$pkgver build --prefix=/usr --libdir=lib --buildtype=release --wrap-mode=nofallback
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+    install -Dm644 "$srcdir/mobile-broadband-provider-info-$pkgver/COPYING" "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}
