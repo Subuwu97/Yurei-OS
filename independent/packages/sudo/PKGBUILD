@@ -4,13 +4,13 @@
 # keeps them the same.
 pkgname=sudo
 pkgver=1.9.17p1
-pkgrel=2
+pkgrel=3
 pkgdesc="Lets the administrators (the wheel group) run commands as root"
 arch=(x86_64)
 url="https://www.sudo.ws/"
 license=(ISC)
 depends=(glibc libxcrypt zlib openssl linux-pam)
-backup=(etc/sudoers)
+backup=(etc/sudoers etc/pam.d/sudo)
 source=("https://www.sudo.ws/dist/sudo-$pkgver.tar.gz")
 sha256sums=('ff607ea717072197738a78f778692cd6df9a7e3e404565f51de063ca27455d32')
 

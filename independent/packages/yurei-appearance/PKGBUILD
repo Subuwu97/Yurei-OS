@@ -2,7 +2,7 @@
 # stage-appearance.py copies shared visual assets here before recipe hashing.
 pkgname=yurei-appearance
 pkgver=0.5.1
-pkgrel=1
+pkgrel=2
 pkgdesc="Independent Yurei desktop and login appearance"
 arch=(any)
 url="https://github.com/Subuwu97/Yurei-OS"
@@ -21,7 +21,12 @@ package() {
           -e 's/yurei-install.desktop/yurei-install-gui.desktop/g' \
           -e '\|"preferred://browser",|d' "$startdir/assets/usr/share/yurei/desktop-layout.js"
     } > "$layout"
-    install -Dm644 "$layout" "$pkgdir/usr/share/plasma/shells/org.kde.plasma.desktop/contents/updates/yurei-desktop-layout.js"
+    local update="$pkgdir/usr/share/plasma/shells/org.kde.plasma.desktop/contents/updates/yurei-desktop-layout.js"
+    install -d "$(dirname "$update")"
+    # Updates may change only a stock layout; never force existing user panels.
+    { echo 'var yureiLayout = undefined;'
+      tail -n +2 "$layout"
+    } > "$update"
     install -Dm644 /dev/stdin "$pkgdir/etc/xdg/mimeapps.list" <<'APPS'
 [Default Applications]
 inode/directory=thunar.desktop

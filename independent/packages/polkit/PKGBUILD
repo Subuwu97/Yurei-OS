@@ -4,12 +4,13 @@
 # check-recipes.py keeps them the same.
 pkgname=polkit
 pkgver=126
-pkgrel=2
+pkgrel=3
 pkgdesc="Lets desktop programs ask for an administrator's password for system tasks"
 arch=(x86_64)
 url="https://github.com/polkit-org/polkit"
 license=(LGPL-2.0-or-later)
 depends=(glibc glib expat duktape systemd linux-pam)
+backup=(etc/pam.d/polkit-1)
 source=("https://github.com/polkit-org/polkit/archive/$pkgver/polkit-$pkgver.tar.gz")
 sha256sums=('2814a7281989f6baa9e57bd33bbc5e148827e2721ccef22aaf28ab2b376068e8')
 

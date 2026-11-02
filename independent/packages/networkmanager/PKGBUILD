@@ -2,7 +2,7 @@
 pkgname=networkmanager
 _lockname=networkmanager
 pkgver=1.54.1
-pkgrel=1
+pkgrel=2
 pkgdesc="networkmanager: independent Plasma desktop support"
 arch=(x86_64)
 url="https://github.com/Subuwu97/Yurei-OS"
