@@ -2,12 +2,13 @@
 pkgname=modemmanager
 _lockname=modemmanager
 pkgver=1.24.2
-pkgrel=2
+pkgrel=3
 pkgdesc="modemmanager: independent Plasma desktop support"
 arch=(x86_64)
 url="https://github.com/Subuwu97/Yurei-OS"
 license=(LGPL-2.1-or-later GPL-2.0-or-later)
 depends=(glib dbus libgudev systemd polkit)
+makedepends=(libxslt)
 source=("ModemManager-$pkgver.tar.gz::https://github.com/linux-mobile-broadband/ModemManager/archive/refs/tags/$pkgver.tar.gz")
 sha256sums=('fbc75adcc0d7b0565f256e7ff4e8872b0a37c4413ff576665f7470932d9c1b68')
 

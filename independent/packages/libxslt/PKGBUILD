@@ -1,0 +1,23 @@
+# Maintainer: Yurei Linux project
+pkgname=libxslt
+pkgver=1.1.43
+pkgrel=1
+pkgdesc="XSLT processor and libraries for generating desktop service interfaces"
+arch=(x86_64)
+url="https://gitlab.gnome.org/GNOME/libxslt"
+license=(MIT)
+depends=(glibc libxml2)
+source=("https://download.gnome.org/sources/libxslt/1.1/libxslt-$pkgver.tar.xz")
+sha256sums=('5a3d6b383ca5afc235b171118e90f5ff6aa27e9fea3303065231a6d403f0183a')
+
+build() {
+    cd libxslt-$pkgver
+    ./configure --prefix=/usr --disable-static --without-python --without-crypto
+    make
+}
+
+package() {
+    cd libxslt-$pkgver
+    make DESTDIR="$pkgdir" install
+    install -Dm644 Copyright "$pkgdir/usr/share/licenses/$pkgname/Copyright"
+}

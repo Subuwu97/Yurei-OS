@@ -97,6 +97,7 @@ mtdev
 libevdev
 xkeyboard-config
 libxml2
+libxslt
 # Thirteenth batch (stage 3): the X11 client libraries (for Xwayland and Mesa's X11 drivers).
 util-macros
 xorgproto
