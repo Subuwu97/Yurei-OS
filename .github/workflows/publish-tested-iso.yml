@@ -1,0 +1,105 @@
+name: Publish tested Plasma ISO
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/desktop-integration]
+    paths: [.github/workflows/publish-tested-iso.yml]
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: publish-yurei-plasma-test-41461724280
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.actor == 'Subuwu97'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      TESTED_RUN: '41461724280'
+      TESTED_SHA: e6c65b3962f4bb8658ebb33b9274ebf9c76037c2
+      TAG: yurei-plasma-test-41461724280
+      ISO: yurei-independent-desktop-41461724280-x86_64.iso
+    steps:
+      - name: Require the successful tested build
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GH_REPO/actions/runs/$TESTED_RUN" > tested-run.json
+          jq -e --arg sha "$TESTED_SHA" '.conclusion == "success" and .head_sha == $sha' tested-run.json
+      - name: Download the tested ISO and checksum
+        uses: actions/download-artifact@v4
+        with:
+          name: yurei-desktop-integration-iso
+          run-id: '41461724280'
+          github-token: ${{ github.token }}
+          path: image
+      - name: Verify and prepare release files
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd image
+          sha256sum -c "$ISO.sha256"
+          split -b 1900M -d -a 1 "$ISO" "$ISO.part"
+          test -f "$ISO.part0" && test -f "$ISO.part1"
+          test ! -e "$ISO.part2"
+          expected=$(awk '{print $1}' "$ISO.sha256")
+          actual=$(cat "$ISO.part0" "$ISO.part1" | sha256sum | awk '{print $1}')
+          test "$actual" = "$expected"
+          sha256sum "$ISO.part0" "$ISO.part1" > SHA256SUMS.parts
+          cat > README-download.txt <<'NOTES'
+          Yurei independent Plasma test ISO
+
+          Tested build: https://github.com/Subuwu97/Yurei-OS/actions/runs/41461724280
+          Source commit: e6c65b3962f4bb8658ebb33b9274ebf9c76037c2
+
+          Includes Plasma 6.4.5, the Yurei appearance, SDDM, a labwc fallback,
+          graphical installer, and network, sound and power applets.
+          Automated clean-install, library, Qt/QML, PAM, UEFI DVD/USB boot,
+          virtual-disk installation/reboot, SDDM login and Plasma session tests passed.
+          This is a test prerelease; real-hardware testing remains necessary.
+          Plymouth artwork is included, but installed-system boot animation is not wired up.
+
+          DOWNLOAD AND JOIN
+          GitHub requires release files under 2 GiB. Download BOTH .iso.part0 and
+          .iso.part1 files into the same directory, plus the .iso.sha256 checksum.
+          The automatic Source code archives are not the bootable ISO.
+
+          Windows Command Prompt, opened in the download directory:
+          copy /b yurei-independent-desktop-41461724280-x86_64.iso.part0+yurei-independent-desktop-41461724280-x86_64.iso.part1 yurei-independent-desktop-41461724280-x86_64.iso
+
+          Linux:
+          cat yurei-independent-desktop-41461724280-x86_64.iso.part0 yurei-independent-desktop-41461724280-x86_64.iso.part1 > yurei-independent-desktop-41461724280-x86_64.iso
+          sha256sum -c yurei-independent-desktop-41461724280-x86_64.iso.sha256
+
+          Windows PowerShell checksum check:
+          Get-FileHash .\yurei-independent-desktop-41461724280-x86_64.iso -Algorithm SHA256
+          Compare the result with the hash inside the .iso.sha256 file.
+
+          Boot the joined .iso in a UEFI virtual machine, or write it to a USB
+          using Rufus in DD mode or another image writer. USB writing erases that USB.
+          Secure Boot is not supported by this preview.
+          The live system logs in as root automatically. Use Install Yurei from
+          the application menu for the graphical installer; installing erases the
+          selected destination disk after confirmation.
+          NOTES
+      - name: Publish the verified files as a prerelease
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd image
+          if gh release view "$TAG" --json isDraft > release-state.json 2>/dev/null; then
+            jq -e '.isDraft == true' release-state.json
+          else
+            gh release create "$TAG" --target "$TESTED_SHA" --draft --prerelease \
+              --title "Yurei Plasma test ISO - build 41461724280" --notes-file README-download.txt
+          fi
+          gh release upload "$TAG" "$ISO.part0" "$ISO.part1" "$ISO.sha256" SHA256SUMS.parts README-download.txt --clobber
+          gh release edit "$TAG" --draft=false --prerelease --latest=false
+          gh release view "$TAG" --json url,assets
