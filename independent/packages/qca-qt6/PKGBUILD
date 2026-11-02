@@ -1,0 +1,23 @@
+# Maintainer: Yurei Linux project
+pkgname=qca-qt6
+pkgver=2.3.10
+pkgrel=1
+pkgdesc="Qt 6 cryptographic architecture with OpenSSL"
+arch=(x86_64)
+url="https://github.com/Subuwu97/Yurei-OS"
+license=(LGPL-2.1-or-later)
+depends=(qt6-base qt6-5compat openssl)
+source=("https://download.kde.org/stable/qca/$pkgver/qca-$pkgver.tar.xz")
+sha256sums=('1c5b722da93d559365719226bb121c726ec3c0dc4c67dea34f1e50e4e0d14a02')
+
+build() {
+    cmake -S qca-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_WITH_QT6=ON -DBUILD_TESTS=OFF -DWITH_ossl_PLUGIN=yes -DLIB_INSTALL_DIR=/usr/lib
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 qca-$pkgver/COPYING "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}

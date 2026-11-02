@@ -295,6 +295,9 @@ kbookmarks
 kded
 
 # File operations, settings modules, desktop search and controls
+qca-qt6
+libsecret
+kwallet
 kio
 kparts
 kcmutils
@@ -302,3 +305,15 @@ krunner
 knewstuff
 qqc2-desktop-style
 purpose
+
+# Media, speech, text editing and barcode support
+nasm
+ffmpeg
+qt6-multimedia
+flite
+qt6-speech
+ktextwidgets
+ktexteditor
+knotifyconfig
+libqrencode
+prison

@@ -1,0 +1,25 @@
+# Maintainer: Yurei Linux project
+pkgname=ffmpeg
+pkgver=7.1.1
+pkgrel=1
+pkgdesc="Audio and video codecs for Qt Multimedia"
+arch=(x86_64)
+url="https://github.com/Subuwu97/Yurei-OS"
+license=(LGPL-2.1-or-later)
+depends=(glibc zlib libvorbis opus)
+makedepends=(nasm)
+source=("https://ffmpeg.org/releases/ffmpeg-$pkgver.tar.xz")
+sha256sums=('733984395e0dbbe5c046abda2dc49a5544e7e0e1e2366bba849222ae9e3a03b1')
+
+build() {
+    cd ffmpeg-$pkgver
+    ./configure --prefix=/usr --libdir=/usr/lib --disable-static --enable-shared \
+        --disable-debug --disable-doc --disable-autodetect --enable-libvorbis --enable-libopus
+    make
+}
+
+package() {
+    cd ffmpeg-$pkgver
+    make DESTDIR="$pkgdir" install
+    install -Dm644 COPYING.LGPLv2.1 "$pkgdir/usr/share/licenses/$pkgname/COPYING.LGPLv2.1"
+}

@@ -45,4 +45,7 @@ Validated milestone: all 262 packages in the previous batch installed cleanly,
 all six native installer screens rendered, and the shared-library audit passed.
 The next seven recipes add KIO, KParts, KCMUtils, KRunner, KNewStuff, the
 Qt Quick desktop style and Purpose. Their builds remain to be validated.
-KIO will need rebuilding with Wallet once the wallet runtime dependencies land.
+The following batch builds QCA/OpenSSL, libsecret and the full Wallet runtime
+before rebuilding KIO with mandatory Wallet discovery. It also adds FFmpeg,
+Qt Multimedia, Flite and Qt Speech, text widgets/editor, notification settings
+and QR encoding. Media builds and speech playback still require validation.

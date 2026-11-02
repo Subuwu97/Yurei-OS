@@ -3,12 +3,12 @@
 pkgname=kio
 _lockname=kf6-kio
 pkgver=6.18.0
-pkgrel=1
+pkgrel=2
 pkgdesc="KDE file operations and file dialogs"
 arch=(x86_64)
 url="https://kde.org/"
 license=(BSD-2-Clause BSD-3-Clause CC0-1.0 GPL-2.0-only GPL-2.0-or-later GPL-3.0-only LGPL-2.0-only LGPL-2.0-or-later LGPL-2.1-only LGPL-2.1-or-later LGPL-3.0-only)
-depends=(qt6-base kconfig kcoreaddons ki18n kservice solid kcrash kwindowsystem kbookmarks kcolorscheme kcompletion kguiaddons kiconthemes kitemviews kjobwidgets kwidgetsaddons kded kauth kdbusaddons karchive acl util-linux libxml2)
+depends=(qt6-base kconfig kcoreaddons ki18n kservice solid kcrash kwindowsystem kbookmarks kcolorscheme kcompletion kguiaddons kiconthemes kitemviews kjobwidgets kwidgetsaddons kded kauth kdbusaddons karchive acl util-linux libxml2 kwallet)
 makedepends=(extra-cmake-modules qt6-tools)
 source=("https://download.kde.org/stable/frameworks/6.18/kio-$pkgver.tar.xz")
 sha256sums=('a97acec1407e1f00ca74e63964e7608828d4431bfe0aebe9010c296bb6387bda')
@@ -17,7 +17,7 @@ build() {
     cmake -S kio-$pkgver -B build -G Ninja \
         -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
         -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
-        -DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON -DCMAKE_REQUIRE_FIND_PACKAGE_KF6Wallet=ON -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
         -DBUILD_DESIGNERPLUGIN=OFF
     cmake --build build
 }
