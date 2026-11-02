@@ -1,10 +1,10 @@
-# Maintainer: Yūrei Linux project
-# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md): the installer, which
+# Maintainer: YÅ«rei Linux project
+# YÅ«rei's own recipe (stage 2c, docs/INDEPENDENT.md): the installer, which
 # puts the live system onto a disk.
 pkgname=yurei-install
 pkgver=0.1
-pkgrel=4
-pkgdesc="Installs Yūrei from the live system onto a disk"
+pkgrel=5
+pkgdesc="Installs YÅ«rei from the live system onto a disk"
 arch=(any)
 url="https://github.com/Subuwu97/Yurei-OS"
 license=(GPL-3.0-or-later)

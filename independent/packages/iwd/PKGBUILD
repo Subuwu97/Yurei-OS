@@ -4,7 +4,7 @@
 # keeps them the same.
 pkgname=iwd
 pkgver=3.9
-pkgrel=1
+pkgrel=2
 pkgdesc="Wi-Fi daemon (connect with iwctl)"
 arch=(x86_64)
 url="https://iwd.wiki.kernel.org/"
@@ -27,11 +27,10 @@ build() {
 package() {
     cd iwd-$pkgver
     make DESTDIR="$pkgdir" install
-    # iwd gets the address itself (DHCP) and hands names to resolved, so a
-    # Wi-Fi network works as soon as iwctl connects to it
+    # NetworkManager owns address configuration; iwd supplies the Wi-Fi link.
     install -Dm644 /dev/stdin "$pkgdir/etc/iwd/main.conf" <<'CONF'
 [General]
-EnableNetworkConfiguration=true
+EnableNetworkConfiguration=false
 
 [Network]
 NameResolvingService=systemd

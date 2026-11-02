@@ -1,4 +1,4 @@
-# The order YÃƒâ€¦Ã‚Â«rei's packages are built in: each after what it needs to build.
+# The order YÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â«rei's packages are built in: each after what it needs to build.
 # First batch: enough for a system installed by pacman to run a shell.
 yurei-filesystem
 linux-api-headers
@@ -334,6 +334,16 @@ polkit-kde-agent-1
 lcms2
 qcoro
 libplasma
+# Network, power and applet support before shell configuration.
+libgudev
+libndp
+modemmanager
+networkmanager
+upower
+networkmanager-qt
+modemmanager-qt
+pulseaudio-qt
+kirigami-addons
 plasma5support
 kactivitymanagerd
 breeze
@@ -355,3 +365,8 @@ sddm
 
 # Reuse the shared Yurei visual assets without CachyOS dependencies.
 yurei-appearance
+
+# User-facing network, volume and laptop controls
+powerdevil
+plasma-nm
+plasma-pa

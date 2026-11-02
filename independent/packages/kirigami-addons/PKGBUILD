@@ -1,0 +1,26 @@
+# Maintainer: Yurei Linux project
+pkgname=kirigami-addons
+_lockname=kirigami-addons
+pkgver=1.9.0
+pkgrel=1
+pkgdesc="kirigami-addons: independent Plasma desktop support"
+arch=(x86_64)
+url="https://github.com/Subuwu97/Yurei-OS"
+license=(BSD-2-Clause BSD-3-Clause CC-BY-SA-4.0 CC0-1.0 FSFAP GPL-2.0-or-later LGPL-2.0-only LGPL-2.0-or-later LGPL-2.1-only LGPL-2.1-or-later LGPL-3.0-only MIT)
+depends=(qt6-base qt6-declarative kirigami ki18n kconfig kcoreaddons kguiaddons kglobalaccel)
+source=("https://download.kde.org/stable/kirigami-addons/kirigami-addons-$pkgver.tar.xz")
+sha256sums=('21314a91f26b1c962def3fd7ff2e762d3358b075f63f4d7e0144fb2c63b7ebc7')
+
+build() {
+    cmake -S kirigami-addons-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF 
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a kirigami-addons-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

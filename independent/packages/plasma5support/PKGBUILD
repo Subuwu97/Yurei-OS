@@ -3,12 +3,12 @@
 pkgname=plasma5support
 _lockname=plasma-plasma5support
 pkgver=6.4.5
-pkgrel=1
+pkgrel=2
 pkgdesc="Compatibility data engines for Plasma applets"
 arch=(x86_64)
 url="https://kde.org/"
 license=(CC0-1.0 GPL-2.0-or-later LGPL-2.0-or-later)
-depends=(qt6-base qt6-declarative kconfig kcoreaddons kguiaddons ki18n knotifications solid kservice kidletime kio plasma-activities libx11)
+depends=(qt6-base qt6-declarative kconfig kcoreaddons kguiaddons ki18n knotifications solid kservice kidletime kio plasma-activities libx11 networkmanager-qt)
 makedepends=(extra-cmake-modules qt6-tools)
 source=("https://download.kde.org/stable/plasma/6.4.5/plasma5support-$pkgver.tar.xz")
 sha256sums=('acfdfbc82f8e3af7bd35d514b1e3cbb5daba8da7ba790cecb68f925a0f4df942')

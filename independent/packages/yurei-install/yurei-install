@@ -186,6 +186,16 @@ install -m644 "$kernel" "$target/boot/vmlinuz-yurei"
 say "Settings"
 # the live settings out, the installed system's in
 rm -rf "$target/etc/systemd/system/getty@tty1.service.d"
+if [[ -f $target/etc/pam.d/system-login ]]; then
+    # The live console permits its blank root password. Never carry that
+    # live-only nullok policy into the installed system.
+    cat > "$target/etc/pam.d/login" <<'PAM'
+auth include system-login
+account include system-login
+password include system-login
+session include system-login
+PAM
+fi
 echo "$hostname" > "$target/etc/hostname"
 printf '\n  Yūrei Linux (independent preview)\n\n' > "$target/etc/issue"
 printf '\n  Welcome to Yūrei, built entirely from source by Yūrei itself.\n  Run administrator commands with sudo; Wi-Fi with iwctl.\n\n' > "$target/etc/motd"

@@ -51,3 +51,13 @@ The final disposable-VM checks now target SDDM and actual KWin/Plasma
 processes, collect screenshots, and type the test password into SDDM. These
 graphical checks are not yet validated. The live-only passwordless root
 console uses a live-only PAM exception; installed accounts retain normal PAM.
+
+The next batch adds the Plasma network, sound and battery/brightness controls,
+NetworkManager with iwd, UPower and their Qt bindings. NetworkManager owns
+DHCP/DNS; iwd address configuration and systemd-networkd are disabled in
+this assembled image to avoid competing network managers. The modem service
+has generic AT support; QMI/MBIM/QRTR hardware support is deferred.
+
+The installer explicitly restores the normal login PAM policy after copying
+the live rootfs, and the VM checks verify that neither the live-only nullok
+policy nor the console autologin override survives installation.

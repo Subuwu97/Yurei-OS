@@ -1,0 +1,25 @@
+# Maintainer: Yurei Linux project
+pkgname=libndp
+_lockname=libndp
+pkgver=1.9
+pkgrel=1
+pkgdesc="libndp: independent Plasma desktop support"
+arch=(x86_64)
+url="https://github.com/Subuwu97/Yurei-OS"
+license=(LGPL-2.1-or-later GPL-2.0-or-later)
+depends=(glibc)
+source=("libndp-$pkgver.tar.gz::https://github.com/jpirko/libndp/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('e564f5914a6b1b799c3afa64c258824a801c1b79a29e2fe6525b682249c65261')
+
+build() {
+    cd libndp-$pkgver
+    ./autogen.sh
+    ./configure --prefix=/usr --libdir=/usr/lib --disable-static
+    make
+}
+
+package() {
+    cd libndp-$pkgver
+    make DESTDIR="$pkgdir" install
+    install -Dm644 "$srcdir/libndp-$pkgver/COPYING" "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}

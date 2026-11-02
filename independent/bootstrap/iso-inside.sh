@@ -54,7 +54,7 @@ live_settings() {
     # root without a password, logged in on the first screen
     sed -i 's/^root:[^:]*:/root::/' "$live/etc/shadow"
     # The passwordless root console is confined to the live image. Installed
-    # systems get the normal non-null PAM stack from the package repository.
+    # systems have the normal non-null login policy restored by yurei-install.
     if [[ -d $live/etc/pam.d ]]; then
         cat > "$live/etc/pam.d/login" <<'PAM'
 auth required pam_unix.so nullok

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Installs YÃƒâ€¦Ã‚Â«rei from the live ISO onto a blank disk in QEMU (UEFI, OVMF),
+"""Installs YÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â«rei from the live ISO onto a blank disk in QEMU (UEFI, OVMF),
 the way a person would at the live system's console, then starts the
 installed system from that disk alone, up to its login prompt.
 
@@ -225,6 +225,9 @@ if all(results):
     installed.send("if [ \"$(printf '%s\\n' " + shlex.quote(password) + " | sudo -S id -u)\" = 0 ]; "
                    "then echo SUDO-''OK; else echo SUDO-''BAD; fi")
     check("the user is an administrator (sudo)", installed.wait("SUDO-OK", 30, fail="SUDO-BAD"))
+    if args.expected_session == "sddm":
+        installed.send("if ! grep -qw nullok /etc/pam.d/login && [ ! -e /etc/systemd/system/getty@tty1.service.d/autologin.conf ]; then echo LOGIN-POLICY-''OK; else echo LOGIN-POLICY-''BAD; fi")
+        check("installed system has no live-only passwordless login policy", installed.wait("LOGIN-POLICY-OK", 30, fail="LOGIN-POLICY-BAD"))
     if args.expected_session == "greeter":
         installed.send("if id -nG | grep -qw seat && systemctl -q is-enabled seatd yurei-greeter; then echo GREETER-''OK; else echo GREETER-''BAD; fi")
         check("the user has the seat, and the login screen is on", installed.wait("GREETER-OK", 30, fail="GREETER-BAD"))
