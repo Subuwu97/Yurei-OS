@@ -176,9 +176,37 @@ def check_recorded_audio(machine, label):
 
 
 def check_browser(machine, label):
-    command = "timeout 90 firefox --headless --no-remote --profile /tmp/yurei-firefox-test --screenshot /tmp/yurei-browser.png " + shlex.quote("data:text/html,<html><body><h1>Yurei Firefox test</h1></body></html>")
-    machine.send(command + " && test -s /tmp/yurei-browser.png && echo BROWSER-''OK || echo BROWSER-''BAD")
-    return check(label + " Firefox renders a local page without sandbox overrides", machine.wait("BROWSER-OK", 120, fail="BROWSER-BAD"))
+    # Serve an actual HTTP document: an instant data: navigation can race
+    # Firefox's headless screenshot listener. Keep the normal browser sandbox.
+    program = """import functools, http.server, pathlib, subprocess, tempfile, threading
+with tempfile.TemporaryDirectory(prefix='yurei-browser-') as temporary:
+    root = pathlib.Path(temporary)
+    (root / 'index.html').write_text('<!doctype html><html><body><h1>Yurei Firefox test</h1></body></html>')
+    profile = root / 'profile'
+    profile.mkdir()
+    handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=temporary)
+    server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    try:
+        image = root / 'browser.png'
+        result = subprocess.run(['firefox', '--headless', '--no-remote', '--profile', str(profile), '--window-size=800,600', '--screenshot', str(image), 'http://127.0.0.1:%d/index.html' % server.server_port], timeout=90)
+        print('Firefox exit status:', result.returncode, flush=True)
+        assert result.returncode == 0
+        data = image.read_bytes()
+        assert data[:8] == bytes.fromhex('89504e470d0a1a0a') and len(data) > 100
+        assert int.from_bytes(data[16:20], 'big') == 800 and int.from_bytes(data[20:24], 'big') == 600
+    finally:
+        server.shutdown()
+        server.server_close()
+"""
+    encoded = base64.b64encode(program.encode()).decode()
+    command = "python3 -c " + shlex.quote("import base64;exec(base64.b64decode(" + repr(encoded) + "))")
+    machine.send(command + " && echo BROWSER-''OK || echo BROWSER-''BAD")
+    ok = check(label + " Firefox renders a local HTTP page without sandbox overrides", machine.wait("BROWSER-OK", 120, fail="BROWSER-BAD"))
+    if not ok:
+        machine.send("ldd /usr/lib/firefox/libxul.so | grep 'not found'; free -m; journalctl -k -n 30 --no-pager; echo BROWSER-DIAG-''DONE")
+        machine.wait("BROWSER-DIAG-DONE", 45)
+    return ok
 
 
 with open(disk, "xb") as f:
