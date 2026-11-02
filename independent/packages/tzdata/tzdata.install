@@ -1,0 +1,6 @@
+post_install() {
+    # Supply a default only for a fresh system. Never replace a user's zone.
+    if [ ! -e /etc/localtime ] && [ ! -L /etc/localtime ]; then
+        ln -s ../usr/share/zoneinfo/Etc/UTC /etc/localtime
+    fi
+}

@@ -1,0 +1,28 @@
+# Maintainer: Yurei Linux project
+pkgname=tzdata
+pkgver=2025b
+pkgrel=1
+pkgdesc="IANA timezone database for date, systemd-timedated and Plasma settings"
+arch=(any)
+url="https://www.iana.org/time-zones"
+license=(LicenseRef-Public-Domain BSD-3-Clause)
+depends=(glibc)
+install=tzdata.install
+source=("https://data.iana.org/time-zones/releases/tzdata$pkgver.tar.gz"
+        "https://data.iana.org/time-zones/releases/tzcode$pkgver.tar.gz")
+sha256sums=('11810413345fc7805017e27ea9fa4885fd74cd61b2911711ad038f5d28d71474'
+            '05f8fedb3525ee70d49c87d3fae78a8a0dbae4fe87aa565c65cda9948ae135ec')
+
+build() {
+    # Build the IANA compiler from source; do not depend on a host zic or
+    # install compiler files that could belong to the C library package.
+    make CC=gcc CFLAGS="$CFLAGS" zic tzdata.zi
+}
+
+package() {
+    install -d "$pkgdir/usr/share/zoneinfo"
+    ./zic -b fat -d "$pkgdir/usr/share/zoneinfo" \
+        africa antarctica asia australasia europe northamerica southamerica etcetera backward
+    install -m644 iso3166.tab zone.tab zone1970.tab zonenow.tab leap-seconds.list tzdata.zi "$pkgdir/usr/share/zoneinfo/"
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

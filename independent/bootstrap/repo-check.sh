@@ -264,4 +264,13 @@ C
     echo "PAM accepts the correct password and rejects the wrong password"
 fi
 
+# Check real timezone offsets, including seasonal and fractional offsets.
+if pacman -Q tzdata >/dev/null 2>&1; then
+    test "$(TZ=America/New_York date -d '2026-01-15 12:00:00 UTC' +%z)" = -0500
+    test "$(TZ=America/New_York date -d '2026-07-15 12:00:00 UTC' +%z)" = -0400
+    test "$(TZ=Asia/Kathmandu date -d '2026-01-15 12:00:00 UTC' +%z)" = +0545
+    test -s /usr/share/zoneinfo/Etc/UTC
+    echo "Timezone database handles winter, summer and fractional offsets"
+fi
+
 echo "all libraries found"

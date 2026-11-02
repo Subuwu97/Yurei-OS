@@ -367,3 +367,5 @@ libxslt  1.1.43  https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.43.t
 mobile-broadband-provider-info  20250613  mobile-broadband-provider-info-20250613.tar.bz2::https://deb.debian.org/debian/pool/main/m/mobile-broadband-provider-info/mobile-broadband-provider-info_20250613.orig.tar.bz2  7bf72daee64895c77c0f0d2f2b96c4117be3c063292a6d522392946b303cb841  repo
 libxft  2.3.9  https://xorg.freedesktop.org/archive/individual/lib/libXft-2.3.9.tar.xz  60a25b78945ed6932635b3bb1899a517d31df7456e69867ffba27f89ff3976f5  repo
 libwacom  2.15.0  https://github.com/linuxwacom/libwacom/releases/download/libwacom-2.15.0/libwacom-2.15.0.tar.xz  20cd65b1693129c3a6c003db0fe7fff7eccaf19fb04e89aaad9c20eb2151515a  repo
+tzcode  2025b  https://data.iana.org/time-zones/releases/tzcode2025b.tar.gz  05f8fedb3525ee70d49c87d3fae78a8a0dbae4fe87aa565c65cda9948ae135ec  repo
+tzdata  2025b  https://data.iana.org/time-zones/releases/tzdata2025b.tar.gz  11810413345fc7805017e27ea9fa4885fd74cd61b2911711ad038f5d28d71474  repo

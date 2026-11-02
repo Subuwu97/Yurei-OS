@@ -52,6 +52,7 @@ gawk
 findutils
 gzip
 make
+tzdata
 patch
 tar
 texinfo

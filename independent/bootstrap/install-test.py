@@ -160,6 +160,17 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
         # Stop echoing injected source and establish an unambiguous prompt.
         live.send("stty -echo; export PS1='yurei-''test> '")
         ready = check("serial command channel ready", live.wait("yurei-test> ", 30))
+        if ready:
+            # Exercise timedated over D-Bus in the disposable live VM. Disable
+            # NTP before setting time, then restore it after the manual check.
+            live.send("if timedatectl set-ntp false && "
+                      "timedatectl set-timezone America/Chicago && "
+                      "[ \"$(timedatectl show -p Timezone --value)\" = America/Chicago ] && "
+                      "timedatectl set-timezone Etc/UTC && "
+                      "timedatectl set-time \"$(date -u '+%Y-%m-%d %H:%M:%S')\" && "
+                      "timedatectl set-ntp true; then echo CLOCK-''OK; "
+                      "else journalctl -u systemd-timedated --no-pager -n 30; echo CLOCK-''BAD; fi")
+            ready = check("live clock and timezone can be changed through timedated", live.wait("CLOCK-OK", 60, fail="CLOCK-BAD"))
         backend = "yurei-install"
         if ready and args.backend:
             source = args.backend.read_bytes()
