@@ -132,12 +132,19 @@ class Machine:
         self.qemu.stdin.flush()
 
     def stop(self, timeout=60):
+        # Drain the serial pipe while waiting. An unread pipe can block QEMU
+        # during guest shutdown, leaving its WAV header unfinished after kill.
+        os.set_blocking(self.qemu.stdout.fileno(), True)
+        graceful = True
         try:
-            self.qemu.wait(timeout)
+            output, _ = self.qemu.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
+            graceful = False
             self.qemu.kill()
-            self.qemu.wait()
+            output, _ = self.qemu.communicate()
+        self.log.write(output)
         self.log.close()
+        return graceful and self.qemu.returncode == 0
 
 
 results = []
@@ -291,7 +298,7 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
             live.send(command + "&& echo INSTALL-''DONE || echo INSTALL-''FAILED")
             check("yurei-install finished", live.wait("INSTALL-DONE", 1800, fail="INSTALL-FAILED"))
     live.send("poweroff")
-live.stop()
+check("live VM shut down cleanly", live.stop())
 if audio_enabled:
     check_recorded_audio(live, "live session")
 
@@ -339,7 +346,7 @@ if all(results):
         installed.send("if [ \"$(systemctl get-default)\" = multi-user.target ]; then echo CONSOLE-''OK; else echo CONSOLE-''BAD; fi")
         check("older seed image retains console boot", installed.wait("CONSOLE-OK", 30, fail="CONSOLE-BAD"))
     installed.send("printf '%s\\n' " + shlex.quote(password) + " | sudo -S poweroff")
-    installed.stop()
+    check("installed VM shut down cleanly", installed.stop())
     if audio_enabled:
         check_recorded_audio(installed, "installed user")
 
