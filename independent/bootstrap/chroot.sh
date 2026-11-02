@@ -47,6 +47,12 @@ mnt /dev/pts -t devpts devpts -o gid=5,mode=0620
 mnt /proc -t proc proc
 mnt /sys -t sysfs sysfs
 mnt /run -t tmpfs tmpfs
+# Optional persistent signing home, separate from all disposable build roots.
+# Only the integration workflow supplies it; private keys never enter an ISO.
+if [[ -n ${YUREI_SIGNING_HOME:-} ]]; then
+    [[ $YUREI_SIGNING_HOME == /* && -d $YUREI_SIGNING_HOME ]] || { echo "invalid signing home" >&2; exit 1; }
+    mnt /signing-gnupg --bind "$YUREI_SIGNING_HOME"
+fi
 # the sources and the build scripts, read-only, so the build can't change them
 mnt /sources --bind -o ro "$SOURCES"
 mnt /bootstrap --bind -o ro "$here"

@@ -9,8 +9,8 @@
 # repository with pacman alone, trusting only the repository's key, and
 # runs a shell inside it.
 #
-# Packages are signed with a throwaway key made for each run, until Yūrei's
-# own signing key is set up (docs/INDEPENDENT.md).
+# The integration workflow supplies a persistent signing home; isolated
+# bootstrap runs without one continue to use a temporary key.
 #
 # A recipe that hasn't changed since the last run isn't built again: the
 # workflow hands in that run's packages (/srv/yurei/previous) with a hash of
@@ -26,6 +26,7 @@ repo=$srv/repo
 previous=$srv/previous
 stamps=$srv/stamps
 user=yurei-builder
+if [[ -d /signing-gnupg ]]; then export GNUPGHOME=/signing-gnupg; fi
 
 # Runs a command as the build user; makepkg won't run as root.
 as_user() {
@@ -48,9 +49,16 @@ fingerprint() { as_user gpg --batch --with-colons --list-secret-keys | awk -F: '
 setup() {
     msg "Build user, signing key and build settings"
     [[ -f $recipes/ORDER ]] || { echo "no recipes in $recipes" >&2; exit 1; }
-    getent passwd "$user" >/dev/null || useradd -m "$user"
-    as_user gpg --batch --quiet --passphrase '' \
-        --quick-gen-key "Yūrei build (throwaway) <build@yurei.invalid>" ed25519 sign never
+    # A stable, dedicated UID also avoids colliding with WSL's login user.
+    getent passwd "$user" >/dev/null || useradd -u 60000 -m "$user"
+    if [[ -n ${GNUPGHOME:-} ]]; then
+        chown -R "$user:" "$GNUPGHOME"
+        chmod 700 "$GNUPGHOME"
+    fi
+    if [[ -z $(as_user gpg --batch --with-colons --list-secret-keys 2>/dev/null | awk -F: '/^sec/ {print $5; exit}') ]]; then
+        as_user gpg --batch --quiet --passphrase '' \
+            --quick-gen-key "Yurei independent repository <packages@yurei.invalid>" ed25519 sign never
+    fi
     # systemd's boot loader is built with pyelftools; a build tool only,
     # like the rest of this system, not part of any package
     python3 -c 'import elftools' 2>/dev/null ||
@@ -195,6 +203,7 @@ publish() {
     fpr=$(fingerprint)
     as_user sh -c "cd $repo && repo-add --sign --key $fpr --verify yurei.db.tar.zst *.pkg.tar.zst"
     as_user gpg --batch --armor --export "$fpr" > "$repo/yurei-build.asc"
+    printf '%s\n' "$fpr" > "$repo/yurei-signing-fingerprint.txt"
     ls -l "$repo"
 }
 

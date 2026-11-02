@@ -26,6 +26,7 @@ jobs:
     env:
       YUREI: /home/runner/yurei-root
       SOURCES: /home/runner/yurei-sources
+      YUREI_SIGNING_HOME: /home/runner/yurei-signing-gnupg
       BUILD_DESKTOP_ISO: "true"
     steps:
       - uses: actions/checkout@v4
@@ -34,6 +35,7 @@ jobs:
           set -euo pipefail
           test "$(id -un)" = runner
           sudo -n true
+          sudo install -d -m 0700 "$YUREI_SIGNING_HOME"
           test -w /dev/kvm
           sudo test -x "$YUREI/usr/bin/gcc"
           test -d "$SOURCES"
@@ -58,13 +60,13 @@ jobs:
           # The failed repository check left its temporary build account.
           # Reset that account so setup can make a fresh throwaway signing key.
           if sudo chroot "$YUREI" /usr/bin/getent passwd yurei-builder >/dev/null; then
-            sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh repo-inside.sh cleanup
+            sudo --preserve-env=YUREI,SOURCES,YUREI_SIGNING_HOME independent/bootstrap/chroot.sh repo-inside.sh cleanup
           fi
-          sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh repo-inside.sh
+          sudo --preserve-env=YUREI,SOURCES,YUREI_SIGNING_HOME independent/bootstrap/chroot.sh repo-inside.sh
       - name: Create the test ISO
         if: env.BUILD_DESKTOP_ISO == 'true'
         run: |
-          sudo --preserve-env=YUREI,SOURCES independent/bootstrap/chroot.sh iso-inside.sh
+          sudo --preserve-env=YUREI,SOURCES,YUREI_SIGNING_HOME independent/bootstrap/chroot.sh iso-inside.sh
           sudo YUREI="$YUREI" OUT=/home/runner/yurei-iso \
             ISO_NAME="yurei-independent-desktop-${GITHUB_RUN_ID}-x86_64.iso" independent/bootstrap/iso.sh
           sudo chown -R "$(id -u):$(id -g)" /home/runner/yurei-iso
@@ -105,3 +107,24 @@ jobs:
             /home/runner/yurei-boot/*.wav
             /home/runner/yurei-root/srv/yurei/gui-previews/*.png
           if-no-files-found: ignore
+
+  publish-repository:
+    name: Publish tested independent package updates
+    needs: recover
+    if: github.actor == 'Subuwu97'
+    runs-on: yurei-pc
+    timeout-minutes: 90
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      YUREI_REPO: /home/runner/yurei-root/srv/yurei/repo
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install official Ubuntu release-publishing tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gh gnupg
+      - name: Verify and publish the signed packages, then the database
+        run: bash independent/bootstrap/publish-repository.sh
