@@ -1,7 +1,7 @@
 # Maintainer: Yurei Linux project
 pkgname=vlc-libs
 pkgver=3.0.21
-pkgrel=2
+pkgrel=3
 pkgdesc="VLC audio playback libraries for the Phonon backend"
 arch=(x86_64)
 url="https://www.videolan.org/"
@@ -14,7 +14,7 @@ build() {
     cd vlc-$pkgver
     BUILDCC=gcc CFLAGS="$CFLAGS -std=gnu17" ./configure --prefix=/usr --libdir=/usr/lib --disable-nls \
         --disable-vlc --disable-qt --disable-skins2 --disable-lua --disable-dbus \
-        --disable-avcodec --disable-avformat --disable-swscale --disable-postproc \
+        --disable-avcodec --disable-avformat --disable-swscale --disable-postproc --disable-a52 \
         --disable-live555 --disable-v4l2 --disable-screen --disable-xcb --disable-wayland \
         --disable-vdpau --disable-libva --disable-ncurses --disable-sout --disable-vlm \
         --disable-addonmanagermodules --enable-pulse --enable-alsa
