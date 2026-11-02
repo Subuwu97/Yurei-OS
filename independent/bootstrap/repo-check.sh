@@ -173,6 +173,23 @@ if pacman -Q qt6-declarative qt6-5compat qt6-svg > /dev/null 2>&1; then
     [[ $qmlout == *QML-OK* ]]
     rm -f "$qmltest"
 fi
+if pacman -Q plasma-workspace > /dev/null 2>&1; then
+    command -v startplasma-wayland kwin_wayland plasmashell systemsettings sddm
+    cat > /tmp/yurei-plasma-imports.qml <<'QML'
+import QtQuick
+import org.kde.plasma.core as PlasmaCore
+import org.kde.plasma.components as PlasmaComponents
+import org.kde.kirigami as Kirigami
+Item {
+    Component.onCompleted: { console.log("PLASMA-QML-OK"); Qt.quit() }
+}
+QML
+    qmlout=$(QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software timeout 60 \
+        /usr/lib/qt6/bin/qml /tmp/yurei-plasma-imports.qml 2>&1) || true
+    printf '%s\n' "$qmlout"
+    [[ $qmlout == *PLASMA-QML-OK* ]]
+    rm -f /tmp/yurei-plasma-imports.qml
+fi
 if pacman -Q yurei-install-gui > /dev/null 2>&1; then
     mkdir -p /tmp/yurei-gui-previews
     for page in 0 1 2 3 4 5; do

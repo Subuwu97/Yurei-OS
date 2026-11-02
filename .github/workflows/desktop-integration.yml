@@ -1,4 +1,4 @@
-name: Desktop integration test ISO
+name: Build Yurei Plasma ISO (your PC)
 
 on:
   workflow_dispatch:
@@ -19,13 +19,14 @@ concurrency:
 
 jobs:
   recover:
+    name: Build and test Plasma ISO
     if: github.actor == 'Subuwu97'
     runs-on: yurei-pc
     timeout-minutes: 150
     env:
       YUREI: /home/runner/yurei-root
       SOURCES: /home/runner/yurei-sources
-      BUILD_DESKTOP_ISO: "false"
+      BUILD_DESKTOP_ISO: "true"
     steps:
       - uses: actions/checkout@v4
       - name: Require the previous build and complete local package cache

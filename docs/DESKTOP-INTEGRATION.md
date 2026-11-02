@@ -25,9 +25,9 @@ SDDM, session integration, independent Yurei appearance defaults and final
 UEFI boot, graphical login, installer and installed-system checks. Existing
 user configuration must be preserved. No Arch or CachyOS binaries are used.
 
-BUILD_DESKTOP_ISO remains false during dependency bring-up. Enable it only
-once the complete session is assembled; then rebuild and verify one combined
-image. The previously tested Qt/labwc ISO remains available in outputs.
+BUILD_DESKTOP_ISO is now true for the assembled session. Successful package
+validation proceeds directly to one combined image, UEFI boot, installation,
+real Plasma startup and SDDM password-login checks. The previously tested Qt/labwc ISO remains available in outputs.
 
 The assembled-shell batch adds KWin, Plasma workspace/desktop, libksysguard,
 Phonon with its VLC audio backend and SDDM. The launcher selects Plasma when
