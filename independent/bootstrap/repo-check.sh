@@ -204,4 +204,47 @@ if [[ -n $missing ]]; then
     printf '%s' "$missing"
     exit 1
 fi
+if pacman -Q linux-pam > /dev/null 2>&1; then
+    test -s /usr/lib/security/pam_systemd.so
+    useradd -m -s /bin/bash yurei-pam-test
+    printf 'yurei-pam-test:local-build-check-4872\n' | chpasswd
+    cat > /tmp/yurei-pam-check.c <<'C'
+#include <security/pam_appl.h>
+#include <stdlib.h>
+#include <string.h>
+static int converse(int n, const struct pam_message **messages,
+                    struct pam_response **out, void *data) {
+    struct pam_response *r = calloc((size_t)n, sizeof(*r));
+    if (!r) return PAM_BUF_ERR;
+    for (int i = 0; i < n; ++i) {
+        if (messages[i]->msg_style == PAM_PROMPT_ECHO_OFF)
+            r[i].resp = strdup((const char *)data);
+        else if (messages[i]->msg_style == PAM_PROMPT_ECHO_ON)
+            r[i].resp = strdup("yurei-pam-test");
+    }
+    *out = r;
+    return PAM_SUCCESS;
+}
+int main(int argc, char **argv) {
+    if (argc != 2) return 2;
+    struct pam_conv conv = {converse, argv[1]};
+    pam_handle_t *p = NULL;
+    int status = pam_start("sudo", "yurei-pam-test", &conv, &p);
+    if (status == PAM_SUCCESS) status = pam_authenticate(p, 0);
+    if (status == PAM_SUCCESS) status = pam_acct_mgmt(p, 0);
+    if (p) pam_end(p, status);
+    return status == PAM_SUCCESS ? 0 : 1;
+}
+C
+    cc /tmp/yurei-pam-check.c -lpam -o /tmp/yurei-pam-check
+    /tmp/yurei-pam-check local-build-check-4872
+    if /tmp/yurei-pam-check deliberately-wrong; then
+        echo "PAM accepted an incorrect password" >&2
+        exit 1
+    fi
+    userdel -r yurei-pam-test
+    rm -f /tmp/yurei-pam-check.c /tmp/yurei-pam-check
+    echo "PAM accepts the correct password and rejects the wrong password"
+fi
+
 echo "all libraries found"

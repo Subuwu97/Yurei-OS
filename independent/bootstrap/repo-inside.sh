@@ -139,7 +139,8 @@ install_here() {
 # Builds every recipe in ORDER. --nodeps: while bootstrapping, everything a
 # recipe needs is in this system already, but not yet known to pacman (from
 # ORDER's "#> install from here on" line, each package is installed here
-# once built, for the ones after it). A recipe written "NAME build-only" is
+# once built, for the ones after it). bootstrap-install makes an early
+# prerequisite available without installing all bootstrap recipes. A recipe written "NAME build-only" is
 # only there to build the ones after it (a cross compiler): its packages go
 # into the repository, and leave this system again at the end, so the
 # booted system and the ISO don't carry them.
@@ -160,7 +161,7 @@ packages() {
         # the keyring holds this run's key, so it's always made afresh
         if [[ $name != yurei-keyring ]] && reuse "$name" "$hash"; then
             echo "   unchanged since the last run: reused"
-            [[ -z $install ]] || install_here "$name"
+            if [[ -n $install || $flag == bootstrap-install ]]; then install_here "$name"; fi
             continue
         fi
         rm -rf "$(home)/build/$name"
@@ -178,7 +179,7 @@ packages() {
         done < "$stamps/$name.files"
         echo "$hash" > "$stamps/$name.hash"
         rm -rf "$(home)/build/$name"
-        [[ -z $install ]] || install_here "$name"
+        if [[ -n $install || $flag == bootstrap-install ]]; then install_here "$name"; fi
         printf '   (%s took %d s)\n' "$name" $((SECONDS - start))
     done < "$recipes/ORDER"
     for name in "${buildonly[@]}"; do

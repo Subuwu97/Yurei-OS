@@ -1,4 +1,4 @@
-# The order Yūrei's packages are built in: each after what it needs to build.
+# The order YÅ«rei's packages are built in: each after what it needs to build.
 # First batch: enough for a system installed by pacman to run a shell.
 yurei-filesystem
 linux-api-headers
@@ -17,6 +17,7 @@ gmp
 mpfr
 mpc
 libxcrypt
+linux-pam bootstrap-install
 gcc
 # Third batch: the core tools, Perl, Python and OpenSSL.
 m4
@@ -328,3 +329,14 @@ layer-shell-qt
 kwayland
 kglobalacceld
 polkit-kde-agent-1
+
+# Plasma shell libraries, appearance, settings and screen locking
+lcms2
+qcoro
+libplasma
+plasma5support
+kactivitymanagerd
+breeze
+systemsettings
+kde-cli-tools
+kscreenlocker

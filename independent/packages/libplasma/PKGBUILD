@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=libplasma
+_lockname=plasma-libplasma
+pkgver=6.4.5
+pkgrel=1
+pkgdesc="Plasma shell and QML libraries"
+arch=(x86_64)
+url="https://kde.org/"
+license=(BSD-3-Clause CC0-1.0 GPL-2.0-only GPL-2.0-or-later GPL-3.0-only LGPL-2.0-or-later LGPL-2.1-only LGPL-2.1-or-later LGPL-3.0-only Qt-LGPL-exception-1.1)
+depends=(qt6-base qt6-declarative qt6-svg qt6-wayland karchive kconfig kcoreaddons kglobalaccel kguiaddons ki18n kiconthemes kio kwindowsystem knotifications kpackage kirigami ksvg kcolorscheme plasma-activities plasma-wayland-protocols wayland libx11 libxcb libglvnd)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/plasma/6.4.5/libplasma-$pkgver.tar.xz")
+sha256sums=('945b6c54cfec56080f6b55864e82a7702096d682becf1fd4979d77a4009c4124')
+
+build() {
+    cmake -S libplasma-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a libplasma-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

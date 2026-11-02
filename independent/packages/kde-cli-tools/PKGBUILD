@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=kde-cli-tools
+_lockname=plasma-kde-cli-tools
+pkgver=6.4.5
+pkgrel=1
+pkgdesc="Desktop launch and administration tools"
+arch=(x86_64)
+url="https://kde.org/"
+license=(Artistic-2.0 GPL-2.0-only GPL-2.0-or-later GPL-3.0-only LGPL-2.0-only LGPL-2.0-or-later LGPL-2.1-only LGPL-3.0-only)
+depends=(qt6-base qt6-svg kconfig kiconthemes ki18n kcmutils kio kservice kwindowsystem kparts kcoreaddons kdesu kwidgetsaddons)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/plasma/6.4.5/kde-cli-tools-$pkgver.tar.xz")
+sha256sums=('3cc327470efd63ce6798f31000234674d6949872c8571c072dcb23956a277b26')
+
+build() {
+    cmake -S kde-cli-tools-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_DOC=OFF -DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a kde-cli-tools-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

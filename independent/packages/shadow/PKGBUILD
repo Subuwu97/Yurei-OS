@@ -4,12 +4,12 @@
 # keeps them the same.
 pkgname=shadow
 pkgver=4.18.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Password and account management tool suite"
 arch=(x86_64)
 url="https://github.com/shadow-maint/shadow"
 license=(BSD-3-Clause)
-depends=(acl attr libxcrypt glibc)
+depends=(acl attr libxcrypt glibc linux-pam)
 backup=(etc/login.defs etc/default/useradd)
 source=("https://github.com/shadow-maint/shadow/releases/download/$pkgver/shadow-$pkgver.tar.xz")
 sha256sums=('add4604d3bc410344433122a819ee4154b79dd8316a56298c60417e637c07608')
@@ -27,13 +27,22 @@ prepare() {
 build() {
     cd shadow-$pkgver
     ./configure --sysconfdir=/etc --disable-static --with-bcrypt --with-yescrypt \
-        --without-libbsd --with-group-name-max-length=32
+        --with-libpam --without-libbsd --with-group-name-max-length=32
     make
 }
 
 package() {
     cd shadow-$pkgver
     make exec_prefix=/usr DESTDIR="$pkgdir" install
+    install -d "$pkgdir/etc/pam.d"
+    for service in chage chpasswd chgpasswd groupadd groupdel groupmod newusers useradd userdel usermod; do
+        printf 'auth required pam_rootok.so\naccount required pam_permit.so\npassword include system-auth\nsession required pam_permit.so\n' > "$pkgdir/etc/pam.d/$service"
+    done
+    for service in login passwd; do
+        printf 'auth include system-login\naccount include system-login\npassword include system-login\nsession include system-login\n' > "$pkgdir/etc/pam.d/$service"
+    done
+    printf 'auth sufficient pam_rootok.so\nauth include system-auth\naccount include system-auth\npassword include system-auth\nsession include system-auth\n' > "$pkgdir/etc/pam.d/su"
+    cp "$pkgdir/etc/pam.d/su" "$pkgdir/etc/pam.d/su-l"
     # new accounts: group "users", Bash, a home folder from /etc/skel
     install -d "$pkgdir/etc/default"
     printf 'GROUP=100\nHOME=/home\nINACTIVE=-1\nEXPIRE=\nSHELL=/usr/bin/bash\nSKEL=/etc/skel\nCREATE_MAIL_SPOOL=no\n' \

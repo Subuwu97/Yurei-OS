@@ -1,56 +1,30 @@
 # Combined independent desktop image
 
-Target: one source-built image with Qt, Plasma as the default Wayland desktop,
+Target: one source-built image with Plasma as the default Wayland desktop,
 labwc as the fallback, and the native graphical installer in the live session.
 
-This branch combines the tested ISO recovery fixes, the native installer from
-PR #7, and Claude's first KDE Frameworks tier with the protocol fix from PR #8.
-It does not yet include a working Plasma shell/session. The known-good test
-ISO remains available while integration proceeds.
+Validated at commit 3f8a25a: 291 packages installed cleanly, all six native
+installer screens rendered with Yurei Qt, and the shared-library audit passed.
+This includes Qt 6.9.3, the required initial Frameworks tiers, wallet, media,
+speech and text components, and the first Plasma platform libraries and
+Polkit authentication agent. This is not yet a complete Plasma session.
 
-Current build milestone:
+The next batch adds PAM authentication to systemd, shadow, sudo and Polkit.
+PAM is explicitly installed early during repository builds so systemd and
+shadow can link it even when the prerequisite package comes from the cache.
+A regression check covers early installation without enabling installation
+of every core bootstrap recipe. The clean-root check exercises correct and
+incorrect password authentication through the distro's actual PAM modules.
 
-- Keep the already-built Qt/labwc/gaming packages and their cached recipes.
-- Compile and package the native installer with Yurei's own Qt.
-- Render all six installer screens inside the freshly installed Yurei root.
-- Build ECM, Plasma Wayland protocols and the first Frameworks tiers.
-- The next 19 Frameworks recipes use dependencies read from the verified 6.18
-  upstream CMake files; runtime compilation is still being validated.
-- Qt Sensors, Positioning and Location 6.9.3 recipes are pinned for KWin and
-  Plasma workspace; these still need compilation on the runner.
-- The next dependency batch adds notification audio codecs, client-only
-  libpulse, libcanberra, Polkit Qt 6 and five additional Frameworks.
-  PipeWire remains the audio server; these recipes still require build validation.
-- Recheck clean installation, shared libraries, ISO boot and installation.
+That batch also builds lcms2, QCoro, libplasma, Plasma5Support, the activity
+manager, Breeze, System Settings, KDE CLI tools and KScreenLocker. Compilation
+and PAM behavior are still awaiting runner validation.
 
-Remaining before the target image can be called Plasma-ready:
+Remaining: KWin, Plasma workspace/desktop, their remaining dependencies,
+SDDM, session integration, independent Yurei appearance defaults and final
+UEFI boot, graphical login, installer and installed-system checks. Existing
+user configuration must be preserved. No Arch or CachyOS binaries are used.
 
-- Remaining required KDE Frameworks and their system dependencies.
-- PAM/logind session integration and a working desktop authentication agent.
-- KWin, libplasma, Plasma workspace/desktop and their dependency graph.
-- SDDM with Plasma default and labwc available as a fallback session.
-- System settings, Breeze assets and independent Yurei appearance defaults.
-- Real graphical VM login, compositor, panel, installer authorization and
-  installation checks. Offscreen rendering alone does not establish these.
-
-No KDE binaries are taken from Arch or CachyOS. Source release archives and
-checksums stay pinned in sources.lock. Existing users' personal desktop
-configuration must be preserved.
-
-During dependency bring-up, BUILD_DESKTOP_ISO is false in the integration
-workflow: package/GUI validation and cached results are produced each cycle.
-Enable it for the final combined image after the Plasma session is assembled.
-
-Validated milestone: all 262 packages in the previous batch installed cleanly,
-all six native installer screens rendered, and the shared-library audit passed.
-The next seven recipes add KIO, KParts, KCMUtils, KRunner, KNewStuff, the
-Qt Quick desktop style and Purpose. Their builds remain to be validated.
-The following batch builds QCA/OpenSSL, libsecret and the full Wallet runtime
-before rebuilding KIO with mandatory Wallet discovery. It also adds FFmpeg,
-Qt Multimedia, Flite and Qt Speech, text widgets/editor, notification settings
-and QR encoding. Media builds and speech playback still require validation.
-
-The first Plasma 6.4.5 library batch is queued: activities and statistics,
-KDecoration, libkscreen, layer-shell-qt, KWayland, global shortcut daemon and
-the Polkit KDE authentication agent. Upstream archives were checked against
-the existing lock; these builds have not yet passed on the PC runner.
+BUILD_DESKTOP_ISO remains false during dependency bring-up. Enable it only
+once the complete session is assembled; then rebuild and verify one combined
+image. The previously tested Qt/labwc ISO remains available in outputs.
