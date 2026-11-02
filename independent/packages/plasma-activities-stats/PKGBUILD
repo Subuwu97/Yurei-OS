@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=plasma-activities-stats
+_lockname=plasma-plasma-activities-stats
+pkgver=6.4.5
+pkgrel=1
+pkgdesc="Activity usage statistics"
+arch=(x86_64)
+url="https://kde.org/"
+license=(CC0-1.0 GPL-2.0-only GPL-2.0-or-later GPL-3.0-only LGPL-2.0-or-later LGPL-2.1-only LGPL-3.0-only)
+depends=(qt6-base kconfig plasma-activities)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/plasma/6.4.5/plasma-activities-stats-$pkgver.tar.xz")
+sha256sums=('35c64f724c0550f99677f6134849decf76be47971210ca9418582ea38b480c30')
+
+build() {
+    cmake -S plasma-activities-stats-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a plasma-activities-stats-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

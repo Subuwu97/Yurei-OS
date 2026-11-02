@@ -49,3 +49,8 @@ The following batch builds QCA/OpenSSL, libsecret and the full Wallet runtime
 before rebuilding KIO with mandatory Wallet discovery. It also adds FFmpeg,
 Qt Multimedia, Flite and Qt Speech, text widgets/editor, notification settings
 and QR encoding. Media builds and speech playback still require validation.
+
+The first Plasma 6.4.5 library batch is queued: activities and statistics,
+KDecoration, libkscreen, layer-shell-qt, KWayland, global shortcut daemon and
+the Polkit KDE authentication agent. Upstream archives were checked against
+the existing lock; these builds have not yet passed on the PC runner.

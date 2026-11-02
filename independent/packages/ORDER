@@ -317,3 +317,13 @@ ktexteditor
 knotifyconfig
 libqrencode
 prison
+
+# Plasma platform libraries and desktop authorization agent
+plasma-activities
+plasma-activities-stats
+kdecoration
+libkscreen
+layer-shell-qt
+kwayland
+kglobalacceld
+polkit-kde-agent-1
