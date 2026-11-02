@@ -1,15 +1,21 @@
 # Maintainer: Yurei Linux project
 pkgname=lm-sensors
 pkgver=3.6.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Hardware sensor library and inspection tools"
 arch=(x86_64)
 url="https://github.com/lm-sensors/lm-sensors"
 license=(GPL-2.0-or-later LGPL-2.1-or-later)
 depends=(glibc perl)
 backup=(etc/sensors3.conf)
+makedepends=(bison flex)
 source=("lm-sensors-$pkgver.tar.gz::https://github.com/lm-sensors/lm-sensors/archive/refs/tags/V3-6-0.tar.gz")
 sha256sums=('0591f9fa0339f0d15e75326d0365871c2d4e2ed8aa1ff759b3a55d3734b7d197')
+
+prepare() {
+    # The minimal base has no standalone which; use the shell builtin.
+    sed -i 's/! which /! command -v /g' lm-sensors-3-6-0/Makefile
+}
 
 build() {
     cd lm-sensors-3-6-0
