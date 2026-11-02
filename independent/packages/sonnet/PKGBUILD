@@ -5,19 +5,19 @@
 pkgname=sonnet
 _lockname=kf6-sonnet
 pkgver=6.18.0
-pkgrel=2
+pkgrel=3
 pkgdesc="KDE Frameworks: spell checking"
 arch=(x86_64)
 url="https://kde.org/"
 license=(LGPL-2.0-or-later)
-depends=(qt6-base qt6-declarative)
+depends=(qt6-base qt6-declarative hunspell)
 makedepends=(extra-cmake-modules qt6-tools)
 source=("https://download.kde.org/stable/frameworks/6.18/sonnet-$pkgver.tar.xz")
 sha256sums=('2d94c957a3c5f2232653ad782b291e2b959eea6dca83cc09cae621bc9834ab25')
 
 build() {
     cmake -S sonnet-$pkgver -B build -G Ninja \
-        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_USE_QT_SYS_PATHS=ON -DKDE_INSTALL_LIBDIR=lib
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_REQUIRE_FIND_PACKAGE_HUNSPELL=ON -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_USE_QT_SYS_PATHS=ON -DKDE_INSTALL_LIBDIR=lib
     cmake --build build
 }
 
