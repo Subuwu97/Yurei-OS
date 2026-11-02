@@ -319,6 +319,7 @@ libqrencode
 prison
 
 # Plasma platform libraries and desktop authorization agent
+boost-headers
 plasma-activities
 plasma-activities-stats
 kdecoration

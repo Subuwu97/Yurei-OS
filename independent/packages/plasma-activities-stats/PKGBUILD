@@ -3,13 +3,13 @@
 pkgname=plasma-activities-stats
 _lockname=plasma-plasma-activities-stats
 pkgver=6.4.5
-pkgrel=1
+pkgrel=2
 pkgdesc="Activity usage statistics"
 arch=(x86_64)
 url="https://kde.org/"
 license=(CC0-1.0 GPL-2.0-only GPL-2.0-or-later GPL-3.0-only LGPL-2.0-or-later LGPL-2.1-only LGPL-3.0-only)
 depends=(qt6-base kconfig plasma-activities)
-makedepends=(extra-cmake-modules qt6-tools)
+makedepends=(extra-cmake-modules qt6-tools boost-headers)
 source=("https://download.kde.org/stable/plasma/6.4.5/plasma-activities-stats-$pkgver.tar.xz")
 sha256sums=('35c64f724c0550f99677f6134849decf76be47971210ca9418582ea38b480c30')
 

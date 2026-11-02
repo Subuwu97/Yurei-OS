@@ -3,13 +3,13 @@
 pkgname=plasma-activities
 _lockname=plasma-plasma-activities
 pkgver=6.4.5
-pkgrel=1
+pkgrel=2
 pkgdesc="Activities library and QML bindings"
 arch=(x86_64)
 url="https://kde.org/"
 license=(CC0-1.0 GPL-2.0-or-later LGPL-2.0-or-later LGPL-2.1-only LGPL-3.0-only MIT)
 depends=(qt6-base qt6-declarative)
-makedepends=(extra-cmake-modules qt6-tools)
+makedepends=(extra-cmake-modules qt6-tools boost-headers)
 source=("https://download.kde.org/stable/plasma/6.4.5/plasma-activities-$pkgver.tar.xz")
 sha256sums=('30ad23846e97bf3c2ed6d3af25de0ae1d981ea871608492fcc16155efd0c8169')
 
