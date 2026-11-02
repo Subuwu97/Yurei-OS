@@ -1,0 +1,24 @@
+# Maintainer: Yurei Linux project
+pkgname=libxft
+pkgver=2.3.9
+pkgrel=1
+pkgdesc="FreeType font rendering for X11 applications and Plasma font settings"
+arch=(x86_64)
+url="https://www.x.org/"
+license=(MIT)
+depends=(libx11 libxrender fontconfig freetype)
+makedepends=(xorgproto)
+source=("https://xorg.freedesktop.org/archive/individual/lib/libXft-$pkgver.tar.xz")
+sha256sums=('60a25b78945ed6932635b3bb1899a517d31df7456e69867ffba27f89ff3976f5')
+
+build() {
+    cd libXft-$pkgver
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static
+    make
+}
+
+package() {
+    cd libXft-$pkgver
+    make DESTDIR="$pkgdir" install
+    install -Dm644 COPYING "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}
