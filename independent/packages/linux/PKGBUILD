@@ -4,7 +4,7 @@
 # keeps them the same.
 pkgname=linux
 pkgver=6.18
-pkgrel=8
+pkgrel=9
 # NVIDIA's open kernel modules (MIT/GPL), built here against this kernel so
 # their versions always match; nvidia-utils brings the matching driver
 _nvidia=595.112.07
@@ -77,7 +77,7 @@ build() {
         -m SND_SOC_SOF_LUNARLAKE -e SND_SOC_SOF_HDA_LINK -e SND_SOC_SOF_HDA_AUDIO_CODEC \
         -e SND_SOC_INTEL_MACH -m SND_SOC_INTEL_SKL_HDA_DSP_GENERIC_MACH \
         -m SND_SOC_INTEL_SOF_RT5682_MACH -m SND_SOC_INTEL_SOF_SSP_AMP_MACH -m SND_SOC_DMIC \
-        -e SPI -e SPI_MASTER -e I2C -m SOUNDWIRE -m SOUNDWIRE_INTEL \
+        -e GPIOLIB -e GPIO_SWNODE_UNDEFINED -e SPI -e SPI_MASTER -e I2C -m SOUNDWIRE -m SOUNDWIRE_INTEL \
         -e SND_SOC_INTEL_USER_FRIENDLY_LONG_NAMES -m SND_SOC_SOF_INTEL_SOUNDWIRE \
         -m SND_SOC_INTEL_SOUNDWIRE_SOF_MACH -m SND_HDA_GENERIC \
         -m SND_HDA_CODEC_CONEXANT -m SND_USB_AUDIO -m SND_SOC_AMD_ACP6x -m SND_SOC_AMD_PS \
@@ -95,6 +95,7 @@ build() {
     for option in HYPERV HYPERV_VMBUS HYPERV_STORAGE SCSI BLK_DEV_SD BLK_DEV_SR HYPERV_NET DRM_HYPERV HYPERV_KEYBOARD HID_HYPERV_MOUSE; do
         grep -qx "CONFIG_${option}=y" .config || { echo "Missing built-in $option" >&2; return 1; }
     done
+    grep -qx "CONFIG_GPIO_SWNODE_UNDEFINED=y" .config || { echo "Missing software-node GPIO sentinel for Cirrus audio" >&2; return 1; }
     for option in SOUNDWIRE SOUNDWIRE_INTEL SND_SOC_SOF_INTEL_SOUNDWIRE SND_SOC_INTEL_SOUNDWIRE_SOF_MACH SND_SOC_RT711_SDCA_SDW SND_SOC_RT1316_SDW; do
         grep -Eq "^CONFIG_${option}=[ym]$" .config || { echo "Missing laptop audio driver $option" >&2; return 1; }
     done
