@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Installs Yūrei from the live ISO onto a blank disk in QEMU (UEFI, OVMF),
+"""Installs YÃƒâ€¦Ã‚Â«rei from the live ISO onto a blank disk in QEMU (UEFI, OVMF),
 the way a person would at the live system's console, then starts the
 installed system from that disk alone, up to its login prompt.
 
@@ -9,11 +9,13 @@ Talks to the live system over its serial console: logs in as root (no
 password on the live system) and runs yurei-install unattended."""
 
 import argparse
+import atexit
 import base64
 import hashlib
 import json
 import os
 import shlex
+import socket
 import subprocess
 import sys
 import time
@@ -27,7 +29,8 @@ parser.add_argument("--backend", type=Path, help="inject this backend into the l
 parser.add_argument("--gui-protocol", action="store_true", help="test the GUI's stdin-password/device-binding protocol")
 parser.add_argument("--gui-preview-check", action="store_true", help="render the installed GUI in the live guest before installation")
 parser.add_argument("--disk-size-gib", type=int, default=16)
-parser.add_argument("--expected-session", choices=("greeter", "console"), default="greeter")
+parser.add_argument("--expected-session", choices=("greeter", "console", "sddm"), default="greeter")
+parser.add_argument("--desktop-check", action="store_true", help="verify real KWin/Plasma startup and SDDM login in the disposable VM")
 args = parser.parse_args()
 iso, firmware, out = args.iso, args.firmware, args.out
 if not 16 <= args.disk_size_gib <= 128:
@@ -38,15 +41,34 @@ disk = os.path.join(out, "install-disk.img")
 accel = ["-enable-kvm", "-cpu", "host"] if os.access("/dev/kvm", os.W_OK) else ["-cpu", "max"]
 
 
+machines = []
+
+
+def cleanup_machines():
+    for machine in machines:
+        if machine.qemu.poll() is None:
+            machine.qemu.kill()
+            machine.qemu.wait()
+        machine.log.close()
+
+
+atexit.register(cleanup_machines)
+
+
 class Machine:
     def __init__(self, log, *args):
         self.log = open(log, "wb")
         self.seen = b""
+        self.qmp_path = log + ".qmp"
+        if os.path.exists(self.qmp_path):
+            os.unlink(self.qmp_path)
         self.qemu = subprocess.Popen(
-            ["qemu-system-x86_64", *accel, "-m", "3072", "-smp", "2", "-bios", firmware,
-             "-display", "none", "-serial", "stdio", "-monitor", "none", "-no-reboot",
+            ["qemu-system-x86_64", *accel, "-m", "4096", "-smp", "2", "-bios", firmware,
+             "-display", "none", "-vga", "virtio", "-serial", "stdio", "-monitor", "none", "-no-reboot",
+             "-qmp", f"unix:{self.qmp_path},server=on,wait=off",
              "-nic", "user,model=virtio-net-pci", *args],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        machines.append(self)
         os.set_blocking(self.qemu.stdout.fileno(), False)
 
     def wait(self, text, timeout, fail=None):
@@ -69,6 +91,33 @@ class Machine:
             if not data:
                 time.sleep(0.5)
         return False
+
+    def monitor(self, command, arguments):
+        with socket.socket(socket.AF_UNIX) as connection:
+            connection.settimeout(30)
+            connection.connect(self.qmp_path)
+            stream = connection.makefile("rwb")
+            json.loads(stream.readline())
+            for name, data in [("qmp_capabilities", {}), (command, arguments)]:
+                stream.write((json.dumps({"execute": name, "arguments": data}) + "\n").encode())
+                stream.flush()
+                while True:
+                    response = json.loads(stream.readline())
+                    if "error" in response:
+                        raise RuntimeError(response["error"])
+                    if "return" in response:
+                        break
+
+    def screenshot(self, name):
+        self.monitor("screendump", {"filename": os.path.abspath(os.path.join(out, name)), "format": "png"})
+
+    def type_password(self, value):
+        # Test-only password sent to the selected SDDM password field.
+        for char in value:
+            key = "minus" if char == "-" else char
+            self.monitor("human-monitor-command", {"command-line": "sendkey " + key})
+            time.sleep(0.12)
+        self.monitor("human-monitor-command", {"command-line": "sendkey ret"})
 
     def send(self, line):
         self.qemu.stdin.write(line.encode() + b"\n")
@@ -93,6 +142,13 @@ def check(what, ok):
 
 with open(disk, "xb") as f:
     f.truncate(args.disk_size_gib * 1024**3)
+def cleanup_test_disk():
+    cleanup_machines()
+    if os.path.exists(disk):
+        os.remove(disk)
+
+
+atexit.register(cleanup_test_disk)
 
 print(f"== install: the live ISO, with a blank {args.disk_size_gib} GiB disk", flush=True)
 live = Machine(os.path.join(out, "install-live.log"),
@@ -120,6 +176,13 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
             live.send(f"base64 -d /run/yurei-backend.b64 > {backend} && chmod 700 {backend} && "
                       f"echo '{digest}  {backend}' | sha256sum -c - && echo BACKEND-''READY || echo BACKEND-''BAD")
             ready = check("injected backend matches the reviewed source", ready and live.wait("BACKEND-READY", 60, fail="BACKEND-BAD"))
+        if ready and args.desktop_check:
+            live.send("for n in $(seq 1 120); do if pgrep -xu 0 plasmashell >/dev/null && pgrep -xu 0 kwin_wayland >/dev/null; then echo LIVE-''DESKTOP-OK; break; fi; sleep 1; done")
+            ready = check("live KWin and Plasma desktop started", live.wait("LIVE-DESKTOP-OK", 150))
+            live.screenshot("live-plasma.png")
+            if not ready:
+                live.send("journalctl -b --no-pager -n 120; journalctl --user -b --no-pager -n 120; echo DESKTOP-DIAG-''DONE")
+                live.wait("DESKTOP-DIAG-DONE", 60)
         if ready and args.gui_preview_check:
             # Execute Yurei's own binary and Qt libraries, not the host's Qt.
             # Offscreen preview does not inventory disks or launch the backend.
@@ -165,6 +228,20 @@ if all(results):
     if args.expected_session == "greeter":
         installed.send("if id -nG | grep -qw seat && systemctl -q is-enabled seatd yurei-greeter; then echo GREETER-''OK; else echo GREETER-''BAD; fi")
         check("the user has the seat, and the login screen is on", installed.wait("GREETER-OK", 30, fail="GREETER-BAD"))
+    elif args.expected_session == "sddm":
+        installed.send("if systemctl -q is-enabled sddm && ! systemctl -q is-enabled yurei-greeter && [ \"$(systemctl get-default)\" = graphical.target ]; then echo SDDM-''ENABLED; else echo SDDM-''BAD; fi")
+        check("SDDM is the only enabled display manager", installed.wait("SDDM-ENABLED", 30, fail="SDDM-BAD"))
+        if args.desktop_check:
+            installed.send("for n in $(seq 1 90); do if pgrep -u sddm -f sddm-greeter >/dev/null; then echo GREETER-''RUNNING; break; fi; sleep 1; done")
+            if check("the Wayland SDDM greeter is running", installed.wait("GREETER-RUNNING", 120)):
+                time.sleep(4)
+                installed.screenshot("installed-sddm.png")
+                installed.type_password(password)
+                installed.send("for n in $(seq 1 120); do if pgrep -xu \"$(id -u)\" plasmashell >/dev/null && pgrep -xu \"$(id -u)\" kwin_wayland >/dev/null; then echo USER-''PLASMA-OK; break; fi; sleep 1; done")
+                check("the installed user logged in through SDDM to Plasma", installed.wait("USER-PLASMA-OK", 150))
+                installed.screenshot("installed-plasma.png")
+                installed.send("if loginctl list-sessions --no-legend | awk '{print $1}' | xargs -r -n1 loginctl show-session -p Type --value | grep -qx wayland; then echo LOGIND-''WAYLAND; else echo LOGIND-''BAD; fi")
+                check("logind registered a Wayland session", installed.wait("LOGIND-WAYLAND", 30, fail="LOGIND-BAD"))
     else:
         installed.send("if [ \"$(systemctl get-default)\" = multi-user.target ]; then echo CONSOLE-''OK; else echo CONSOLE-''BAD; fi")
         check("older seed image retains console boot", installed.wait("CONSOLE-OK", 30, fail="CONSOLE-BAD"))

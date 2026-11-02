@@ -6,6 +6,8 @@ on:
     branches: [codex/desktop-integration]
     paths:
       - independent/**
+      - themes/**
+      - pkg/yurei-settings/files/**
       - .github/workflows/desktop-integration.yml
 
 permissions:
@@ -50,6 +52,7 @@ jobs:
           sudo rm -rf "$YUREI/srv/yurei"
           sudo mkdir -p "$YUREI/srv/yurei/previous/stamps"
           sudo cp -r independent/packages "$YUREI/srv/yurei/recipes"
+          sudo python3 independent/packages/stage-appearance.py "$YUREI/srv/yurei/recipes/yurei-appearance/assets"
           sudo cp -r /home/runner/yurei-pkgcache/. "$YUREI/srv/yurei/previous/"
           # The failed repository check left its temporary build account.
           # Reset that account so setup can make a fresh throwaway signing key.
@@ -67,7 +70,7 @@ jobs:
       - name: Boot the ISO as DVD and USB, install and reboot a virtual disk
         if: env.BUILD_DESKTOP_ISO == 'true'
         run: |
-          sudo ISO="/home/runner/yurei-iso/yurei-independent-desktop-${GITHUB_RUN_ID}-x86_64.iso" \
+          sudo EXPECTED_SESSION=sddm ISO="/home/runner/yurei-iso/yurei-independent-desktop-${GITHUB_RUN_ID}-x86_64.iso" \
             OUT=/home/runner/yurei-boot independent/bootstrap/iso-test.sh
       - name: Downloadable tested ISO and checksum
         if: env.BUILD_DESKTOP_ISO == 'true'
@@ -97,5 +100,6 @@ jobs:
           path: |
             /home/runner/yurei-boot/*.log
             /home/runner/yurei-boot/*.json
+            /home/runner/yurei-boot/*.png
             /home/runner/yurei-root/srv/yurei/gui-previews/*.png
           if-no-files-found: ignore

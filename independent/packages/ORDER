@@ -1,4 +1,4 @@
-# The order YÅ«rei's packages are built in: each after what it needs to build.
+# The order YÃ…Â«rei's packages are built in: each after what it needs to build.
 # First batch: enough for a system installed by pacman to run a shell.
 yurei-filesystem
 linux-api-headers
@@ -350,3 +350,6 @@ kwin
 plasma-workspace
 plasma-desktop
 sddm
+
+# Reuse the shared Yurei visual assets without CachyOS dependencies.
+yurei-appearance

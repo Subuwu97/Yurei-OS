@@ -34,3 +34,20 @@ Phonon with its VLC audio backend and SDDM. The launcher selects Plasma when
 available and exposes labwc explicitly; SDDM uses Wayland and PAM/logind.
 These builds and runtime integration checks are still pending. Qt Multimedia
 provides FFmpeg playback; the smaller VLC build is for Phonon desktop audio.
+
+PAM and the shell-library batch passed: 301 packages installed cleanly,
+correct/wrong-password checks behaved as expected, native installer previews
+rendered, and all libraries were found. Phonon built; the VLC helper compiler
+needs BUILDCC=gcc explicitly on this from-scratch toolchain.
+
+The independent appearance payload stages shared visual files directly from
+the repository before recipe hashing. It does not import distribution tools
+or sudoers rules. Shared themes remain byte-identical; generated dock scripts
+select Foot, Thunar and the graphical installer, omitting absent browser and
+commercial launchers. Plymouth artwork is included but boot animation is
+not yet wired into the installed boot path.
+
+The final disposable-VM checks now target SDDM and actual KWin/Plasma
+processes, collect screenshots, and type the test password into SDDM. These
+graphical checks are not yet validated. The live-only passwordless root
+console uses a live-only PAM exception; installed accounts retain normal PAM.

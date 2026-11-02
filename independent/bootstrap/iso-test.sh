@@ -52,7 +52,7 @@ boot() {
     check() {
         if grep -qa "$2" "$log"; then echo "ok   $name: $1"; else echo "FAIL $name: $1"; fail=1; fi
     }
-    [[ $name == file ]] || check "Yūrei's kernel started from systemd-boot" "Linux version .*-yurei"
+    [[ $name == file ]] || check "YÅ«rei's kernel started from systemd-boot" "Linux version .*-yurei"
     check "the initramfs found the ISO" "Yurei: found it on .*, starting"
     check "systemd started" "systemd.*running in system mode"
     check "the live system reached its login prompt" "yurei-live login:"
@@ -82,7 +82,11 @@ else
 fi
 
 # install onto a blank disk with yurei-install, then start from that disk
-"$(dirname "$0")/install-test.py" "$iso" "$firmware" "$out" --disk-size-gib 32 || fail=1
+install_args=(--disk-size-gib 32 --expected-session "${EXPECTED_SESSION:-greeter}")
+if [[ ${EXPECTED_SESSION:-greeter} == sddm ]]; then
+    install_args+=(--gui-protocol --gui-preview-check --desktop-check)
+fi
+"$(dirname "$0")/install-test.py" "$iso" "$firmware" "$out" "${install_args[@]}" || fail=1
 for log in "$out"/install-*.log; do
     [[ -f $log ]] && { echo "-- ${log##*/}"; cat -v "$log" | tail -n 40; }
 done

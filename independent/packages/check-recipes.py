@@ -20,7 +20,7 @@ def field(text, name):
     return m[1] if m else None
 
 errors = []
-# a line is a recipe's name, then (for a cross compiler) "build-only"
+# A recipe name optionally carries build-only or bootstrap-install.
 order = []
 for l in (here / "ORDER").read_text().splitlines():
     if l.strip() and not l.startswith("#"):
@@ -41,7 +41,7 @@ for name in order:
         errors.append(f"{name}: PKGBUILD isn't valid shell: {syntax.stderr.strip()}")
         continue
     source = field(text, "source")
-    if source is None:  # YÅ«rei's own files, nothing from upstream
+    if source is None:  # YÃ…Â«rei's own files, nothing from upstream
         continue
     pkgver = field(text, "pkgver")
     # a recipe's sources.lock entry: _lockname, else pkgbase, else pkgname
