@@ -28,3 +28,9 @@ user configuration must be preserved. No Arch or CachyOS binaries are used.
 BUILD_DESKTOP_ISO remains false during dependency bring-up. Enable it only
 once the complete session is assembled; then rebuild and verify one combined
 image. The previously tested Qt/labwc ISO remains available in outputs.
+
+The assembled-shell batch adds KWin, Plasma workspace/desktop, libksysguard,
+Phonon with its VLC audio backend and SDDM. The launcher selects Plasma when
+available and exposes labwc explicitly; SDDM uses Wayland and PAM/logind.
+These builds and runtime integration checks are still pending. Qt Multimedia
+provides FFmpeg playback; the smaller VLC build is for Phonon desktop audio.

@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+pkgname=phonon-qt6
+_lockname=phonon-qt6
+pkgver=4.12.0
+pkgrel=1
+pkgdesc="KDE multimedia library for Qt 6"
+arch=(x86_64)
+url="https://kde.org/"
+license=(LGPL-2.1-or-later)
+depends=(qt6-base qt6-5compat libpulse glib)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/phonon/4.12.0/phonon-$pkgver.tar.xz")
+sha256sums=('3287ffe0fbcc2d4aa1363f9e15747302d0b080090fe76e5f211d809ecb43f39a')
+
+build() {
+    cmake -S phonon-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DPHONON_BUILD_QT5=OFF -DPHONON_BUILD_QT6=ON -DPHONON_BUILD_DESIGNER_PLUGIN=OFF -DPHONON_BUILD_DEMOS=OFF -DPHONON_BUILD_SETTINGS=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    install -Dm644 phonon-$pkgver/COPYING.LIB "$pkgdir/usr/share/licenses/$pkgname/COPYING.LIB"
+    install -Dm644 phonon-$pkgver/COPYING "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}

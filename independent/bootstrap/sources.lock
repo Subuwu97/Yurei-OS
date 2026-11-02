@@ -353,3 +353,6 @@ qt6-speech  6.9.3  https://download.qt.io/archive/qt/6.9/6.9.3/submodules/qtspee
 flite  2.2  flite-2.2.tar.gz::https://github.com/festvox/flite/archive/refs/tags/v2.2.tar.gz  ab1555fe5adc3f99f1d4a1a0eb1596d329fd6d74f1464a0097c81f53c0cf9e5c  repo
 libqrencode  4.1.1  libqrencode-4.1.1.tar.gz::https://github.com/fukuchi/libqrencode/archive/refs/tags/v4.1.1.tar.gz  5385bc1b8c2f20f3b91d258bf8ccc8cf62023935df2d2676b5b67049f31a049c  repo
 boost-headers  1.88.0  https://archives.boost.io/release/1.88.0/source/boost_1_88_0.tar.bz2  46d9d2c06637b219270877c9e16155cbd015b6dc84349af064c088e9b5b12f7b  repo
+phonon-qt6  4.12.0  https://download.kde.org/stable/phonon/4.12.0/phonon-4.12.0.tar.xz  3287ffe0fbcc2d4aa1363f9e15747302d0b080090fe76e5f211d809ecb43f39a  repo
+vlc-libs  3.0.21  https://download.videolan.org/pub/videolan/vlc/3.0.21/vlc-3.0.21.tar.xz  24dbbe1d7dfaeea0994d5def0bbde200177347136dbfe573f5b6a4cee25afbb0  repo
+phonon-vlc-qt6  0.12.0  https://download.kde.org/stable/phonon/phonon-backend-vlc/0.12.0/phonon-backend-vlc-0.12.0.tar.xz  338479dc451e4b94b3ca5b578def741dcf82f5c626a2807d36235be2dce7c9a5  repo

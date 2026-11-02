@@ -9,3 +9,8 @@ if command -v pipewire > /dev/null && ! pgrep -u "$(id -u)" -x pipewire > /dev/n
     wireplumber >/dev/null 2>&1 &
     command -v pipewire-pulse > /dev/null && pipewire-pulse >/dev/null 2>&1 &
 fi
+
+# Plasma's authentication agent also handles graphical installation on labwc.
+for agent in /usr/lib/polkit-kde-authentication-agent-1 /usr/libexec/polkit-kde-authentication-agent-1 /usr/lib/qt6/libexec/polkit-kde-authentication-agent-1; do
+    if [ -x "$agent" ]; then "$agent" >/dev/null 2>&1 & break; fi
+done

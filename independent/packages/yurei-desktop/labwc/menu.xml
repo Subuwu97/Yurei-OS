@@ -4,6 +4,7 @@
   <menu id="root-menu" label="">
     <item label="Terminal"><action name="Execute" command="foot" /></item>
     <item label="Files"><action name="Execute" command="thunar" /></item>
+    <item label="Install Yurei"><action name="Execute" command="yurei-install-gui" /></item>
     <separator />
     <item label="Reload settings"><action name="Reconfigure" /></item>
     <item label="Log out"><action name="Exit" /></item>

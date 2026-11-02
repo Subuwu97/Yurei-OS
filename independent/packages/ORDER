@@ -340,3 +340,13 @@ breeze
 systemsettings
 kde-cli-tools
 kscreenlocker
+
+# Complete Plasma shell, compositor and graphical login
+phonon-qt6
+vlc-libs
+phonon-vlc-qt6
+libksysguard
+kwin
+plasma-workspace
+plasma-desktop
+sddm

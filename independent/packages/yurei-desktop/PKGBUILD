@@ -3,7 +3,7 @@
 # graphical session: labwc with a terminal (or one terminal in cage).
 pkgname=yurei-desktop
 pkgver=0.5
-pkgrel=2
+pkgrel=3
 pkgdesc="Starts Yūrei's graphical session from the console"
 arch=(any)
 url="https://github.com/Subuwu97/Yurei-OS"
@@ -15,5 +15,14 @@ package() {
     install -Dm755 "$startdir/yurei-desktop" "$pkgdir/usr/bin/yurei-desktop"
     install -Dm644 -t "$pkgdir/etc/xdg/labwc" "$startdir/labwc/rc.xml" "$startdir/labwc/menu.xml" \
         "$startdir/labwc/autostart" "$startdir/labwc/environment"
+    install -Dm644 /dev/stdin "$pkgdir/usr/share/wayland-sessions/labwc.desktop" <<'SESSION'
+[Desktop Entry]
+Name=Yurei labwc (fallback)
+Comment=Lightweight Wayland fallback desktop
+Exec=/usr/bin/yurei-desktop --labwc
+TryExec=/usr/bin/labwc
+Type=Application
+DesktopNames=labwc
+SESSION
     install -Dm644 "$startdir/profile.sh" "$pkgdir/etc/profile.d/yurei-desktop.sh"
 }
