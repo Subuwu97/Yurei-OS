@@ -1,4 +1,4 @@
-# The order YÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â«rei's packages are built in: each after what it needs to build.
+# The order YÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â«rei's packages are built in: each after what it needs to build.
 # First batch: enough for a system installed by pacman to run a shell.
 yurei-filesystem
 linux-api-headers
@@ -362,6 +362,7 @@ libnl
 lm-sensors
 libksysguard
 kwin
+icu
 plasma-workspace
 plasma-desktop
 sddm

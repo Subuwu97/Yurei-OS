@@ -3,7 +3,7 @@
 # graphical session: labwc with a terminal (or one terminal in cage).
 pkgname=yurei-desktop
 pkgver=0.5
-pkgrel=3
+pkgrel=4
 pkgdesc="Starts Yūrei's graphical session from the console"
 arch=(any)
 url="https://github.com/Subuwu97/Yurei-OS"

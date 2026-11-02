@@ -2,12 +2,12 @@
 pkgname=plasma-workspace
 _lockname=plasma-plasma-workspace
 pkgver=6.4.5
-pkgrel=2
+pkgrel=3
 pkgdesc="Plasma shell panels task manager and Wayland session"
 arch=(x86_64)
 url="https://kde.org/"
 license=(BSD-2-Clause BSD-3-Clause CC0-1.0 GPL-2.0-only GPL-2.0-or-later GPL-3.0-only LGPL-2.0-only LGPL-2.0-or-later LGPL-2.1-only LGPL-2.1-or-later LGPL-3.0-only LGPL-3.0-or-later MIT)
-depends=(qt6-base qt6-declarative qt6-5compat qt6-location qt6-positioning qt6-shadertools qt6-svg qt6-wayland qcoro karchive kauth kcoreaddons kcrash kdbusaddons kdeclarative kglobalaccel kguiaddons ki18n kiconthemes kitemmodels kcmutils kded kio knewstuff knotifications knotifyconfig kpackage kparts prison krunner kstatusnotifieritem ksvg ktexteditor ktextwidgets kunitconversion kwallet kcolorscheme plasma5support libplasma kwayland plasma-activities plasma-activities-stats libksysguard libkscreen layer-shell-qt kwin kscreenlocker phonon-qt6 phonon-vlc-qt6 libcanberra breeze zlib fontconfig libx11 libxcb xcb-util xcb-util-cursor xcb-util-image plasma-wayland-protocols wayland systemd polkit-qt6 kirigami kquickcharts kuserfeedback kholidays networkmanager-qt kirigami-addons upower)
+depends=(qt6-base qt6-declarative qt6-5compat qt6-location qt6-positioning qt6-shadertools qt6-svg qt6-wayland qcoro karchive kauth kcoreaddons kcrash kdbusaddons kdeclarative kglobalaccel kguiaddons ki18n kiconthemes kitemmodels kcmutils kded kio knewstuff knotifications knotifyconfig kpackage kparts prison krunner kstatusnotifieritem ksvg ktexteditor ktextwidgets kunitconversion kwallet kcolorscheme plasma5support libplasma kwayland plasma-activities plasma-activities-stats libksysguard libkscreen layer-shell-qt kwin kscreenlocker phonon-qt6 phonon-vlc-qt6 libcanberra breeze zlib fontconfig libx11 libxcb xcb-util xcb-util-cursor xcb-util-image plasma-wayland-protocols wayland systemd polkit-qt6 kirigami kquickcharts kuserfeedback kholidays networkmanager-qt kirigami-addons upower icu)
 makedepends=(extra-cmake-modules qt6-tools)
 source=("https://download.kde.org/stable/plasma/6.4.5/plasma-workspace-$pkgver.tar.xz")
 sha256sums=('19999ebf3574f539145ba7074019b88d51f2ca952d121394daf6af2e632910fb')
