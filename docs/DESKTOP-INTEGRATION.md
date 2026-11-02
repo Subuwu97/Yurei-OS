@@ -18,6 +18,9 @@ Current build milestone:
   upstream CMake files; runtime compilation is still being validated.
 - Qt Sensors, Positioning and Location 6.9.3 recipes are pinned for KWin and
   Plasma workspace; these still need compilation on the runner.
+- The next dependency batch adds notification audio codecs, client-only
+  libpulse, libcanberra, Polkit Qt 6 and five additional Frameworks.
+  PipeWire remains the audio server; these recipes still require build validation.
 - Recheck clean installation, shared libraries, ISO boot and installation.
 
 Remaining before the target image can be called Plasma-ready:

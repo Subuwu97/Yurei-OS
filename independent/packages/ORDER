@@ -278,3 +278,18 @@ kimageformats
 kdesu
 kdeclarative
 kxmlgui
+
+# Desktop sound, authorization and the next Frameworks tier
+libogg
+libvorbis
+flac
+opus
+libsndfile
+libpulse
+libcanberra
+polkit-qt6
+kauth
+knotifications
+kjobwidgets
+kbookmarks
+kded

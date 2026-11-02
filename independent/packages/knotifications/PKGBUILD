@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=knotifications
+_lockname=kf6-knotifications
+pkgver=6.18.0
+pkgrel=1
+pkgdesc="Desktop notifications and event sounds"
+arch=(x86_64)
+url="https://kde.org/"
+license=(BSD-2-Clause BSD-3-Clause CC0-1.0 LGPL-2.0-only LGPL-2.0-or-later LGPL-2.1-only LGPL-3.0-only)
+depends=(qt6-base qt6-declarative kconfig libcanberra)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/frameworks/6.18/knotifications-$pkgver.tar.xz")
+sha256sums=('593cb00c9e04018477ba146031f6d46f4079c637c6a46630566712d842b9f3a8')
+
+build() {
+    cmake -S knotifications-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a knotifications-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

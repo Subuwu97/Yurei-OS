@@ -1,0 +1,24 @@
+# Maintainer: Yūrei Linux project
+pkgname=polkit-qt6
+pkgver=0.200.0
+pkgrel=1
+pkgdesc="Qt 6 bindings for desktop authorization"
+arch=(x86_64)
+url="https://download.kde.org/stable/polkit-qt-1/polkit-qt-1-$pkgver.tar.xz"
+license=(LGPL-2.0-or-later)
+depends=(qt6-base polkit)
+source=("https://download.kde.org/stable/polkit-qt-1/polkit-qt-1-$pkgver.tar.xz")
+sha256sums=('5d3b611c062d2b76a93750bb10c907bfd21d1ff08d0a15dc2cf63e278e1677fb')
+
+build() {
+    cmake -S polkit-qt-1-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+        -DQT_MAJOR_VERSION=6 -DBUILD_EXAMPLES=OFF -DBUILD_TEST=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -r polkit-qt-1-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}
