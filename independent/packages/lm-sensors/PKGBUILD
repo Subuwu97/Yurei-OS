@@ -1,0 +1,24 @@
+# Maintainer: Yurei Linux project
+pkgname=lm-sensors
+pkgver=3.6.0
+pkgrel=1
+pkgdesc="Hardware sensor library and inspection tools"
+arch=(x86_64)
+url="https://github.com/lm-sensors/lm-sensors"
+license=(GPL-2.0-or-later LGPL-2.1-or-later)
+depends=(glibc perl)
+backup=(etc/sensors3.conf)
+source=("lm-sensors-$pkgver.tar.gz::https://github.com/lm-sensors/lm-sensors/archive/refs/tags/V3-6-0.tar.gz")
+sha256sums=('0591f9fa0339f0d15e75326d0365871c2d4e2ed8aa1ff759b3a55d3734b7d197')
+
+build() {
+    cd lm-sensors-3-6-0
+    make PREFIX=/usr LIBDIR=/usr/lib BUILD_STATIC_LIB=0
+}
+
+package() {
+    cd lm-sensors-3-6-0
+    make DESTDIR="$pkgdir" PREFIX=/usr LIBDIR=/usr/lib MANDIR=/usr/share/man BUILD_STATIC_LIB=0 install
+    install -Dm644 COPYING "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+    install -Dm644 COPYING.LGPL "$pkgdir/usr/share/licenses/$pkgname/COPYING.LGPL"
+}

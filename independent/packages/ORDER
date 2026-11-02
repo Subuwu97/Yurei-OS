@@ -1,4 +1,4 @@
-# The order YÃ…Â«rei's packages are built in: each after what it needs to build.
+# The order YÃƒâ€¦Ã‚Â«rei's packages are built in: each after what it needs to build.
 # First batch: enough for a system installed by pacman to run a shell.
 yurei-filesystem
 linux-api-headers
@@ -345,6 +345,8 @@ kscreenlocker
 phonon-qt6
 vlc-libs
 phonon-vlc-qt6
+libnl
+lm-sensors
 libksysguard
 kwin
 plasma-workspace
