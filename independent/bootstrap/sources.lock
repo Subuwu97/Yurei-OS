@@ -366,3 +366,4 @@ icu  77.1  https://github.com/unicode-org/icu/releases/download/release-77-1/icu
 libxslt  1.1.43  https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.43.tar.xz  5a3d6b383ca5afc235b171118e90f5ff6aa27e9fea3303065231a6d403f0183a  repo
 mobile-broadband-provider-info  20250613  mobile-broadband-provider-info-20250613.tar.bz2::https://deb.debian.org/debian/pool/main/m/mobile-broadband-provider-info/mobile-broadband-provider-info_20250613.orig.tar.bz2  7bf72daee64895c77c0f0d2f2b96c4117be3c063292a6d522392946b303cb841  repo
 libxft  2.3.9  https://xorg.freedesktop.org/archive/individual/lib/libXft-2.3.9.tar.xz  60a25b78945ed6932635b3bb1899a517d31df7456e69867ffba27f89ff3976f5  repo
+libwacom  2.15.0  https://github.com/linuxwacom/libwacom/releases/download/libwacom-2.15.0/libwacom-2.15.0.tar.xz  20cd65b1693129c3a6c003db0fe7fff7eccaf19fb04e89aaad9c20eb2151515a  repo

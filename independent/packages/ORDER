@@ -338,6 +338,7 @@ qcoro
 libplasma
 # Network, power and applet support before shell configuration.
 libgudev
+libwacom
 libndp
 modemmanager
 mobile-broadband-provider-info
