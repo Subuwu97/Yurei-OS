@@ -182,6 +182,17 @@ def request_shutdown(machine, label, password=None):
     return check(label + " accepted the systemd shutdown request", accepted)
 
 
+def check_network_agent(machine, label):
+    # No radio is attached to this VM; verify the actual Plasma secret agent
+    # loads, without claiming that this exercises a wireless association.
+    machine.send("for n in $(seq 1 30); do if busctl --user call org.kde.kded6 /kded org.kde.kded6 loadedModules 2>/dev/null | grep -q '\"networkmanagement\"'; then echo NETWORK-AGENT-''READY; break; fi; sleep 1; done")
+    ok = check(label + " loads the Plasma Wi-Fi secret agent", machine.wait("NETWORK-AGENT-READY", 45))
+    if not ok:
+        machine.send("systemctl --user status plasma-kded6 --no-pager; journalctl --user -b -n 80 --no-pager; echo NETWORK-DIAG-''DONE")
+        machine.wait("NETWORK-DIAG-DONE", 30)
+    return ok
+
+
 def check_audio(machine, label):
     machine.send("for n in $(seq 1 60); do if pactl info >/dev/null 2>&1 && wpctl inspect @DEFAULT_AUDIO_SINK@ 2>/dev/null | grep -q alsa_output; then echo AUDIO-SINK-''READY; break; fi; sleep 1; done")
     ok = check(label + " detects an ALSA output through PipeWire", machine.wait("AUDIO-SINK-READY", 90))
@@ -298,6 +309,10 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
                 live.send("journalctl -b --no-pager -n 120; journalctl --user -b --no-pager -n 120; echo DESKTOP-DIAG-''DONE")
                 live.wait("DESKTOP-DIAG-DONE", 60)
         if ready and args.desktop_check:
+            live.send("if grep -qx 'Enabled=false' /etc/xdg/kwalletrc; then echo LIVE-WALLET-''OK; else echo LIVE-WALLET-''BAD; fi")
+            ready = check("live Wi-Fi does not require an encrypted wallet", live.wait("LIVE-WALLET-OK", 30, fail="LIVE-WALLET-BAD"))
+            ready = check_network_agent(live, "live session") and ready
+        if ready and args.desktop_check:
             ready = check_audio(live, "live session")
             if ready:
                 ready = check_browser(live, "live session")
@@ -375,6 +390,9 @@ if all(results):
                 check("logind registered a Wayland session", installed.wait("LOGIND-WAYLAND", 30, fail="LOGIND-BAD"))
                 installed.send("if [ ! -e /etc/systemd/user/pipewire.service.d/90-yurei-live-root.conf ]; then echo AUDIO-POLICY-''OK; else echo AUDIO-POLICY-''BAD; fi")
                 check("installed audio keeps normal upstream user policy", installed.wait("AUDIO-POLICY-OK", 30, fail="AUDIO-POLICY-BAD"))
+                installed.send("if ! grep -qx '# Yurei live-only wallet policy' /etc/xdg/kwalletrc 2>/dev/null; then echo WALLET-POLICY-''OK; else echo WALLET-POLICY-''BAD; fi")
+                check("installed system restores normal wallet policy", installed.wait("WALLET-POLICY-OK", 30, fail="WALLET-POLICY-BAD"))
+                check_network_agent(installed, "installed user")
                 check_audio(installed, "installed user")
                 check_browser(installed, "installed user")
     else:

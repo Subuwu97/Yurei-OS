@@ -72,6 +72,14 @@ PAM
 ConditionUser=
 AUDIO
     done
+    # Match the working CachyOS live profile: a disposable passwordless
+    # session must not block Wi-Fi secrets on creating/unlocking a wallet.
+    # Installed systems remove this live-only configuration.
+    install -Dm644 /dev/stdin "$live/etc/xdg/kwalletrc" <<'WALLET'
+# Yurei live-only wallet policy
+[Wallet]
+Enabled=false
+WALLET
     install -d "$live/etc/systemd/system/getty@tty1.service.d"
     cat > "$live/etc/systemd/system/getty@tty1.service.d/autologin.conf" <<'UNIT'
 [Service]

@@ -189,6 +189,9 @@ rm -rf "$target/etc/systemd/system/getty@tty1.service.d"
 for unit in pipewire.service pipewire.socket pipewire-pulse.service pipewire-pulse.socket; do
     rm -f "$target/etc/systemd/user/$unit.d/90-yurei-live-root.conf"
 done
+if [[ -f $target/etc/xdg/kwalletrc ]] && grep -qx '# Yurei live-only wallet policy' "$target/etc/xdg/kwalletrc"; then
+    rm -f "$target/etc/xdg/kwalletrc"
+fi
 if [[ -f $target/etc/pam.d/system-login ]]; then
     # The live console permits its blank root password. Never carry that
     # live-only nullok policy into the installed system.
