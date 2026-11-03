@@ -393,3 +393,5 @@ gst-plugins-base  1.26.11  https://gstreamer.freedesktop.org/src/gst-plugins-bas
 xdg-desktop-portal  1.22.1  https://github.com/flatpak/xdg-desktop-portal/releases/download/1.22.1/xdg-desktop-portal-1.22.1.tar.xz  d4879ddb3d65ff1a8f19187497e6f13dc5d267bcac404a5d501218be355753d3  repo
 discover  6.4.5  https://download.kde.org/stable/plasma/6.4.5/discover-6.4.5.tar.xz  9208d4e37ad2ae4cd1da7cd3b01ede61071a13898ec4c14edffe983b972f8576  repo
 yurei-flathub  1  https://flathub.org/repo/flathub.flatpakrepo  3371dd250e61d9e1633630073fefda153cd4426f72f4afa0c3373ae2e8fea03a  repo
+
+itstool  2.0.7  https://files.itstool.org/itstool/itstool-2.0.7.tar.bz2  6b9a7cd29a12bb95598f5750e8763cee78836a1a207f85b74d8b3275b27e87ca  repo

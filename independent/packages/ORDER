@@ -399,6 +399,7 @@ fuse3
 bubblewrap
 xdg-dbus-proxy
 python-pyparsing
+itstool build-only
 appstream
 ostree
 flatpak

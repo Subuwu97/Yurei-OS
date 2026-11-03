@@ -4,18 +4,18 @@
 # check-recipes.py keeps them the same.
 pkgname=libxml2
 pkgver=2.14.3
-pkgrel=1
+pkgrel=2
 pkgdesc="XML parsing (labwc reads its settings with it)"
 arch=(x86_64)
 url="https://gitlab.gnome.org/GNOME/libxml2"
 license=(MIT)
-depends=(glibc zlib xz)
+depends=(glibc zlib xz python)
 source=("https://download.gnome.org/sources/libxml2/2.14/libxml2-$pkgver.tar.xz")
 sha256sums=('6de55cacc8c2bc758f2ef6f93c313cb30e4dd5d84ac5d3c7ccbd9344d8cc6833')
 
 build() {
     cd libxml2-$pkgver
-    ./configure --prefix=/usr --disable-static --without-python --with-history
+    ./configure --prefix=/usr --disable-static --with-python=/usr/bin/python3 --with-history
     make
 }
 
