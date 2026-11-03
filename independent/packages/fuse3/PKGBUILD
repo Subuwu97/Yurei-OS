@@ -1,0 +1,20 @@
+# Maintainer: Yurei Linux project
+pkgname=fuse3
+pkgver=3.18.3
+pkgrel=1
+pkgdesc="fuse3: application store and sandboxed desktop support"
+arch=(x86_64)
+url="https://github.com/libfuse/libfuse/releases/download/fuse-3.18.3"
+license=(LGPL-2.1-only GPL-2.0-only)
+depends=(glibc)
+source=("https://github.com/libfuse/libfuse/releases/download/fuse-3.18.3/fuse-3.18.3.tar.gz")
+sha256sums=('bcd19582c5e30f7fe45dd86a5540e998590aa01903afc7ebcbeea6c8ac5421ee')
+
+build() {
+    meson setup fuse-3.18.3 build --prefix=/usr --libdir=lib --libexecdir=lib --sysconfdir=/etc --localstatedir=/var --buildtype=release --wrap-mode=nofallback -Dtests=false -Dexamples=false -Duseroot=false -Dinitscriptdir= -Dudevrulesdir=/usr/lib/udev/rules.d -Denable-io-uring=false
+    meson compile -C build
+}
+package() {
+    DESTDIR="$pkgdir" meson install -C build
+    chmod 4755 "$pkgdir/usr/bin/fusermount3"
+}

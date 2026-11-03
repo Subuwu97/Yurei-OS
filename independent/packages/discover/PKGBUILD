@@ -1,0 +1,19 @@
+# Maintainer: Yurei Linux project
+pkgname=discover
+pkgver=6.4.5
+pkgrel=1
+pkgdesc="discover: application store and sandboxed desktop support"
+arch=(x86_64)
+url="https://download.kde.org/stable/plasma/6.4.5"
+license=(LGPL-2.1-or-later)
+depends=(flatpak appstream qt6-base qt6-declarative kirigami kcoreaddons kconfig kcrash kdbusaddons ki18n karchive kxmlgui kio kcmutils kidletime knotifications purpose kauth kstatusnotifieritem kiconthemes kitemmodels kirigami-addons qcoro)
+source=("https://download.kde.org/stable/plasma/6.4.5/discover-6.4.5.tar.xz")
+sha256sums=('9208d4e37ad2ae4cd1da7cd3b01ede61071a13898ec4c14edffe983b972f8576')
+
+build() {
+    cmake -S discover-6.4.5 -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DCMAKE_DISABLE_FIND_PACKAGE_packagekitqt6=ON -DWITH_NOTIFIER=OFF
+    cmake --build build
+}
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+}

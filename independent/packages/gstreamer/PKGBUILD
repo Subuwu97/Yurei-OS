@@ -1,0 +1,19 @@
+# Maintainer: Yurei Linux project
+pkgname=gstreamer
+pkgver=1.26.11
+pkgrel=1
+pkgdesc="gstreamer: application store and sandboxed desktop support"
+arch=(x86_64)
+url="https://gstreamer.freedesktop.org/src/gstreamer"
+license=(LGPL-2.1-or-later)
+depends=(glib elfutils)
+source=("https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.26.11.tar.xz")
+sha256sums=('2e0bd192d0438ea606a6f76a95c8e16542167656ffec2c2bc3aaf6ee0837fbf6')
+
+build() {
+    meson setup gstreamer-1.26.11 build --prefix=/usr --libdir=lib --libexecdir=lib --sysconfdir=/etc --localstatedir=/var --buildtype=release --wrap-mode=nofallback -Dtests=disabled -Dexamples=disabled -Dbenchmarks=disabled -Dintrospection=disabled -Ddoc=disabled -Dptp-helper=disabled -Dcheck=disabled -Dlibunwind=disabled
+    meson compile -C build
+}
+package() {
+    DESTDIR="$pkgdir" meson install -C build
+}

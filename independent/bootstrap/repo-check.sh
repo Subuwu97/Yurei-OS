@@ -294,4 +294,14 @@ if pacman -Q konsole >/dev/null 2>&1; then
     echo "Konsole, Dolphin and Firefox start and their default applications are configured"
 fi
 
+if pacman -Q flatpak >/dev/null 2>&1; then
+    timeout 20 flatpak --version
+    timeout 20 bwrap --version
+    timeout 20 xdg-dbus-proxy --version
+    QT_QPA_PLATFORM=offscreen timeout 20 plasma-discover --version
+    test -s /usr/share/flatpak/remotes.d/flathub.flatpakrepo
+    test -s /usr/share/xdg-desktop-portal/portals/kde.portal
+    echo "Discover, Flatpak, sandbox helpers and KDE portals are installed"
+fi
+
 echo "all libraries found"

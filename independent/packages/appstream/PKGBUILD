@@ -1,0 +1,19 @@
+# Maintainer: Yurei Linux project
+pkgname=appstream
+pkgver=1.0.6
+pkgrel=1
+pkgdesc="appstream: application store and sandboxed desktop support"
+arch=(x86_64)
+url="https://www.freedesktop.org/software/appstream/releases"
+license=(LGPL-2.1-or-later)
+depends=(glib curl libxml2 libyaml libxmlb zstd systemd qt6-base)
+source=("https://www.freedesktop.org/software/appstream/releases/AppStream-1.0.6.tar.xz")
+sha256sums=('db4439db6a33de3ca1041473501610844ddf1b72ae23016c05242c681c380b4d')
+
+build() {
+    meson setup AppStream-1.0.6 build --prefix=/usr --libdir=lib --libexecdir=lib --sysconfdir=/etc --localstatedir=/var --buildtype=release --wrap-mode=nofallback -Dqt=true -Dqt-versions=6 -Dgir=false -Dvapi=false -Dcompose=false -Dstemming=false -Ddocs=false -Dapidocs=false -Dinstall-docs=false
+    meson compile -C build
+}
+package() {
+    DESTDIR="$pkgdir" meson install -C build
+}

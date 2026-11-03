@@ -375,3 +375,21 @@ konsole  25.08.3  https://download.kde.org/stable/release-service/25.08.3/src/ko
 dolphin  25.08.3  https://download.kde.org/stable/release-service/25.08.3/src/dolphin-25.08.3.tar.xz  1abd632ebe3837df5616216f69c3ca9f6240165f9f84502422203275eaa8ee09  repo
 libxt  1.3.1  https://xorg.freedesktop.org/archive/individual/lib/libXt-1.3.1.tar.xz  e0a774b33324f4d4c05b199ea45050f87206586d81655f8bef4dba434d931288  repo
 firefox  153.6.0esr  firefox-153.6.0esr-linux-x86_64.tar.xz::https://archive.mozilla.org/pub/firefox/releases/153.6.0esr/linux-x86_64/en-US/firefox-153.6.0esr.tar.xz  31321cd9e2cef73df678417e810cdd1b5760aa5cc8063c8465669e5869cb8498  repo
+
+# Application store and sandboxed desktop support
+libyaml  0.2.5  https://pyyaml.org/download/libyaml/yaml-0.2.5.tar.gz  c642ae9b75fee120b2d96c712538bd2cf283228d2337df2cf2988e3c02678ef4  repo
+json-glib  1.10.6  https://download.gnome.org/sources/json-glib/1.10/json-glib-1.10.6.tar.xz  77f4bcbf9339528f166b8073458693f0a20b77b7059dbc2db61746a1928b0293  repo
+libxmlb  0.3.29  https://github.com/hughsie/libxmlb/releases/download/0.3.29/libxmlb-0.3.29.tar.xz  448294be33bfae62f00fa66e506f1cae80237ce71b7ab6530aefa75005eeb08a  repo
+libseccomp  2.6.0  https://github.com/seccomp/libseccomp/releases/download/v2.6.0/libseccomp-2.6.0.tar.gz  83b6085232d1588c379dc9b9cae47bb37407cf262e6e74993c61ba72d2a784dc  repo
+fuse3  3.18.3  https://github.com/libfuse/libfuse/releases/download/fuse-3.18.3/fuse-3.18.3.tar.gz  bcd19582c5e30f7fe45dd86a5540e998590aa01903afc7ebcbeea6c8ac5421ee  repo
+bubblewrap  0.13.1  https://github.com/containers/bubblewrap/releases/download/v0.13.1/bubblewrap-0.13.1.tar.xz  0e85c8702248b8dd64144f594147553650cdd0e4c951690345faace79c217c4d  repo
+xdg-dbus-proxy  0.1.6  https://github.com/flatpak/xdg-dbus-proxy/releases/download/0.1.6/xdg-dbus-proxy-0.1.6.tar.xz  131bf59fce7c7ee7ecbc5d9106d6750f4f597bfe609966573240f7e4952973a1  repo
+pyparsing  3.2.3  https://files.pythonhosted.org/packages/bb/22/f1129e69d94ffff626bdb5c835506b3a5b4f3d070f17ea295e12c2c6f60f/pyparsing-3.2.3.tar.gz  b9c13f1ab8b3b542f72e28f634bad4de758ab3ce4546e4301970ad6fa77c38be  repo
+appstream  1.0.6  https://www.freedesktop.org/software/appstream/releases/AppStream-1.0.6.tar.xz  db4439db6a33de3ca1041473501610844ddf1b72ae23016c05242c681c380b4d  repo
+ostree  2026.6  https://github.com/ostreedev/ostree/releases/download/v2026.6/libostree-2026.6.tar.xz  164b8226aea6a0e6601036de02a5e3b62307bae25890ed557fb4e19020bd5974  repo
+flatpak  1.18.4  https://github.com/flatpak/flatpak/releases/download/1.18.4/flatpak-1.18.4.tar.xz  b899a7a00c48d2c626cb8ec33fe556720b376c25805d7222430c0fdca4c6ac8d  repo
+gstreamer  1.26.11  https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.26.11.tar.xz  2e0bd192d0438ea606a6f76a95c8e16542167656ffec2c2bc3aaf6ee0837fbf6  repo
+gst-plugins-base  1.26.11  https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-1.26.11.tar.xz  fc50f885d41f5d0407ce0876ec7235d9e7b82d48db2f4bc72c5f244a4ac79263  repo
+xdg-desktop-portal  1.22.1  https://github.com/flatpak/xdg-desktop-portal/releases/download/1.22.1/xdg-desktop-portal-1.22.1.tar.xz  d4879ddb3d65ff1a8f19187497e6f13dc5d267bcac404a5d501218be355753d3  repo
+discover  6.4.5  https://download.kde.org/stable/plasma/6.4.5/discover-6.4.5.tar.xz  9208d4e37ad2ae4cd1da7cd3b01ede61071a13898ec4c14edffe983b972f8576  repo
+yurei-flathub  1  https://flathub.org/repo/flathub.flatpakrepo  3371dd250e61d9e1633630073fefda153cd4426f72f4afa0c3373ae2e8fea03a  repo

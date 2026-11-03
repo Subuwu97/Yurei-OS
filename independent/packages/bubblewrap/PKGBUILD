@@ -1,0 +1,19 @@
+# Maintainer: Yurei Linux project
+pkgname=bubblewrap
+pkgver=0.13.1
+pkgrel=1
+pkgdesc="bubblewrap: application store and sandboxed desktop support"
+arch=(x86_64)
+url="https://github.com/containers/bubblewrap/releases/download/v0.13.1"
+license=(LGPL-2.0-or-later)
+depends=(glibc libcap)
+source=("https://github.com/containers/bubblewrap/releases/download/v0.13.1/bubblewrap-0.13.1.tar.xz")
+sha256sums=('0e85c8702248b8dd64144f594147553650cdd0e4c951690345faace79c217c4d')
+
+build() {
+    meson setup bubblewrap-0.13.1 build --prefix=/usr --libdir=lib --libexecdir=lib --sysconfdir=/etc --localstatedir=/var --buildtype=release --wrap-mode=nofallback -Dtests=false -Dman=disabled -Dselinux=disabled -Dbash_completion=disabled -Dzsh_completion=disabled
+    meson compile -C build
+}
+package() {
+    DESTDIR="$pkgdir" meson install -C build
+}

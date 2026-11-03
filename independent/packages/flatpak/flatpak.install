@@ -1,0 +1,5 @@
+post_install() {
+    systemd-sysusers /usr/lib/sysusers.d/flatpak.conf >/dev/null 2>&1 || true
+    systemd-tmpfiles --create /usr/lib/tmpfiles.d/flatpak.conf >/dev/null 2>&1 || true
+}
+post_upgrade() { post_install; }

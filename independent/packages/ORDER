@@ -1,4 +1,4 @@
-# The order YÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â«rei's packages are built in: each after what it needs to build.
+# The order YÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â«rei's packages are built in: each after what it needs to build.
 # First batch: enough for a system installed by pacman to run a shell.
 yurei-filesystem
 linux-api-headers
@@ -389,3 +389,22 @@ plasma-pa
 
 # Branded on-demand terminal system information
 fastfetch
+
+# Application store and sandboxed desktop support
+libyaml
+json-glib
+libxmlb
+libseccomp
+fuse3
+bubblewrap
+xdg-dbus-proxy
+python-pyparsing
+appstream
+ostree
+flatpak
+gstreamer
+gst-plugins-base
+xdg-desktop-portal
+xdg-desktop-portal-kde
+discover
+yurei-flathub

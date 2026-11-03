@@ -1,0 +1,16 @@
+# Maintainer: Yurei Linux project
+pkgname=python-pyparsing
+pkgver=3.2.3
+pkgrel=1
+pkgdesc="python-pyparsing: application store and sandboxed desktop support"
+arch=(x86_64)
+url="https://files.pythonhosted.org/packages/bb/22/f1129e69d94ffff626bdb5c835506b3a5b4f3d070f17ea295e12c2c6f60f"
+license=(MIT)
+depends=(python)
+_lockname=pyparsing
+source=("https://files.pythonhosted.org/packages/bb/22/f1129e69d94ffff626bdb5c835506b3a5b4f3d070f17ea295e12c2c6f60f/pyparsing-3.2.3.tar.gz")
+sha256sums=('b9c13f1ab8b3b542f72e28f634bad4de758ab3ce4546e4301970ad6fa77c38be')
+
+package() {
+    pip3 install --no-index --no-build-isolation --no-deps --ignore-installed --root="$pkgdir" --prefix=/usr "$srcdir/pyparsing-$pkgver"
+}

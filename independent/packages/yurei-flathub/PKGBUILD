@@ -1,0 +1,15 @@
+# Maintainer: Yurei Linux project
+pkgname=yurei-flathub
+pkgver=1
+pkgrel=1
+pkgdesc="yurei-flathub: application store and sandboxed desktop support"
+arch=(x86_64)
+url="https://flathub.org/repo"
+license=(LicenseRef-Flathub-configuration)
+depends=(flatpak)
+source=("https://flathub.org/repo/flathub.flatpakrepo")
+sha256sums=('3371dd250e61d9e1633630073fefda153cd4426f72f4afa0c3373ae2e8fea03a')
+
+package() {
+    install -Dm644 "$srcdir/flathub.flatpakrepo" "$pkgdir/usr/share/flatpak/remotes.d/flathub.flatpakrepo"
+}

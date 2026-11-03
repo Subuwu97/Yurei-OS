@@ -4,7 +4,7 @@
 # keeps them the same.
 pkgname=linux
 pkgver=6.18
-pkgrel=9
+pkgrel=10
 # NVIDIA's open kernel modules (MIT/GPL), built here against this kernel so
 # their versions always match; nvidia-utils brings the matching driver
 _nvidia=595.112.07
@@ -48,7 +48,7 @@ build() {
         -e HID -e HID_GENERIC -e USB_HID -e INPUT_EVDEV \
         -e EXT4_FS -e VFAT_FS -e FAT_FS -e NLS_CODEPAGE_437 -e NLS_ISO8859_1 -e NLS_UTF8 \
         -e EXFAT_FS -e NTFS3_FS -e ISO9660_FS -e JOLIET -e ZISOFS -e SQUASHFS -e SQUASHFS_XZ -e SQUASHFS_ZSTD \
-        -e OVERLAY_FS -e TMPFS -e CDROM -e RD_GZIP -e RD_ZSTD \
+        -e OVERLAY_FS -m FUSE_FS -e TMPFS -e CDROM -e RD_GZIP -e RD_ZSTD \
         -e DRM -e DRM_SIMPLEDRM -e SYSFB_SIMPLEFB -e DRM_FBDEV_EMULATION -e FRAMEBUFFER_CONSOLE \
         -m DRM_I915 -m DRM_XE -m DRM_AMDGPU -e DRM_AMD_DC -e DRM_AMDGPU_USERPTR -m DRM_RADEON \
         -m DRM_NOUVEAU -m DRM_VIRTIO_GPU \
@@ -80,6 +80,8 @@ build() {
         -e GPIOLIB -e GPIO_SWNODE_UNDEFINED -e SPI -e SPI_MASTER -e I2C -m SOUNDWIRE -m SOUNDWIRE_INTEL \
         -e SND_SOC_INTEL_USER_FRIENDLY_LONG_NAMES -m SND_SOC_SOF_INTEL_SOUNDWIRE \
         -m SND_SOC_INTEL_SOUNDWIRE_SOF_MACH -m SND_HDA_GENERIC \
+        -m SPI_PXA2XX -m SPI_PXA2XX_PCI -m SERIAL_MULTI_INSTANTIATE \
+        -m SND_HDA_SCODEC_CS35L41_SPI -m SND_HDA_SCODEC_CS35L41_I2C \
         -m SND_HDA_CODEC_CONEXANT -m SND_USB_AUDIO -m SND_SOC_AMD_ACP6x -m SND_SOC_AMD_PS \
         -e INPUT_JOYSTICK -m INPUT_JOYDEV -m JOYSTICK_XPAD -e JOYSTICK_XPAD_FF -m HID_SONY \
         -e SONY_FF -m HID_PLAYSTATION -e PLAYSTATION_FF -m HID_NINTENDO -m HID_STEAM \
@@ -98,6 +100,11 @@ build() {
     grep -qx "CONFIG_GPIO_SWNODE_UNDEFINED=y" .config || { echo "Missing software-node GPIO sentinel for Cirrus audio" >&2; return 1; }
     for option in SOUNDWIRE SOUNDWIRE_INTEL SND_SOC_SOF_INTEL_SOUNDWIRE SND_SOC_INTEL_SOUNDWIRE_SOF_MACH SND_SOC_RT711_SDCA_SDW SND_SOC_RT1316_SDW; do
         grep -Eq "^CONFIG_${option}=[ym]$" .config || { echo "Missing laptop audio driver $option" >&2; return 1; }
+    done
+    # XPS 15 9530 (1028:0beb): Realtek's quirk binds two CS35L41 SPI amps.
+    # Without their side-codec/controller chain only part of the speakers work.
+    for option in SPI_PXA2XX SPI_PXA2XX_PCI SERIAL_MULTI_INSTANTIATE SND_HDA_SCODEC_CS35L41 SND_HDA_SCODEC_CS35L41_SPI SND_HDA_SCODEC_CS35L41_I2C; do
+        grep -Eq "^CONFIG_${option}=[ym]$" .config || { echo "Missing XPS speaker amplifier support $option" >&2; return 1; }
     done
     make
     make -C "$srcdir/open-gpu-kernel-modules-$_nvidia" modules SYSSRC="$PWD" SYSOUT="$PWD"
