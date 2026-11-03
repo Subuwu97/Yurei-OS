@@ -1,11 +1,21 @@
 # Independent package updates
 
 The tested desktop integration workflow publishes the independent `[yurei]`
-repository to the `repo` release after all package and ISO checks pass. It does
+repository to a new `repo-RUN_ID` snapshot release after all package and ISO checks pass. It does
 not use the legacy CachyOS package build in `repo.yml`.
 
-Pacman downloads `yurei.db` from the URL already shipped in the independent
-mirror list. Packages and database signatures remain enabled. Package payloads
+Pacman downloads `yurei.db` through `https://github.com/Subuwu97/Yurei-OS/releases/latest/download`.
+Each snapshot is uploaded as a draft and marked Latest only after all files are
+present. This works with GitHub immutable releases; published assets are never
+replaced. Keep ISO releases as prereleases with `--latest=false`, since Latest
+is the package repository pointer.
+
+ISOs made before this change use the frozen `/releases/download/repo` URL.
+They need their `/etc/pacman.d/mirrorlist` Server changed to the URL above to
+receive subsequent updates. Pacman preserves edited configuration files; check
+for a `.pacnew` file when updating an existing installation.
+
+ Packages and database signatures remain enabled. Package payloads
 are uploaded before the new database is exposed; the initial release stays a
 draft until its files have uploaded.
 

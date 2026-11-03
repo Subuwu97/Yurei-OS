@@ -4,7 +4,7 @@
 set -euo pipefail
 repo=${YUREI_REPO:?set YUREI_REPO to the tested package repository}
 : "${GH_REPO:?set GH_REPO}" "${GH_TOKEN:?set GH_TOKEN}" "${GITHUB_SHA:?}" "${GITHUB_RUN_ID:?}"
-tag=repo
+tag=repo-$GITHUB_RUN_ID
 work=$(mktemp -d /home/runner/yurei-publish.XXXXXX)
 cleanup() {
     gpgconf --homedir "$work/gnupg" --kill all 2>/dev/null || true
@@ -57,8 +57,9 @@ this public key after independently checking the fingerprint above. New ISOs
 built with this persistent identity already trust it. Never disable signature
 checking to work around a key error, and never mix Arch/CachyOS packages here.
 
-Public key: https://github.com/$GH_REPO/releases/download/repo/yurei-build.asc
-Repository URL: https://github.com/$GH_REPO/releases/download/repo
+Public key: https://github.com/$GH_REPO/releases/download/$tag/yurei-build.asc
+Snapshot URL: https://github.com/$GH_REPO/releases/download/$tag
+Update URL: https://github.com/$GH_REPO/releases/latest/download
 NOTES
 cd "$work"
 # Checksums cover public release data only; no signing-home glob is used.
@@ -66,18 +67,26 @@ cd "$work"
 for asset in "${assets[@]}" "$work"/yurei.* "$work/yurei-build.asc" "$work/yurei-signing-fingerprint.txt" "$work/repository-build.json"; do
     printf '%s  %s\n' "$(sha256sum "$asset" | cut -d ' ' -f1)" "${asset##*/}" >> SHA256SUMS
 done
+# Published releases may be immutable. Never replace their assets. A rerun
+# of a completed snapshot only verifies it; failed drafts can resume safely.
+if [[ $(gh release view "$tag" --repo "$GH_REPO" --json isDraft --jq .isDraft 2>/dev/null || true) == false ]]; then
+    curl --fail --location --retry 5 --retry-all-errors "https://github.com/$GH_REPO/releases/download/$tag/yurei.db" -o public-yurei.db
+    cmp yurei.db public-yurei.db
+    echo "Verified existing immutable snapshot $tag"
+    exit 0
+fi
 if ! gh release view "$tag" --repo "$GH_REPO" >/dev/null 2>&1; then
     gh release create "$tag" --repo "$GH_REPO" --target "$GITHUB_SHA" --draft --latest=false \
-        --title "Yurei independent package repository" --notes-file README-repository.txt
+        --title "Yurei package repository snapshot $GITHUB_RUN_ID" --notes-file README-repository.txt
 fi
-# Payloads first. Existing users continue seeing the previous database until
-# every required package upload succeeds; the first publication stays a draft.
+# Payloads first, in a new draft snapshot. The latest pointer changes only
+# after every upload succeeds. Published snapshots are never modified.
 gh release upload "$tag" "${assets[@]}" --repo "$GH_REPO" --clobber
 gh release upload "$tag" yurei-build.asc yurei-signing-fingerprint.txt repository-build.json SHA256SUMS README-repository.txt --repo "$GH_REPO" --clobber
 gh release upload "$tag" yurei.db yurei.db.sig yurei.files yurei.files.sig --repo "$GH_REPO" --clobber
-gh release edit "$tag" --repo "$GH_REPO" --draft=false --latest=false --notes-file README-repository.txt
+gh release edit "$tag" --repo "$GH_REPO" --draft=false --latest --notes-file README-repository.txt
 # Check the public URL that pacman actually requests, not just the API upload.
 curl --fail --location --retry 5 --retry-all-errors \
-    "https://github.com/$GH_REPO/releases/download/repo/yurei.db" -o public-yurei.db
+    "https://github.com/$GH_REPO/releases/latest/download/yurei.db" -o public-yurei.db
 cmp yurei.db public-yurei.db
 printf 'Published signed yurei.db and %d packages. Fingerprint: %s\n' "${#packages[@]}" "$expected"
