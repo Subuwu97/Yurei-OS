@@ -131,18 +131,26 @@ class Machine:
         self.qemu.stdin.write(line.encode() + b"\n")
         self.qemu.stdin.flush()
 
-    def stop(self, timeout=60):
-        # Drain the serial pipe while waiting. An unread pipe can block QEMU
-        # during guest shutdown, leaving its WAV header unfinished after kill.
-        os.set_blocking(self.qemu.stdout.fileno(), True)
-        graceful = True
-        try:
-            output, _ = self.qemu.communicate(timeout=timeout)
-        except subprocess.TimeoutExpired:
-            graceful = False
+    def stop(self, timeout=180):
+        # Keep stdin open until the guest exits: EOF on the stdio chardev can
+        # race the last serial command. Drain output throughout shutdown.
+        deadline = time.monotonic() + timeout
+        while self.qemu.poll() is None and time.monotonic() < deadline:
+            data = self.qemu.stdout.read()
+            if data:
+                self.log.write(data)
+                self.log.flush()
+            else:
+                time.sleep(0.05)
+        graceful = self.qemu.poll() is not None
+        if not graceful:
+            print("VM shutdown timed out; terminating QEMU", flush=True)
             self.qemu.kill()
-            output, _ = self.qemu.communicate()
-        self.log.write(output)
+        self.qemu.wait()
+        os.set_blocking(self.qemu.stdout.fileno(), True)
+        self.log.write(self.qemu.stdout.read())
+        self.qemu.stdout.close()
+        self.qemu.stdin.close()
         self.log.close()
         return graceful and self.qemu.returncode == 0
 
@@ -154,6 +162,21 @@ def check(what, ok):
     checks.append({"check": what, "passed": bool(ok)})
     print(("ok   " if ok else "FAIL ") + "install: " + what, flush=True)
     return ok
+
+def request_shutdown(machine, label, password=None):
+    command = "systemctl --no-block poweroff"
+    if password is not None:
+        command = "printf '%s\\n' " + shlex.quote(password) + " | sudo -S " + command
+    machine.send(command + "; rc=$?; if [ $rc -eq 0 ]; then echo SHUTDOWN-''ACCEPTED; else echo SHUTDOWN-''REJECTED-$rc; fi")
+    accepted = machine.wait("SHUTDOWN-ACCEPTED", 30, fail="SHUTDOWN-REJECTED")
+    if not accepted and machine.qemu.poll() == 0:
+        # A fast shutdown may end the serial session before the acknowledgement.
+        accepted = True
+    if not accepted and machine.qemu.poll() is None:
+        machine.send("systemctl list-jobs --no-pager; systemd-inhibit --list --no-pager; journalctl -b -n 80 --no-pager; echo SHUTDOWN-DIAG-''DONE")
+        machine.wait("SHUTDOWN-DIAG-DONE", 30)
+    return check(label + " accepted the systemd shutdown request", accepted)
+
 
 def check_audio(machine, label):
     machine.send("for n in $(seq 1 60); do if pactl info >/dev/null 2>&1 && wpctl inspect @DEFAULT_AUDIO_SINK@ 2>/dev/null | grep -q alsa_output; then echo AUDIO-SINK-''READY; break; fi; sleep 1; done")
@@ -297,7 +320,7 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
                 command = "YUREI_USER_PASSWORD=test YUREI_ROOT_PASSWORD=test " + command
             live.send(command + "&& echo INSTALL-''DONE || echo INSTALL-''FAILED")
             check("yurei-install finished", live.wait("INSTALL-DONE", 1800, fail="INSTALL-FAILED"))
-    live.send("poweroff")
+    request_shutdown(live, "live VM")
 check("live VM shut down cleanly", live.stop())
 if audio_enabled:
     check_recorded_audio(live, "live session")
@@ -345,7 +368,7 @@ if all(results):
     else:
         installed.send("if [ \"$(systemctl get-default)\" = multi-user.target ]; then echo CONSOLE-''OK; else echo CONSOLE-''BAD; fi")
         check("older seed image retains console boot", installed.wait("CONSOLE-OK", 30, fail="CONSOLE-BAD"))
-    installed.send("printf '%s\\n' " + shlex.quote(password) + " | sudo -S poweroff")
+    request_shutdown(installed, "installed VM", password)
     check("installed VM shut down cleanly", installed.stop())
     if audio_enabled:
         check_recorded_audio(installed, "installed user")

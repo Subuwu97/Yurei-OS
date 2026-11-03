@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import time
 import wave
 
 
@@ -14,7 +15,7 @@ def machine_class():
     # Load only the class; the script's top level starts destructive test VMs.
     parsed = ast.parse(SOURCE.read_text(encoding="utf-8"))
     definition = next(node for node in parsed.body if isinstance(node, ast.ClassDef) and node.name == "Machine")
-    namespace = {"os": os, "subprocess": subprocess}
+    namespace = {"os": os, "subprocess": subprocess, "time": time}
     exec(compile(ast.Module(body=[definition], type_ignores=[]), str(SOURCE), "exec"), namespace)
     return namespace["Machine"]
 
@@ -45,3 +46,14 @@ def test_forced_shutdown_is_reported_as_failure(tmp_path):
     machine = child_machine(tmp_path, "import time;time.sleep(60)")
     assert not machine.stop(timeout=0.05)
     assert machine.qemu.poll() is not None
+
+
+def test_shutdown_keeps_serial_input_open_until_guest_exits(tmp_path):
+    # Closing stdin immediately after sending a command can make a stdio-backed
+    # emulator discard input. Require the pipe to remain open until child exit.
+    program = "import sys,time,os;assert sys.stdin.readline().strip() == 'poweroff';time.sleep(0.1);os.set_blocking(sys.stdin.fileno(),False)\n"
+    program += "try:\n data=os.read(sys.stdin.fileno(),1)\nexcept BlockingIOError:\n pass\nelse:\n raise AssertionError('serial input was closed before guest exit: %r' % data)"
+    machine = child_machine(tmp_path, program)
+    machine.qemu.stdin.write(b'poweroff\n')
+    machine.qemu.stdin.flush()
+    assert machine.stop(timeout=10)
