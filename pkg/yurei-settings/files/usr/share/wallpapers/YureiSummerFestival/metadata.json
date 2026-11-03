@@ -1,0 +1,12 @@
+{
+    "KPlugin": {
+        "Id": "YureiSummerFestival",
+        "Name": "Yurei’s Riverside Summer Festival",
+        "Authors": [
+            {
+                "Name": "Yūrei Linux"
+            }
+        ],
+        "License": "CC-BY-SA-4.0"
+    }
+}

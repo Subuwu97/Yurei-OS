@@ -6,7 +6,7 @@
 pkgbase=yurei
 pkgname=(yurei-settings yurei-gaming yurei-plymouth-theme yurei-sddm-theme)
 pkgver=0.5.1
-pkgrel=1
+pkgrel=2
 pkgdesc="Yūrei Linux system settings and tools"
 arch=(any)
 url="https://github.com/subuwu97/Y-rei-Linux"

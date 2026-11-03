@@ -2,7 +2,7 @@
 # stage-appearance.py copies shared visual assets here before recipe hashing.
 pkgname=yurei-appearance
 pkgver=0.5.1
-pkgrel=4
+pkgrel=5
 pkgdesc="Independent Yurei desktop and login appearance"
 arch=(any)
 url="https://github.com/Subuwu97/Yurei-OS"

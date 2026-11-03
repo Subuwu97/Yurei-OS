@@ -1,0 +1,12 @@
+{
+    "KPlugin": {
+        "Id": "YureiSummerCountryside",
+        "Name": "Yurei’s Sunlit Summer Countryside",
+        "Authors": [
+            {
+                "Name": "Yūrei Linux"
+            }
+        ],
+        "License": "CC-BY-SA-4.0"
+    }
+}

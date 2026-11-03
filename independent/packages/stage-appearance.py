@@ -16,7 +16,7 @@ def stage(repository, destination):
         (repository / "themes/sddm/yurei", "usr/share/sddm/themes/yurei"),
         (repository / "themes/plymouth/yurei", "usr/share/plymouth/themes/yurei"),
     ]
-    for relative in ["usr/share/color-schemes/Yurei.colors", "usr/share/konsole/Yurei.profile", "usr/share/konsole/Yurei.colorscheme", "usr/share/wallpapers/Yurei", "usr/share/icons/hicolor/scalable/apps/yurei.svg", "usr/share/pixmaps/yurei.svg", "etc/xdg/kdeglobals", "etc/xdg/ksplashrc", "etc/xdg/kscreenlockerrc", "etc/xdg/konsolerc"]:
+    for relative in ["usr/share/color-schemes/Yurei.colors", "usr/share/konsole/Yurei.profile", "usr/share/konsole/Yurei.colorscheme", "usr/share/wallpapers", "usr/share/icons/hicolor/scalable/apps/yurei.svg", "usr/share/pixmaps/yurei.svg", "etc/xdg/kdeglobals", "etc/xdg/ksplashrc", "etc/xdg/kscreenlockerrc", "etc/xdg/konsolerc"]:
         pairs.append((files / relative, relative))
     pairs.extend([
         (files / "usr/share/plasma/shells/org.kde.plasma.desktop/contents/updates/yurei-desktop-layout.js", "usr/share/yurei/desktop-layout.js"),

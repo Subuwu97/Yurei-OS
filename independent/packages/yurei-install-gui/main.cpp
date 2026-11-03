@@ -120,7 +120,7 @@ class Installer : public QWidget {
         stepLabel->setText(labels.join("   ·   "));
         if (page == 4) {
             const auto disk = selectedDisk();
-            review->setText(QString("Erase %1 (%2, %3 GiB)\n\nCreate a 1 GiB EFI partition and an ext4 system partition.\nInstall the live system with systemd-boot.\n\nUser: %4\nComputer: %5\n\nEvery existing file on the selected disk will be lost.")
+            review->setText(QString("Disk to erase: %1\n%2 · %3 GiB\n\nPartitions: 1 GiB EFI + ext4 · Bootloader: systemd-boot\nUser: %4 · Computer: %5\n\nAll existing data on this disk will be erased.")
                 .arg(disk.path, disk.model).arg(disk.bytes / 1073741824.0, 0, 'f', 1).arg(user->text(), hostname->text()));
             QStringList software;
             if (multimedia->isChecked()) software << "VLC and multimedia codecs";
@@ -225,7 +225,7 @@ public:
         software->addWidget(text("ProtonUp-Qt manages GE-Proton and other compatibility tools. Steam downloads its supported Proton versions as needed. Games and account sign-in are separate.", 13));
         reduceMotion = new QCheckBox("Reduce motion"); software->addWidget(reduceMotion); software->addStretch();
         auto *summary = newPage("Review before installing", "Check the disk and account below. Nothing is changed until you explicitly start installation.");
-        review = text(""); summary->addWidget(review);
+        summary->setSpacing(10); review = text("", 13); summary->addWidget(review);
         acknowledge = new QCheckBox("I have backed up this disk and understand that all its data will be erased."); summary->addWidget(acknowledge);
         confirmation = field(); summary->addWidget(text("Type ERASE followed by the exact disk path:", 13)); summary->addWidget(confirmation); summary->addStretch();
         connect(acknowledge, &QCheckBox::toggled, this, [this] { updateButtons(); });
