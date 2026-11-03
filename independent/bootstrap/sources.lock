@@ -395,3 +395,5 @@ discover  6.4.5  https://download.kde.org/stable/plasma/6.4.5/discover-6.4.5.tar
 yurei-flathub  1  https://flathub.org/repo/flathub.flatpakrepo  3371dd250e61d9e1633630073fefda153cd4426f72f4afa0c3373ae2e8fea03a  repo
 
 itstool  2.0.7  https://files.itstool.org/itstool/itstool-2.0.7.tar.bz2  6b9a7cd29a12bb95598f5750e8763cee78836a1a207f85b74d8b3275b27e87ca  repo
+
+libcups  2.4.12  https://github.com/OpenPrinting/cups/releases/download/v2.4.12/cups-2.4.12-source.tar.gz  b1dde191a4ae2760c47220c82ca6155a28c382701e6c1a0159d1054990231d59  repo

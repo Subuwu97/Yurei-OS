@@ -1,0 +1,25 @@
+# Maintainer: Yurei Linux project
+pkgname=libcups
+pkgver=2.4.12
+pkgrel=1
+pkgdesc="CUPS client libraries for Qt and desktop portal printing"
+arch=(x86_64)
+url="https://openprinting.github.io/cups/"
+license=(Apache-2.0 WITH LLVM-exception)
+depends=(glibc openssl zlib)
+source=("https://github.com/OpenPrinting/cups/releases/download/v$pkgver/cups-$pkgver-source.tar.gz")
+sha256sums=('b1dde191a4ae2760c47220c82ca6155a28c382701e6c1a0159d1054990231d59')
+
+build() {
+    cd cups-$pkgver
+    ./configure --prefix=/usr --libdir=/usr/lib --sysconfdir=/etc \
+        --localstatedir=/var --with-components=libcups --with-tls=openssl \
+        --with-dnssd=no --disable-static --disable-gssapi --disable-pam \
+        --disable-libusb --disable-dbus --disable-libpaper --disable-tcp-wrappers
+    make
+}
+
+package() {
+    cd cups-$pkgver
+    make BUILDROOT="$pkgdir" install
+}

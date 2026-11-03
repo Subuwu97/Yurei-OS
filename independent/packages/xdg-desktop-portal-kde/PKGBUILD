@@ -1,7 +1,7 @@
 # Maintainer: Yurei Linux project
 pkgname=xdg-desktop-portal-kde
 pkgver=6.4.5
-pkgrel=1
+pkgrel=2
 pkgdesc="xdg-desktop-portal-kde: application store and sandboxed desktop support"
 arch=(x86_64)
 url="https://download.kde.org/stable/plasma/6.4.5"

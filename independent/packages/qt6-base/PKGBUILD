@@ -4,12 +4,12 @@
 # check-recipes.py keeps them the same.
 pkgname=qt6-base
 pkgver=6.9.3
-pkgrel=1
+pkgrel=2
 pkgdesc="Qt 6: core, GUI, widgets, network, D-Bus, SQL (the base of KDE Plasma)"
 arch=(x86_64)
 url="https://www.qt.io/"
 license=(LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only)
-depends=(glibc zlib zstd openssl dbus systemd libdrm mesa libglvnd libxkbcommon libinput wayland fontconfig freetype harfbuzz libpng libjpeg-turbo pcre2 glib libx11 libxcb xcb-util-keysyms xcb-util-wm xcb-util xcb-util-image xcb-util-renderutil xcb-util-cursor vulkan-icd-loader)
+depends=(libcups glibc zlib zstd openssl dbus systemd libdrm mesa libglvnd libxkbcommon libinput wayland fontconfig freetype harfbuzz libpng libjpeg-turbo pcre2 glib libx11 libxcb xcb-util-keysyms xcb-util-wm xcb-util xcb-util-image xcb-util-renderutil xcb-util-cursor vulkan-icd-loader)
 options=(!lto)
 source=("https://download.qt.io/archive/qt/6.9/$pkgver/submodules/qtbase-everywhere-src-$pkgver.tar.xz")
 sha256sums=('c5a1a2f660356ec081febfa782998ae5ddbc5925117e64f50e4be9cd45b8dc6e')
@@ -25,13 +25,15 @@ build() {
         -DFEATURE_journald=ON -DFEATURE_openssl_linked=ON -DFEATURE_system_sqlite=OFF \
         -DFEATURE_libproxy=OFF -DFEATURE_vulkan=ON -DFEATURE_xcb=ON -DFEATURE_wayland=ON \
         -DFEATURE_sql_odbc=OFF -DFEATURE_sql_mysql=OFF -DFEATURE_sql_psql=OFF -DFEATURE_sql_ibase=OFF \
-        -DFEATURE_cups=OFF -DFEATURE_gtk3=OFF -DFEATURE_icu=OFF -DFEATURE_glib=ON \
+        -DFEATURE_cups=ON -DFEATURE_gtk3=OFF -DFEATURE_icu=OFF -DFEATURE_glib=ON \
         -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
     cmake --build build
 }
 
 package() {
     DESTDIR="$pkgdir" cmake --install build
+    # KDE's print portal needs the CUPS private API from this exact Qt version.
+    test -f "$pkgdir/usr/include/qt6/QtPrintSupport/$pkgver/QtPrintSupport/private/qcups_p.h"
     # the tools people run also in /usr/bin, as Qt lists them
     if [[ -f "$srcdir/build/user_facing_tool_links.txt" ]]; then
         mkdir -p "$pkgdir/usr/bin"

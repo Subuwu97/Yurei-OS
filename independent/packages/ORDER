@@ -222,6 +222,7 @@ xcb-util
 xcb-util-image
 xcb-util-renderutil
 xcb-util-cursor
+libcups
 qt6-base
 qt6-shadertools
 qt6-svg
