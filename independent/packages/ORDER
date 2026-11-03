@@ -408,3 +408,6 @@ xdg-desktop-portal
 xdg-desktop-portal-kde
 discover
 yurei-flathub
+
+# Explicit installer multimedia/gaming selections
+yurei-software

@@ -47,6 +47,7 @@ inline QVector<Disk> eligibleDisks(const QByteArray &json, quint64 minimum, QStr
 
 struct InstallRequest {
     QString user, hostname, password, repeat, rootPassword, rootRepeat;
+    bool multimedia = false, gaming = false;
     QString validationError() const {
         if (!QRegularExpression("^[a-z_][a-z0-9_-]{0,31}$").match(user).hasMatch() || user == "root")
             return "Choose a lowercase user name other than root.";
@@ -68,7 +69,12 @@ inline bool canInstall(const InstallRequest &request, const Disk &disk, bool liv
 }
 
 inline QStringList backendArguments(const InstallRequest &request, const Disk &disk) {
-    return {"--disk", disk.path, "--hostname", request.hostname, "--user", request.user,
+    QStringList args = {"--disk", disk.path, "--hostname", request.hostname, "--user", request.user,
             "--expected-disk-bytes", QString::number(disk.bytes),
             "--expected-disk-device", disk.majorMinor, "--passwords-stdin", "--yes"};
+    QStringList groups;
+    if (request.multimedia) groups << "multimedia";
+    if (request.gaming) groups << "gaming";
+    if (!groups.isEmpty()) args << "--software" << groups.join(',');
+    return args;
 }

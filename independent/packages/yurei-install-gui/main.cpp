@@ -1,6 +1,10 @@
 #include "model.h"
 #include <QApplication>
 #include <QCheckBox>
+#include <QGraphicsOpacityEffect>
+#include <QPropertyAnimation>
+#include <QElapsedTimer>
+#include <cmath>
 #include <QCloseEvent>
 #include <QComboBox>
 #include <QCommandLineParser>
@@ -31,14 +35,17 @@ class Installer : public QWidget {
     QLabel *notice, *error, *review, *phase, *finished;
     QComboBox *diskChoice;
     QLineEdit *user, *hostname, *password, *repeat, *rootPassword, *rootRepeat, *confirmation;
-    QCheckBox *samePassword, *acknowledge;
+    QCheckBox *samePassword, *acknowledge, *multimedia, *gaming, *reduceMotion;
+    QGraphicsOpacityEffect *pageOpacity;
+    QPropertyAnimation *pageFade;
+    QElapsedTimer motionClock;
     QPushButton *back, *next, *close;
     QPlainTextEdit *log;
     QProgressBar *progress;
     QProcess process;
     QByteArray credentials;
     QStringList secrets;
-    const QStringList steps = {"Welcome", "Disk", "Account", "Review", "Install", "Finish"};
+    const QStringList steps = {"Welcome", "Disk", "Account", "Software", "Review", "Install", "Finish"};
     QLabel *stepLabel;
 
     QLabel *text(const QString &value, int size = 15) {
@@ -67,7 +74,7 @@ class Installer : public QWidget {
     InstallRequest request() const {
         return {user->text(), hostname->text(), password->text(), repeat->text(),
                 samePassword->isChecked() ? password->text() : rootPassword->text(),
-                samePassword->isChecked() ? repeat->text() : rootRepeat->text()};
+                samePassword->isChecked() ? repeat->text() : rootRepeat->text(), multimedia->isChecked(), gaming->isChecked()};
     }
     QByteArray readOnlyCommand(const QString &program, const QStringList &args) {
         QProcess query; query.start(program, args);
@@ -93,38 +100,46 @@ class Installer : public QWidget {
     }
     void updateButtons() {
         if (!next || !confirmation || !password) return;
-        back->setEnabled(page > 0 && page < 4 && !running);
-        next->setText(page == 3 ? (preview ? "Preview progress" : "Erase disk and install") : page == 5 ? "Close" : "Continue");
-        bool allowed = !running && page != 4;
+        back->setEnabled(page > 0 && page < 5 && !running);
+        next->setText(page == 4 ? (preview ? "Preview progress" : "Erase disk and install") : page == 6 ? "Close" : "Continue");
+        bool allowed = !running && page != 5;
         if (page == 1) allowed = !selectedDisk().path.isEmpty();
         if (page == 2) { error->setText(request().validationError()); allowed = request().validationError().isEmpty(); }
-        if (page == 3) allowed = preview || canInstall(request(), selectedDisk(), live, preview,
+        if (page == 4) allowed = preview || canInstall(request(), selectedDisk(), live, preview,
                                                        acknowledge->isChecked(), confirmation->text());
         next->setEnabled(allowed);
     }
     void showPage(int index) {
         page = index; pages->setCurrentIndex(page); error->clear();
+        pageFade->stop();
+        if (page != 4 && !reduceMotion->isChecked()) {
+            pageFade->setStartValue(0.25); pageFade->setEndValue(1.0); pageFade->start();
+        } else pageOpacity->setOpacity(1.0);
         QStringList labels;
         for (int i = 0; i < steps.size(); ++i) labels << (i == page ? "[ " + steps[i] + " ]" : steps[i]);
         stepLabel->setText(labels.join("   ·   "));
-        if (page == 3) {
+        if (page == 4) {
             const auto disk = selectedDisk();
             review->setText(QString("Erase %1 (%2, %3 GiB)\n\nCreate a 1 GiB EFI partition and an ext4 system partition.\nInstall the live system with systemd-boot.\n\nUser: %4\nComputer: %5\n\nEvery existing file on the selected disk will be lost.")
                 .arg(disk.path, disk.model).arg(disk.bytes / 1073741824.0, 0, 'f', 1).arg(user->text(), hostname->text()));
+            QStringList software;
+            if (multimedia->isChecked()) software << "VLC and multimedia codecs";
+            if (gaming->isChecked()) software << "Steam, Discord, Lutris and ProtonUp-Qt";
+            review->setText(review->text() + "\n\nOptional software: " + (software.isEmpty() ? "None selected" : software.join("; ")));
             confirmation->setPlaceholderText("ERASE " + disk.path);
         }
-        if (page == 5 && preview) finished->setText("Preview complete. No disks were read or changed, and no installation was performed.");
+        if (page == 6 && preview) finished->setText("Preview complete. No disks were read or changed, and no installation was performed.");
         if (page == 1 && disks.isEmpty()) error->setText("No eligible disk found. Use the UEFI live system, and unmount target filesystems first.");
         updateButtons();
     }
     void finish(bool success, const QString &message) {
         running = false; credentials.fill('\0'); credentials.clear(); secrets.clear();
         progress->setRange(0, 1); progress->setValue(success ? 1 : 0);
-        finished->setText(message); showPage(5); close->setEnabled(true);
+        finished->setText(message); showPage(6); close->setEnabled(true);
     }
     void beginInstall() {
         if (preview) {
-            showPage(4); phase->setText("Preview only — no installation commands will run.");
+            showPage(5); phase->setText("Preview only — no installation commands will run.");
             QTimer::singleShot(1500, this, [this] { finish(true, "Preview complete."); }); return;
         }
         const auto data = request(); const auto disk = selectedDisk();
@@ -142,7 +157,7 @@ class Installer : public QWidget {
         auto environment = QProcessEnvironment::systemEnvironment();
         environment.remove("YUREI_USER_PASSWORD"); environment.remove("YUREI_ROOT_PASSWORD");
         environment.insert("LC_ALL", "C.UTF-8"); process.setProcessEnvironment(environment);
-        running = true; showPage(4); close->setEnabled(false);
+        running = true; showPage(5); close->setEnabled(false);
         phase->setText("Checking the live system and target disk…");
         process.start(program, args);
     }
@@ -151,6 +166,15 @@ protected:
         QPainter painter(this); QPixmap art(":/yurei/slide-shrine.jpg");
         const auto scaled = art.scaled(size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
         painter.drawPixmap(width() - scaled.width(), (height() - scaled.height()) / 2, scaled);
+        if (page == 5 && !reduceMotion->isChecked()) {
+            const double elapsed = motionClock.elapsed() / 1000.0;
+            painter.setPen(Qt::NoPen);
+            for (int i = 0; i < 12; ++i) {
+                const double x = width() * (0.70 + (i % 4) * 0.07) + std::sin(elapsed * 0.6 + i) * 14;
+                const double y = height() - std::fmod(elapsed * 17 + i * 61, height() + 30.0);
+                painter.setBrush(QColor(211, 187, 255, 80)); painter.drawEllipse(QPointF(x, y), 3.0, 3.0);
+            }
+        }
         QLinearGradient shade(0, 0, width(), 0);
         shade.setColorAt(0, QColor(6, 12, 31, 250)); shade.setColorAt(.56, QColor(6, 12, 31, 235));
         shade.setColorAt(1, QColor(6, 12, 31, 65)); painter.fillRect(rect(), shade);
@@ -194,6 +218,12 @@ public:
         form->addRow(samePassword); form->addRow("Administrator password", rootPassword); form->addRow("Repeat administrator password", rootRepeat);
         rootPassword->setEnabled(false); rootRepeat->setEnabled(false); account->addLayout(form); account->addStretch();
         connect(samePassword, &QCheckBox::toggled, this, [this](bool same) { rootPassword->setEnabled(!same); rootRepeat->setEnabled(!same); updateButtons(); });
+        auto *software = newPage("Choose your software", "These selections apply to the installed system. An internet connection is required for apps and any missing runtimes; downloads can be several gigabytes.");
+        multimedia = new QCheckBox("Multimedia: VLC and additional media codecs");
+        gaming = new QCheckBox("Gaming: Steam, Discord, Lutris and ProtonUp-Qt");
+        software->addWidget(multimedia); software->addWidget(gaming);
+        software->addWidget(text("ProtonUp-Qt manages GE-Proton and other compatibility tools. Steam downloads its supported Proton versions as needed. Games and account sign-in are separate.", 13));
+        reduceMotion = new QCheckBox("Reduce motion"); software->addWidget(reduceMotion); software->addStretch();
         auto *summary = newPage("Review before installing", "Check the disk and account below. Nothing is changed until you explicitly start installation.");
         review = text(""); summary->addWidget(review);
         acknowledge = new QCheckBox("I have backed up this disk and understand that all its data will be erased."); summary->addWidget(acknowledge);
@@ -215,8 +245,8 @@ public:
         connect(close, &QPushButton::clicked, this, &QWidget::close);
         connect(back, &QPushButton::clicked, this, [this] { showPage(page - 1); });
         connect(next, &QPushButton::clicked, this, [this] {
-            if (page == 5) { QWidget::close(); return; }
-            if (page == 3) { beginInstall(); return; }
+            if (page == 6) { QWidget::close(); return; }
+            if (page == 4) { beginInstall(); return; }
             if (page == 2 && !request().validationError().isEmpty()) { error->setText(request().validationError()); return; }
             showPage(page + 1);
         });
@@ -232,6 +262,12 @@ public:
             if (problem == QProcess::FailedToStart) finish(false, "The installer could not start. No installation command was launched.");
         });
         connect(&process, &QProcess::finished, this, [this](int code, QProcess::ExitStatus status) {
+            if (status == QProcess::NormalExit && code == 3) {
+                QStringList retry;
+                if (multimedia->isChecked()) retry << "multimedia";
+                if (gaming->isChecked()) retry << "gaming";
+                finish(false, QString("Yūrei is installed, but selected optional apps did not finish downloading. You can boot the system, reconnect to the internet, and retry with sudo yurei-software --groups %1. Review the output for details.").arg(retry.join(','))); return;
+            }
             const bool success = status == QProcess::NormalExit && code == 0;
             finish(success, success ? "Yūrei is installed. Close this window, shut down, remove the USB stick, and start the computer again."
                 : "Installation did not finish. The target disk may be partially changed. Review the installer output; do not assume it is bootable.");
@@ -245,9 +281,15 @@ public:
         }
 #endif
         if (!preview && !live) notice->setText("Installation is unavailable here. Start Yūrei's UEFI live system, or use --preview to explore the design.");
+        pageOpacity = new QGraphicsOpacityEffect(pages); pages->setGraphicsEffect(pageOpacity);
+        pageFade = new QPropertyAnimation(pageOpacity, "opacity", this); pageFade->setDuration(180); pageFade->setEasingCurve(QEasingCurve::OutCubic);
+        motionClock.start();
+        auto *motion = new QTimer(this); motion->setInterval(50);
+        connect(motion, &QTimer::timeout, this, [this] { if (page == 5 && !reduceMotion->isChecked()) update(); }); motion->start();
+        connect(reduceMotion, &QCheckBox::toggled, this, [this](bool reduced) { if (reduced) { pageFade->stop(); pageOpacity->setOpacity(1.0); } update(); });
         inventory(); showPage(0);
     }
-    void previewPage(int index) { if (preview) showPage(qBound(0, index, 5)); }
+    void previewPage(int index) { if (preview) showPage(qBound(0, index, 6)); }
 };
 
 int main(int argc, char **argv) {
@@ -255,7 +297,7 @@ int main(int argc, char **argv) {
     QCommandLineParser parser; parser.addHelpOption();
     parser.addOption({"preview", "Explore the design without disk discovery or installation."});
     parser.addOption({"screenshot", "Save a preview screenshot and exit (requires --preview).", "file"});
-    parser.addOption({"page", "Preview page: 0 welcome, 1 disk, 2 account, 3 review, 4 progress, 5 finish.", "number", "0"});
+    parser.addOption({"page", "Preview page: 0 welcome, 1 disk, 2 account, 3 software, 4 review, 5 progress, 6 finish.", "number", "0"});
     parser.process(app);
     if (parser.isSet("screenshot") && !parser.isSet("preview")) parser.showHelp(2);
     Installer window(parser.isSet("preview")); window.previewPage(parser.value("page").toInt()); window.show();

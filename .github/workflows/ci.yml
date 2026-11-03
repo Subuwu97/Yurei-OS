@@ -21,7 +21,7 @@ jobs:
         run: ctest --test-dir out/installer-gui --output-on-failure
       - name: Render preview screens (no disk access)
         run: |
-          for page in 0 1 2 3 4 5; do
+          for page in 0 1 2 3 4 5 6; do
             out/installer-gui/yurei-install-gui --preview --page "$page" --screenshot "out/installer-$page.png"
           done
       - uses: actions/upload-artifact@v4

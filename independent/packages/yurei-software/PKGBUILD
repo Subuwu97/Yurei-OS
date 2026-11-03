@@ -1,0 +1,11 @@
+pkgname=yurei-software
+pkgver=0.1
+pkgrel=1
+pkgdesc="Install selected Yurei multimedia and gaming apps"
+arch=(any)
+url="https://github.com/Subuwu97/Yurei-OS"
+license=(GPL-3.0-or-later)
+depends=(python flatpak yurei-flathub)
+package() {
+    install -Dm755 "$startdir/yurei-software.py" "$pkgdir/usr/bin/yurei-software"
+}

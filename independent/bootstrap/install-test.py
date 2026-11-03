@@ -320,14 +320,14 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
             # Execute Yurei's own binary and Qt libraries, not the host's Qt.
             # Offscreen preview does not inventory disks or launch the backend.
             live.send("mkdir -p /run/yurei-gui-check && "
-                      "for page in 0 1 2 3 4 5; do "
+                      "for page in 0 1 2 3 4 5 6; do "
                       "QT_QPA_PLATFORM=offscreen /usr/bin/yurei-install-gui --preview "
                       "--page \"$page\" --screenshot /run/yurei-gui-check/page-$page.png "
                       "&& test -s /run/yurei-gui-check/page-$page.png || break; "
                       "done; "
-                      "if [ \"$(find /run/yurei-gui-check -name 'page-*.png' -size +0c | wc -l)\" -eq 6 ]; "
+                      "if [ \"$(find /run/yurei-gui-check -name 'page-*.png' -size +0c | wc -l)\" -eq 7 ]; "
                       "then echo GUI-''READY; else echo GUI-''FAILED; fi")
-            ready = check("all six GUI previews render with the live image's Qt", live.wait("GUI-READY", 180, fail="GUI-FAILED"))
+            ready = check("all seven GUI previews render with the live image's Qt", live.wait("GUI-READY", 180, fail="GUI-FAILED"))
         if ready:
             # Save mount identities to detect propagation damage from chroot
             # cleanup, rather than discovering it only at guest shutdown.

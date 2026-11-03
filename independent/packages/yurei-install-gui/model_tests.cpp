@@ -40,6 +40,16 @@ private slots:
         QVERIFY(!canInstall(request(), target, true, false, false, "ERASE /dev/vda"));
         QVERIFY(!canInstall(request(), target, true, false, true, "ERASE /dev/vdb"));
     }
+    void softwareSelectionsAreExplicit() {
+        auto data = request(); const Disk target{"/dev/vda", "Test", "252:0", 68719476736ULL};
+        QVERIFY(!backendArguments(data, target).contains("--software"));
+        data.multimedia = true;
+        QVERIFY(backendArguments(data, target).contains("multimedia"));
+        data.gaming = true;
+        QVERIFY(backendArguments(data, target).contains("multimedia,gaming"));
+        data.multimedia = false;
+        QVERIFY(backendArguments(data, target).contains("gaming"));
+    }
     void passwordsNeverEnterArguments() {
         const auto data = request();
         const auto args = backendArguments(data, {"/dev/vda", "Test", "252:0", 68719476736ULL});

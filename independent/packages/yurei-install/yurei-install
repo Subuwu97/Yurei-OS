@@ -14,7 +14,7 @@ set -euo pipefail
 target=/mnt/yurei-target
 rootfs=/run/live/rootfs
 disk='' hostname='' user='' yes='' kernel_options=''
-passwords_stdin='' expected_disk_bytes='' expected_disk_device=''
+passwords_stdin='' expected_disk_bytes='' expected_disk_device='' software=''
 
 die() { echo "yurei-install: $*" >&2; exit 1; }
 say() { printf '\n== %s\n' "$*"; }
@@ -25,6 +25,7 @@ while (( $# )); do
         --hostname) hostname=$2; shift ;;
         --user) user=$2; shift ;;
         --kernel-options) kernel_options=$2; shift ;;
+        --software) software=$2; shift ;;
         --yes) yes=1 ;;
         --passwords-stdin) passwords_stdin=1 ;;
         --expected-disk-bytes) expected_disk_bytes=$2; shift ;;
@@ -35,6 +36,13 @@ while (( $# )); do
     shift
 done
 
+case $software in
+    ""|multimedia|gaming|multimedia,gaming|gaming,multimedia) ;;
+    *) die "unknown software selection (choose multimedia and/or gaming)" ;;
+esac
+if [[ -n $software ]]; then
+    command -v yurei-software >/dev/null || die "this live image does not include optional software installation support"
+fi
 [[ $EUID -eq 0 ]] || die "run as root"
 [[ -d /sys/firmware/efi ]] || die "this PC started in legacy BIOS mode; Yūrei installs for UEFI only (start the live system in UEFI mode)"
 mountpoint -q "$rootfs" || die "run from the Yūrei live system ($rootfs isn't there)"
@@ -267,6 +275,14 @@ linux   /vmlinuz-yurei
 options root=PARTUUID=$partuuid rw${kernel_options:+ $kernel_options}
 ENTRY
 
+software_failed=0
+if [[ -n $software ]]; then
+    say "Installing selected optional software (internet required)"
+    # Run in the live environment so DNS works without binding the live /run
+    # tree into the target. Flatpak writes its downloads to the target disk.
+    yurei-software --target-root "$target" --groups "$software" || software_failed=1
+fi
+
 # (sys/fs/cgroup stays busy while systemd runs; it's let go lazily)
 for fs in dev sys proc; do umount -R "$target/$fs" 2>/dev/null || umount -R -l "$target/$fs"; done
 sync
@@ -276,3 +292,9 @@ echo
 echo "Yūrei is installed on $disk."
 [[ -n $boot_entry ]] || echo "(The PC's boot list wasn't changed; choose the disk in its boot menu.)"
 echo "Shut down (poweroff), remove the USB stick, and start the PC again."
+
+if (( software_failed )); then
+    echo "The base system is installed, but optional software downloads were incomplete."
+    echo "After booting and connecting to the internet, retry: sudo yurei-software --groups $software"
+    exit 3
+fi
