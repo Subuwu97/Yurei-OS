@@ -15,7 +15,7 @@ def machine_class():
     # Load only the class; the script's top level starts destructive test VMs.
     parsed = ast.parse(SOURCE.read_text(encoding="utf-8"))
     definition = next(node for node in parsed.body if isinstance(node, ast.ClassDef) and node.name == "Machine")
-    namespace = {"os": os, "subprocess": subprocess, "time": time}
+    namespace = {"os": os, "subprocess": subprocess, "time": time, "Path": Path}
     exec(compile(ast.Module(body=[definition], type_ignores=[]), str(SOURCE), "exec"), namespace)
     return namespace["Machine"]
 
@@ -24,6 +24,7 @@ def child_machine(tmp_path, program):
     cls = machine_class()
     machine = cls.__new__(cls)
     machine.log = (tmp_path / "serial.log").open("wb")
+    machine.screenshot = lambda name: None
     machine.qemu = subprocess.Popen([sys.executable, "-c", program], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     os.set_blocking(machine.qemu.stdout.fileno(), False)
     return machine

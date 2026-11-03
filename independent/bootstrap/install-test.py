@@ -145,6 +145,10 @@ class Machine:
         graceful = self.qemu.poll() is not None
         if not graceful:
             print("VM shutdown timed out; terminating QEMU", flush=True)
+            try:
+                self.screenshot(Path(self.log.name).stem + "-shutdown-timeout.png")
+            except (OSError, RuntimeError) as error:
+                print("Could not capture shutdown screen:", error, flush=True)
             self.qemu.kill()
         self.qemu.wait()
         os.set_blocking(self.qemu.stdout.fileno(), True)
@@ -310,6 +314,12 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
                       "then echo GUI-''READY; else echo GUI-''FAILED; fi")
             ready = check("all six GUI previews render with the live image's Qt", live.wait("GUI-READY", 180, fail="GUI-FAILED"))
         if ready:
+            # Save mount identities to detect propagation damage from chroot
+            # cleanup, rather than discovering it only at guest shutdown.
+            mount_probe = "for path in /proc /sys /sys/fs/cgroup /dev /dev/pts /dev/shm; do findmnt -n -o ID,TARGET --mountpoint \"$path\" || exit 1; done"
+            live.send("bash -c " + shlex.quote(mount_probe) + " > /tmp/yurei-mounts-before && echo MOUNT-BASELINE-''OK || echo MOUNT-BASELINE-''BAD")
+            ready = check("live mounts recorded before installation", live.wait("MOUNT-BASELINE-OK", 30, fail="MOUNT-BASELINE-BAD"))
+        if ready:
             command = backend + " --disk /dev/vda --hostname yurei-installed --user tester --yes "
             command += "--kernel-options 'console=ttyS0,115200 systemd.tty.term.ttyS0=dumb' "
             if args.gui_protocol:
@@ -320,6 +330,8 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
                 command = "YUREI_USER_PASSWORD=test YUREI_ROOT_PASSWORD=test " + command
             live.send(command + "&& echo INSTALL-''DONE || echo INSTALL-''FAILED")
             check("yurei-install finished", live.wait("INSTALL-DONE", 1800, fail="INSTALL-FAILED"))
+            live.send("bash -c " + shlex.quote(mount_probe) + " > /tmp/yurei-mounts-after && diff -u /tmp/yurei-mounts-before /tmp/yurei-mounts-after && systemd-run --wait --pipe /usr/bin/true && echo LIVE-INTEGRITY-''OK || { cat /proc/self/mountinfo; journalctl -b -n 100 --no-pager; echo LIVE-INTEGRITY-''BAD; }")
+            check("installer preserves live mounts and systemd service execution", live.wait("LIVE-INTEGRITY-OK", 60, fail="LIVE-INTEGRITY-BAD"))
     request_shutdown(live, "live VM")
 check("live VM shut down cleanly", live.stop())
 if audio_enabled:

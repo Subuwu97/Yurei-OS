@@ -211,7 +211,13 @@ FSTAB
 
 # what the commands below need inside the new system; not /run, whose
 # live medium mounts would keep it busy
-for fs in proc sys dev; do mount --rbind "/$fs" "$target/$fs"; done
+# Isolate the target copies before any chroot command or recursive unmount.
+# With systemd's shared mounts, cleanup of an ordinary rbind can otherwise
+# unmount /dev/pts or /sys/fs/cgroup in the running live system as well.
+for fs in proc sys dev; do
+    mount --rbind "/$fs" "$target/$fs"
+    mount --make-rslave "$target/$fs"
+done
 in_target() { chroot "$target" "$@"; }
 # the system's groups (and the login screen's own user), then the user:
 # an administrator (wheel), with the screen and input devices (seat) and
