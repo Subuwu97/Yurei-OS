@@ -57,6 +57,11 @@ fi
 if [[ -n ${YUREI_APP_STORE:-} ]]; then
     [[ $YUREI_APP_STORE == /* && -d $YUREI_APP_STORE ]] || { echo "invalid app store" >&2; exit 1; }
     mnt /var/lib/flatpak --bind "$YUREI_APP_STORE"
+    # The staged image uses systemd-resolved, but no services run in this
+    # build chroot. Supply DNS in its temporary /run only; unmounting /run
+    # removes it before packing the live image.
+    mkdir -p "$YUREI/run/systemd/resolve"
+    cp -L /etc/resolv.conf "$YUREI/run/systemd/resolve/stub-resolv.conf"
 fi
 # the sources and the build scripts, read-only, so the build can't change them
 mnt /sources --bind -o ro "$SOURCES"
