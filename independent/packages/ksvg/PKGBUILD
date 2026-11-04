@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=ksvg
+_lockname=kf6-ksvg
+pkgver=6.18.0
+pkgrel=1
+pkgdesc="KDE Frameworks: ksvg"
+arch=(x86_64)
+url="https://kde.org/"
+license=(BSD-2-Clause BSD-3-Clause CC0-1.0 GPL-2.0-only GPL-2.0-or-later GPL-3.0-only LGPL-2.0-or-later LGPL-2.1-only LGPL-2.1-or-later LGPL-3.0-only)
+depends=(qt6-base qt6-declarative qt6-svg karchive kconfig kcolorscheme kcoreaddons kguiaddons kirigami)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/frameworks/6.18/ksvg-$pkgver.tar.xz")
+sha256sums=('0eab2ba532906b612afee2fbfa802a88d7f4570d4c322972cb6debd320075c10')
+
+build() {
+    cmake -S ksvg-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a ksvg-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

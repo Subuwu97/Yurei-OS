@@ -1,0 +1,23 @@
+# Maintainer: Yurei Linux project
+pkgname=nasm
+pkgver=2.16.03
+pkgrel=2
+pkgdesc="Assembler for optimized media codecs"
+arch=(x86_64)
+url="https://github.com/Subuwu97/Yurei-OS"
+license=(BSD-2-Clause)
+depends=(glibc)
+source=("https://www.nasm.us/pub/nasm/releasebuilds/$pkgver/nasm-$pkgver.tar.xz")
+sha256sums=('1412a1c760bbd05db026b6c0d1657affd6631cd0a63cddb6f73cc6d4aa616148')
+
+build() {
+    cd nasm-$pkgver
+    ./configure --prefix=/usr
+    make
+}
+
+package() {
+    cd nasm-$pkgver
+    make DESTDIR="$pkgdir" install
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

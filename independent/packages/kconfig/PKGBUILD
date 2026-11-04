@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 5, KDE Plasma; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock
+# (as kf6-kconfig); check-recipes.py keeps them the same.
+pkgname=kconfig
+_lockname=kf6-kconfig
+pkgver=6.18.0
+pkgrel=2
+pkgdesc="KDE Frameworks: settings"
+arch=(x86_64)
+url="https://kde.org/"
+license=(LGPL-2.0-or-later)
+depends=(qt6-base qt6-declarative)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/frameworks/6.18/kconfig-$pkgver.tar.xz")
+sha256sums=('517cbf6747df9289d6fce860a73d49e59354685334ae468ecd53f1067d9d618b')
+
+build() {
+    cmake -S kconfig-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_USE_QT_SYS_PATHS=ON -DKDE_INSTALL_LIBDIR=lib
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+}

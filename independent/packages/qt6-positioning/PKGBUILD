@@ -1,0 +1,36 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 5, KDE Plasma; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=qt6-positioning
+pkgver=6.9.3
+pkgrel=1
+pkgdesc="Qt 6 positioning services for Plasma"
+arch=(x86_64)
+url="https://www.qt.io/"
+license=(LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only)
+depends=(qt6-base qt6-declarative)
+options=(!lto)
+source=("https://download.qt.io/archive/qt/6.9/$pkgver/submodules/qtpositioning-everywhere-src-$pkgver.tar.xz")
+sha256sums=('0c87c980f704c17aadaf0bf8a03845dd0a60cc0313be24bd7b5b90685d5835b4')
+
+build() {
+    cmake -S qtpositioning-everywhere-src-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DINSTALL_PUBLICBINDIR=bin -DCMAKE_BUILD_TYPE=Release \
+        -DQT_BUILD_TESTS=OFF -DQT_BUILD_EXAMPLES=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    # the tools people run also in /usr/bin, as Qt lists them
+    if [[ -f "$srcdir/build/user_facing_tool_links.txt" ]]; then
+        mkdir -p "$pkgdir/usr/bin"
+        cd "$pkgdir/usr"
+        # Qt emits a target relative to /usr/bin and a link relative to /usr.
+        while read -r target link; do
+            [[ -n $target && -n $link ]] || continue
+            ln -s "$target" "$link"
+        done < "$srcdir/build/user_facing_tool_links.txt"
+    fi
+}

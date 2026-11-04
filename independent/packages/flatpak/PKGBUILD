@@ -1,0 +1,27 @@
+# Maintainer: Yurei Linux project
+pkgname=flatpak
+pkgver=1.18.4
+pkgrel=1
+pkgdesc="flatpak: application store and sandboxed desktop support"
+arch=(x86_64)
+url="https://github.com/flatpak/flatpak/releases/download/1.18.4"
+license=(LGPL-2.1-or-later)
+depends=(libcap libarchive glib curl libxml2 zstd systemd polkit fuse3 ostree json-glib appstream gdk-pixbuf libseccomp gpgme libxau bubblewrap xdg-dbus-proxy wayland)
+source=("https://github.com/flatpak/flatpak/releases/download/1.18.4/flatpak-1.18.4.tar.xz")
+sha256sums=('b899a7a00c48d2c626cb8ec33fe556720b376c25805d7222430c0fdca4c6ac8d')
+makedepends=(python-pyparsing)
+install=flatpak.install
+
+build() {
+    meson setup flatpak-1.18.4 build --prefix=/usr --libdir=lib --libexecdir=lib --sysconfdir=/etc --localstatedir=/var --buildtype=release --wrap-mode=nofallback -Dtests=false -Dgir=disabled -Dgtkdoc=disabled -Dman=disabled -Ddocbook_docs=disabled -Ddconf=disabled -Dmalcontent=disabled -Dselinux_module=disabled -Dsystem_helper=enabled -Dseccomp=enabled -Dsystem_bubblewrap=/usr/bin/bwrap -Dsystem_dbus_proxy=/usr/bin/xdg-dbus-proxy
+    meson compile -C build
+}
+package() {
+    DESTDIR="$pkgdir" meson install -C build
+    install -Dm644 /dev/stdin "$pkgdir/etc/profile.d/flatpak.sh" <<'ENV'
+case ":${XDG_DATA_DIRS:-/usr/local/share:/usr/share}:" in
+    *:/var/lib/flatpak/exports/share:*) ;;
+    *) export XDG_DATA_DIRS="${XDG_DATA_DIRS:-/usr/local/share:/usr/share}:/var/lib/flatpak/exports/share" ;;
+esac
+ENV
+}

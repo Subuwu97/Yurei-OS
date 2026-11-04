@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=kwayland
+_lockname=plasma-kwayland
+pkgver=6.4.5
+pkgrel=1
+pkgdesc="KDE Wayland client library"
+arch=(x86_64)
+url="https://kde.org/"
+license=(BSD-3-Clause CC0-1.0 LGPL-2.1-only LGPL-2.1-or-later LGPL-3.0-only MIT MIT-CMU)
+depends=(qt6-base qt6-wayland wayland wayland-protocols plasma-wayland-protocols libglvnd)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/plasma/6.4.5/kwayland-$pkgver.tar.xz")
+sha256sums=('0b875d9e7cc5bac4d97d3443ff4311533e0d8dad401af1244d4758a5fa5428f3')
+
+build() {
+    cmake -S kwayland-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a kwayland-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

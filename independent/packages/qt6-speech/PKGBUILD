@@ -1,0 +1,36 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 5, KDE Plasma; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock;
+# check-recipes.py keeps them the same.
+pkgname=qt6-speech
+pkgver=6.9.3
+pkgrel=1
+pkgdesc="Qt 6 text to speech"
+arch=(x86_64)
+url="https://www.qt.io/"
+license=(LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only)
+depends=(qt6-base qt6-declarative qt6-multimedia flite)
+options=(!lto)
+source=("https://download.qt.io/archive/qt/6.9/$pkgver/submodules/qtspeech-everywhere-src-$pkgver.tar.xz")
+sha256sums=('f86f5a4c742fb86ccc6e90ee72a9213150986575c3d238829a4b48a28bc9ab3e')
+
+build() {
+    cmake -S qtspeech-everywhere-src-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DINSTALL_PUBLICBINDIR=bin -DCMAKE_BUILD_TYPE=Release \
+        -DFEATURE_flite=ON -DQT_BUILD_TESTS=OFF -DQT_BUILD_EXAMPLES=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    # the tools people run also in /usr/bin, as Qt lists them
+    if [[ -f "$srcdir/build/user_facing_tool_links.txt" ]]; then
+        mkdir -p "$pkgdir/usr/bin"
+        cd "$pkgdir/usr"
+        # Qt emits a target relative to /usr/bin and a link relative to /usr.
+        while read -r target link; do
+            [[ -n $target && -n $link ]] || continue
+            ln -s "$target" "$link"
+        done < "$srcdir/build/user_facing_tool_links.txt"
+    fi
+}

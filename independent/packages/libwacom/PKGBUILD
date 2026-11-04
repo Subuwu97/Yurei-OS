@@ -1,0 +1,22 @@
+# Maintainer: Yurei Linux project
+pkgname=libwacom
+pkgver=2.15.0
+pkgrel=1
+pkgdesc="Tablet model database and device capability library for Plasma settings"
+arch=(x86_64)
+url="https://github.com/linuxwacom/libwacom"
+license=(HPND)
+depends=(glib libgudev libevdev python)
+source=("https://github.com/linuxwacom/libwacom/releases/download/libwacom-$pkgver/libwacom-$pkgver.tar.xz")
+sha256sums=('20cd65b1693129c3a6c003db0fe7fff7eccaf19fb04e89aaad9c20eb2151515a')
+
+build() {
+    meson setup libwacom-$pkgver build --prefix=/usr --libdir=lib --sysconfdir=/etc \
+        --buildtype=release --wrap-mode=nofallback -Dtests=disabled -Ddocumentation=disabled
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+    install -Dm644 "$srcdir/libwacom-$pkgver/COPYING" "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}

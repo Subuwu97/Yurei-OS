@@ -1,0 +1,8 @@
+post_install() {
+    systemctl disable systemd-networkd.service systemd-networkd.socket systemd-networkd-wait-online.service >/dev/null 2>&1 || true
+    systemctl enable NetworkManager.service iwd.service systemd-resolved.service
+}
+post_upgrade() {
+    # Preserve the administrator's service choices on upgrades.
+    systemctl daemon-reload >/dev/null 2>&1 || true
+}

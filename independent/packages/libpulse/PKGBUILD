@@ -1,0 +1,25 @@
+# Maintainer: Yūrei Linux project
+pkgname=libpulse
+pkgver=17.0
+pkgrel=1
+pkgdesc="PulseAudio client libraries for the PipeWire desktop"
+arch=(x86_64)
+url="https://www.freedesktop.org/software/pulseaudio"
+license=(LGPL-2.1-or-later)
+depends=(glibc glib dbus libsndfile systemd)
+source=("https://www.freedesktop.org/software/pulseaudio/releases/pulseaudio-$pkgver.tar.xz")
+sha256sums=('053794d6671a3e397d849e478a80b82a63cb9d8ca296bd35b73317bb5ceb87b5')
+
+build() {
+    meson setup pulseaudio-$pkgver build --prefix=/usr --libdir=lib --buildtype=release \
+        --wrap-mode=nofallback --auto-features=disabled \
+        -Ddaemon=false -Dclient=true -Ddatabase=simple -Dglib=enabled -Ddbus=enabled \
+        -Dsystemd=enabled -Ddoxygen=false -Dman=false -Dtests=false
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+    install -Dm644 pulseaudio-$pkgver/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    install -Dm644 pulseaudio-$pkgver/LGPL "$pkgdir/usr/share/licenses/$pkgname/LGPL"
+}

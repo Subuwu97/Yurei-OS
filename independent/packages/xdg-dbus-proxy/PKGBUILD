@@ -1,0 +1,19 @@
+# Maintainer: Yurei Linux project
+pkgname=xdg-dbus-proxy
+pkgver=0.1.6
+pkgrel=1
+pkgdesc="xdg-dbus-proxy: application store and sandboxed desktop support"
+arch=(x86_64)
+url="https://github.com/flatpak/xdg-dbus-proxy/releases/download/0.1.6"
+license=(LGPL-2.1-or-later)
+depends=(glib)
+source=("https://github.com/flatpak/xdg-dbus-proxy/releases/download/0.1.6/xdg-dbus-proxy-0.1.6.tar.xz")
+sha256sums=('131bf59fce7c7ee7ecbc5d9106d6750f4f597bfe609966573240f7e4952973a1')
+
+build() {
+    meson setup xdg-dbus-proxy-0.1.6 build --prefix=/usr --libdir=lib --libexecdir=lib --sysconfdir=/etc --localstatedir=/var --buildtype=release --wrap-mode=nofallback -Dtests=false -Dman=disabled
+    meson compile -C build
+}
+package() {
+    DESTDIR="$pkgdir" meson install -C build
+}

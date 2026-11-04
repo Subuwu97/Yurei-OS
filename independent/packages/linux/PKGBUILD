@@ -4,7 +4,7 @@
 # keeps them the same.
 pkgname=linux
 pkgver=6.18
-pkgrel=6
+pkgrel=11
 # NVIDIA's open kernel modules (MIT/GPL), built here against this kernel so
 # their versions always match; nvidia-utils brings the matching driver
 _nvidia=595.112.07
@@ -39,7 +39,7 @@ build() {
     make kvm_guest.config
     scripts/config \
         -e DEVTMPFS -e DEVTMPFS_MOUNT -e CGROUPS -e MEMCG -e FHANDLE -e AUTOFS_FS \
-        -e TMPFS_POSIX_ACL -e TMPFS_XATTR -e SECCOMP -e BPF_SYSCALL -e CGROUP_BPF -e PSI \
+        -e TMPFS_POSIX_ACL -e TMPFS_XATTR -e SECCOMP -e SECCOMP_FILTER -e NAMESPACES -e USER_NS -e PID_NS -e NET_NS -e IPC_NS -e UTS_NS -e BPF_SYSCALL -e CGROUP_BPF -e PSI \
         -e DMIID -e INOTIFY_USER -d UEVENT_HELPER -d SYSFS_DEPRECATED \
         -e EFI -e EFI_STUB -e EFIVAR_FS -e EFI_PARTITION \
         -e BLK_DEV_NVME -e ATA -e SATA_AHCI -e BLK_DEV_LOOP -e BLK_DEV_SD -e BLK_DEV_SR \
@@ -48,7 +48,7 @@ build() {
         -e HID -e HID_GENERIC -e USB_HID -e INPUT_EVDEV \
         -e EXT4_FS -e VFAT_FS -e FAT_FS -e NLS_CODEPAGE_437 -e NLS_ISO8859_1 -e NLS_UTF8 \
         -e EXFAT_FS -e NTFS3_FS -e ISO9660_FS -e JOLIET -e ZISOFS -e SQUASHFS -e SQUASHFS_XZ -e SQUASHFS_ZSTD \
-        -e OVERLAY_FS -e TMPFS -e CDROM -e RD_GZIP -e RD_ZSTD \
+        -e OVERLAY_FS -m FUSE_FS -e TMPFS -e CDROM -e RD_GZIP -e RD_ZSTD \
         -e DRM -e DRM_SIMPLEDRM -e SYSFB_SIMPLEFB -e DRM_FBDEV_EMULATION -e FRAMEBUFFER_CONSOLE \
         -m DRM_I915 -m DRM_XE -m DRM_AMDGPU -e DRM_AMD_DC -e DRM_AMDGPU_USERPTR -m DRM_RADEON \
         -m DRM_NOUVEAU -m DRM_VIRTIO_GPU \
@@ -65,6 +65,9 @@ build() {
         -e PKCS7_MESSAGE_PARSER -e PKCS8_PRIVATE_KEY_PARSER \
         -m SND_HDA_INTEL -m SND_HDA_CODEC_REALTEK -m SND_HDA_CODEC_HDMI \
         -e VIRTIO_BLK -e VIRTIO_NET -e SERIAL_8250_CONSOLE \
+        -e HYPERVISOR_GUEST -e HYPERV -e HYPERV_VMBUS -e SCSI -e HYPERV_STORAGE \
+        -e HYPERV_NET -m VSOCKETS -m HYPERV_VSOCKETS -e CONNECTOR -e PTP_1588_CLOCK -e HYPERV_UTILS -e HYPERV_BALLOON \
+        -e HYPERV_KEYBOARD -e HID_HYPERV_MOUSE -e DRM_HYPERV -d FB_HYPERV \
         -m I2C_HID_ACPI -m I2C_DESIGNWARE_PLATFORM -m I2C_DESIGNWARE_PCI -m MFD_INTEL_LPSS_ACPI \
         -m MFD_INTEL_LPSS_PCI -e PINCTRL_INTEL -m PINCTRL_CANNONLAKE -m PINCTRL_TIGERLAKE \
         -m PINCTRL_ALDERLAKE -m PINCTRL_METEORLAKE -m HID_MULTITOUCH -m MOUSE_ELAN_I2C \
@@ -74,6 +77,11 @@ build() {
         -m SND_SOC_SOF_LUNARLAKE -e SND_SOC_SOF_HDA_LINK -e SND_SOC_SOF_HDA_AUDIO_CODEC \
         -e SND_SOC_INTEL_MACH -m SND_SOC_INTEL_SKL_HDA_DSP_GENERIC_MACH \
         -m SND_SOC_INTEL_SOF_RT5682_MACH -m SND_SOC_INTEL_SOF_SSP_AMP_MACH -m SND_SOC_DMIC \
+        -e GPIOLIB -e GPIO_SWNODE_UNDEFINED -e SPI -e SPI_MASTER -e I2C -m SOUNDWIRE -m SOUNDWIRE_INTEL \
+        -e SND_SOC_INTEL_USER_FRIENDLY_LONG_NAMES -m SND_SOC_SOF_INTEL_SOUNDWIRE \
+        -m SND_SOC_INTEL_SOUNDWIRE_SOF_MACH -m SND_HDA_GENERIC \
+        -m SPI_PXA2XX -m SPI_PXA2XX_PCI -m SERIAL_MULTI_INSTANTIATE \
+        -m SND_HDA_SCODEC_CS35L41_SPI -m SND_HDA_SCODEC_CS35L41_I2C \
         -m SND_HDA_CODEC_CONEXANT -m SND_USB_AUDIO -m SND_SOC_AMD_ACP6x -m SND_SOC_AMD_PS \
         -e INPUT_JOYSTICK -m INPUT_JOYDEV -m JOYSTICK_XPAD -e JOYSTICK_XPAD_FF -m HID_SONY \
         -e SONY_FF -m HID_PLAYSTATION -e PLAYSTATION_FF -m HID_NINTENDO -m HID_STEAM \
@@ -84,6 +92,23 @@ build() {
         -e MEDIA_SUPPORT -e MEDIA_USB_SUPPORT -e MEDIA_CAMERA_SUPPORT -m USB_VIDEO_CLASS \
         --set-str LOCALVERSION -yurei -d LOCALVERSION_AUTO
     make olddefconfig
+    # The live initramfs cannot load modules; the Hyper-V bus and DVD/disk
+    # drivers must work before the squashfs can be located.
+    for option in HYPERV HYPERV_VMBUS HYPERV_STORAGE SCSI BLK_DEV_SD BLK_DEV_SR HYPERV_NET DRM_HYPERV HYPERV_KEYBOARD HID_HYPERV_MOUSE; do
+        grep -qx "CONFIG_${option}=y" .config || { echo "Missing built-in $option" >&2; return 1; }
+    done
+    grep -qx "CONFIG_GPIO_SWNODE_UNDEFINED=y" .config || { echo "Missing software-node GPIO sentinel for Cirrus audio" >&2; return 1; }
+    for option in SOUNDWIRE SOUNDWIRE_INTEL SND_SOC_SOF_INTEL_SOUNDWIRE SND_SOC_INTEL_SOUNDWIRE_SOF_MACH SND_SOC_RT711_SDCA_SDW SND_SOC_RT1316_SDW; do
+        grep -Eq "^CONFIG_${option}=[ym]$" .config || { echo "Missing laptop audio driver $option" >&2; return 1; }
+    done
+    # XPS 15 9530 (1028:0beb): Realtek's quirk binds two CS35L41 SPI amps.
+    # Without their side-codec/controller chain only part of the speakers work.
+    for option in SPI_PXA2XX SPI_PXA2XX_PCI SERIAL_MULTI_INSTANTIATE SND_HDA_SCODEC_CS35L41 SND_HDA_SCODEC_CS35L41_SPI SND_HDA_SCODEC_CS35L41_I2C; do
+        grep -Eq "^CONFIG_${option}=[ym]$" .config || { echo "Missing XPS speaker amplifier support $option" >&2; return 1; }
+    done
+    for option in VSOCKETS HYPERV_VSOCKETS; do
+        grep -Eq "^CONFIG_${option}=[ym]$" .config || { echo "Missing Hyper-V socket driver: $option" >&2; return 1; }
+    done
     make
     make -C "$srcdir/open-gpu-kernel-modules-$_nvidia" modules SYSSRC="$PWD" SYSOUT="$PWD"
 }

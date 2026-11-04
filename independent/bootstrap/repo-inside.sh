@@ -9,8 +9,8 @@
 # repository with pacman alone, trusting only the repository's key, and
 # runs a shell inside it.
 #
-# Packages are signed with a throwaway key made for each run, until Yūrei's
-# own signing key is set up (docs/INDEPENDENT.md).
+# The integration workflow supplies a persistent signing home; isolated
+# bootstrap runs without one continue to use a temporary key.
 #
 # A recipe that hasn't changed since the last run isn't built again: the
 # workflow hands in that run's packages (/srv/yurei/previous) with a hash of
@@ -26,6 +26,7 @@ repo=$srv/repo
 previous=$srv/previous
 stamps=$srv/stamps
 user=yurei-builder
+if [[ -d /signing-gnupg ]]; then export GNUPGHOME=/signing-gnupg; fi
 
 # Runs a command as the build user; makepkg won't run as root.
 as_user() {
@@ -48,9 +49,16 @@ fingerprint() { as_user gpg --batch --with-colons --list-secret-keys | awk -F: '
 setup() {
     msg "Build user, signing key and build settings"
     [[ -f $recipes/ORDER ]] || { echo "no recipes in $recipes" >&2; exit 1; }
-    getent passwd "$user" >/dev/null || useradd -m "$user"
-    as_user gpg --batch --quiet --passphrase '' \
-        --quick-gen-key "Yūrei build (throwaway) <build@yurei.invalid>" ed25519 sign never
+    # A stable, dedicated UID also avoids colliding with WSL's login user.
+    getent passwd "$user" >/dev/null || useradd -u 60000 -m "$user"
+    if [[ -n ${GNUPGHOME:-} ]]; then
+        chown -R "$user:" "$GNUPGHOME"
+        chmod 700 "$GNUPGHOME"
+    fi
+    if [[ -z $(as_user gpg --batch --with-colons --list-secret-keys 2>/dev/null | awk -F: '/^sec/ {print $5; exit}') ]]; then
+        as_user gpg --batch --quiet --passphrase '' \
+            --quick-gen-key "Yurei independent repository <packages@yurei.invalid>" ed25519 sign never
+    fi
     # systemd's boot loader is built with pyelftools; a build tool only,
     # like the rest of this system, not part of any package
     python3 -c 'import elftools' 2>/dev/null ||
@@ -139,7 +147,8 @@ install_here() {
 # Builds every recipe in ORDER. --nodeps: while bootstrapping, everything a
 # recipe needs is in this system already, but not yet known to pacman (from
 # ORDER's "#> install from here on" line, each package is installed here
-# once built, for the ones after it). A recipe written "NAME build-only" is
+# once built, for the ones after it). bootstrap-install makes an early
+# prerequisite available without installing all bootstrap recipes. A recipe written "NAME build-only" is
 # only there to build the ones after it (a cross compiler): its packages go
 # into the repository, and leave this system again at the end, so the
 # booted system and the ISO don't carry them.
@@ -160,7 +169,7 @@ packages() {
         # the keyring holds this run's key, so it's always made afresh
         if [[ $name != yurei-keyring ]] && reuse "$name" "$hash"; then
             echo "   unchanged since the last run: reused"
-            [[ -z $install ]] || install_here "$name"
+            if [[ -n $install || $flag == bootstrap-install ]]; then install_here "$name"; fi
             continue
         fi
         rm -rf "$(home)/build/$name"
@@ -178,7 +187,7 @@ packages() {
         done < "$stamps/$name.files"
         echo "$hash" > "$stamps/$name.hash"
         rm -rf "$(home)/build/$name"
-        [[ -z $install ]] || install_here "$name"
+        if [[ -n $install || $flag == bootstrap-install ]]; then install_here "$name"; fi
         printf '   (%s took %d s)\n' "$name" $((SECONDS - start))
     done < "$recipes/ORDER"
     for name in "${buildonly[@]}"; do
@@ -194,6 +203,7 @@ publish() {
     fpr=$(fingerprint)
     as_user sh -c "cd $repo && repo-add --sign --key $fpr --verify yurei.db.tar.zst *.pkg.tar.zst"
     as_user gpg --batch --armor --export "$fpr" > "$repo/yurei-build.asc"
+    printf '%s\n' "$fpr" > "$repo/yurei-signing-fingerprint.txt"
     ls -l "$repo"
 }
 
@@ -231,6 +241,9 @@ CONF
         exit 1
     fi
     umount "$root/proc" "$root/dev"
+    if [[ -d $root/tmp/yurei-gui-previews ]]; then
+        cp -r "$root/tmp/yurei-gui-previews" "$srv/gui-previews"
+    fi
     gpgconf --homedir "$gnupg" --kill all
     as_user gpgconf --kill all
     rm -rf "$root" "$gnupg" "$srv/cache" "$srv/pacman.conf" "$srv/sources"
@@ -241,6 +254,9 @@ cleanup() {
     local builder_home status=0
     builder_home=$(home)
     as_user gpgconf --kill all 2>/dev/null || true
+    # /run is temporary for each chroot invocation. An abandoned agent may
+    # have lost its control socket, so gpgconf cannot always stop it.
+    python3 /bootstrap/cleanup-build-processes.py "$user"
     userdel -r "$user" || status=$?
     # Shadow can remove the account and home, yet return 12 because an old
     # root-owned mail spool was deliberately left alone. Verify both removals

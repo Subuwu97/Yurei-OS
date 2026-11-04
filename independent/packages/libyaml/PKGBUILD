@@ -1,0 +1,21 @@
+# Maintainer: Yurei Linux project
+pkgname=libyaml
+pkgver=0.2.5
+pkgrel=1
+pkgdesc="libyaml: application store and sandboxed desktop support"
+arch=(x86_64)
+url="https://pyyaml.org/download/libyaml"
+license=(MIT)
+depends=(glibc)
+source=("https://pyyaml.org/download/libyaml/yaml-0.2.5.tar.gz")
+sha256sums=('c642ae9b75fee120b2d96c712538bd2cf283228d2337df2cf2988e3c02678ef4')
+
+build() {
+    cd yaml-0.2.5
+    ./configure --prefix=/usr --libdir=/usr/lib --sysconfdir=/etc --localstatedir=/var --disable-static 
+    make
+}
+package() {
+    cd yaml-0.2.5
+    make DESTDIR="$pkgdir" install
+}

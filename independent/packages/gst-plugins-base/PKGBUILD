@@ -1,0 +1,19 @@
+# Maintainer: Yurei Linux project
+pkgname=gst-plugins-base
+pkgver=1.26.11
+pkgrel=1
+pkgdesc="gst-plugins-base: application store and sandboxed desktop support"
+arch=(x86_64)
+url="https://gstreamer.freedesktop.org/src/gst-plugins-base"
+license=(LGPL-2.1-or-later)
+depends=(gstreamer glib zlib)
+source=("https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-1.26.11.tar.xz")
+sha256sums=('fc50f885d41f5d0407ce0876ec7235d9e7b82d48db2f4bc72c5f244a4ac79263')
+
+build() {
+    meson setup gst-plugins-base-1.26.11 build --prefix=/usr --libdir=lib --libexecdir=lib --sysconfdir=/etc --localstatedir=/var --buildtype=release --wrap-mode=nofallback -Dauto_features=disabled -Dtests=disabled -Dexamples=disabled -Dintrospection=disabled -Ddoc=disabled -Dorc=disabled -Dtypefind=enabled -Daudioconvert=enabled -Dvolume=enabled -Dplayback=enabled -Drawparse=enabled
+    meson compile -C build
+}
+package() {
+    DESTDIR="$pkgdir" meson install -C build
+}

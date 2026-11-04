@@ -1,0 +1,28 @@
+# Maintainer: Yurei Linux project
+pkgname=kwin
+_lockname=plasma-kwin
+pkgver=6.4.5
+pkgrel=1
+pkgdesc="Plasma Wayland compositor"
+arch=(x86_64)
+url="https://kde.org/"
+license=(BSD-3-Clause CC0-1.0 GPL-2.0-only GPL-2.0-or-later GPL-3.0-only GPL-3.0-or-later LGPL-2.0-only LGPL-2.0-or-later LGPL-2.1-only LGPL-2.1-or-later LGPL-3.0-only MIT)
+depends=(qt6-base qt6-declarative qt6-5compat qt6-tools qt6-wayland qt6-sensors qt6-svg kauth kcolorscheme kconfig kcoreaddons kcrash kdbusaddons kglobalaccel kguiaddons ki18n kidletime kpackage kservice ksvg kwidgetsaddons kwindowsystem kdeclarative kcmutils knewstuff kxmlgui kwayland plasma-activities libplasma kdecoration breeze libepoxy wayland wayland-protocols plasma-wayland-protocols libxkbcommon libcanberra libxcb xcb-util-cursor xcb-util-wm xcb-util-keysyms libx11 xwayland libinput systemd libdrm mesa lcms2 freetype fontconfig hwdata kglobalacceld knotifications kscreenlocker)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/plasma/6.4.5/kwin-$pkgver.tar.xz")
+sha256sums=('decf1cb79127c285c7eda768e7ff4f97c72f314735c82685758f0b956ac151f7')
+
+build() {
+    cmake -S kwin-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a kwin-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

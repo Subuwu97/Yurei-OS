@@ -5,6 +5,29 @@ on:
   pull_request:
 
 jobs:
+  installer-gui:
+    runs-on: ubuntu-24.04
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install the Qt Widgets build tools
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++ qt6-base-dev fonts-noto-core
+      - name: Build the independent installer GUI
+        run: |
+          cmake -S independent/packages/yurei-install-gui -B out/installer-gui -G Ninja -DBUILD_TESTING=ON
+          cmake --build out/installer-gui --parallel 2
+      - name: Test disk filtering, confirmation and password argument handling
+        run: ctest --test-dir out/installer-gui --output-on-failure
+      - name: Render preview screens (no disk access)
+        run: |
+          for page in 0 1 2 3 4 5 6; do
+            out/installer-gui/yurei-install-gui --preview --page "$page" --screenshot "out/installer-$page.png"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer-gui-previews
+          path: out/installer-*.png
   test:
     runs-on: ubuntu-latest
     steps:

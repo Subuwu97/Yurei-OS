@@ -1,0 +1,46 @@
+{
+  "logo": {
+    "type": "file",
+    "source": "/usr/share/fastfetch/yurei-logo.txt",
+    "color": {
+      "1": "#b9aaff",
+      "2": "#74c7ff",
+      "3": "#f3b2dd",
+      "4": "#eeeaff"
+    },
+    "padding": {
+      "right": 3
+    }
+  },
+  "display": {
+    "separator": ": ",
+    "color": {
+      "keys": "#b9aaff",
+      "title": "#74c7ff"
+    },
+    "key": {
+      "type": "string"
+    }
+  },
+  "modules": [
+    "title",
+    "separator",
+    "os",
+    "kernel",
+    "uptime",
+    "packages",
+    "shell",
+    "display",
+    "de",
+    "wm",
+    "terminal",
+    "cpu",
+    "gpu",
+    "memory",
+    "swap",
+    "disk",
+    "locale",
+    "break",
+    "colors"
+  ]
+}

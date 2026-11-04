@@ -1,0 +1,12 @@
+{
+    "KPlugin": {
+        "Id": "YureiNeonRain",
+        "Name": "Yurei’s Neon Rainy Night",
+        "Authors": [
+            {
+                "Name": "Yūrei Linux"
+            }
+        ],
+        "License": "CC-BY-SA-4.0"
+    }
+}

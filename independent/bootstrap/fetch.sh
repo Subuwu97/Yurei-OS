@@ -38,6 +38,18 @@ mirrors() {
 # 10 kB/s for a minute) instead of waiting for a timeout
 download() {
     local url=$1 file=$2 sum=$3 try
+    # itch.io returns short-lived CDN URLs through a POST request. The
+    # official upload ID is fixed here; the resulting archive is still pinned.
+    if [[ $url == https://4leafstudios.itch.io/katawa-shoujo/file/16033228 ]]; then
+        python3 "$here/fetch-itch-source.py" "$file.part" || return 1
+        if [[ $(sha256sum "$file.part" | cut -d' ' -f1) != "$sum" ]]; then
+            rm -f "$file.part"
+            echo "Official game archive checksum mismatch" >&2
+            return 1
+        fi
+        mv "$file.part" "$file"
+        return 0
+    fi
     while read -r try; do
         if curl -fL --connect-timeout 30 --speed-limit 10000 --speed-time 60 \
                 --retry 2 --retry-delay 5 --retry-all-errors -o "$file.part" "$try"; then

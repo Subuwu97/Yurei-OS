@@ -1,0 +1,24 @@
+# Maintainer: Yūrei Linux project
+pkgname=libsndfile
+pkgver=1.2.2
+pkgrel=1
+pkgdesc="Audio file reader with Vorbis FLAC and Opus support"
+arch=(x86_64)
+url="https://github.com/libsndfile/libsndfile"
+license=(LGPL-2.1-or-later)
+depends=(glibc libogg libvorbis flac opus)
+source=("https://github.com/libsndfile/libsndfile/releases/download/$pkgver/libsndfile-$pkgver.tar.xz")
+sha256sums=('3799ca9924d3125038880367bf1468e53a1b7e3686a934f098b7e1d286cdb80e')
+
+build() {
+    cmake -S libsndfile-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DBUILD_PROGRAMS=OFF -DBUILD_EXAMPLES=OFF \
+        -DENABLE_EXTERNAL_LIBS=ON -DENABLE_MPEG=OFF -DENABLE_CPACK=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 libsndfile-$pkgver/COPYING "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}

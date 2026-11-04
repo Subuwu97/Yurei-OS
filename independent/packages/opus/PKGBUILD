@@ -1,0 +1,23 @@
+# Maintainer: Yūrei Linux project
+pkgname=opus
+pkgver=1.5.2
+pkgrel=1
+pkgdesc="Opus audio codec"
+arch=(x86_64)
+url="https://downloads.xiph.org"
+license=(BSD-3-Clause)
+depends=(glibc)
+source=("https://downloads.xiph.org/releases/opus/opus-$pkgver.tar.gz")
+sha256sums=('65c1d2f78b9f2fb20082c38cbe47c951ad5839345876e46941612ee87f9a7ce1')
+
+build() {
+    cd opus-$pkgver
+    ./configure --prefix=/usr --libdir=/usr/lib --disable-static --disable-doc --disable-extra-programs
+    make
+}
+
+package() {
+    cd opus-$pkgver
+    make DESTDIR="$pkgdir" install
+    install -Dm644 COPYING "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}

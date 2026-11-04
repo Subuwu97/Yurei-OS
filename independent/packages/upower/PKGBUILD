@@ -1,0 +1,23 @@
+# Maintainer: Yurei Linux project
+pkgname=upower
+_lockname=upower
+pkgver=1.90.9
+pkgrel=1
+pkgdesc="upower: independent Plasma desktop support"
+arch=(x86_64)
+url="https://github.com/Subuwu97/Yurei-OS"
+license=(LGPL-2.1-or-later GPL-2.0-or-later)
+depends=(glib libgudev polkit systemd)
+source=("https://gitlab.freedesktop.org/upower/upower/-/archive/v$pkgver/upower-v$pkgver.tar.bz2")
+sha256sums=('ca6018535817c2ea687e389e6b47583342154123c0eea0497b409c49dff319b6')
+
+build() {
+    meson setup upower-v$pkgver build --prefix=/usr --libdir=lib --sysconfdir=/etc --localstatedir=/var \
+        --buildtype=release --wrap-mode=nofallback -Dman=false -Dgtk-doc=false -Dintrospection=disabled -Didevice=disabled -Dpolkit=enabled -Dos_backend=linux
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+    install -Dm644 "$srcdir/upower-v$pkgver/COPYING" "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}

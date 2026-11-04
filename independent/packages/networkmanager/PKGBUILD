@@ -1,0 +1,34 @@
+# Maintainer: Yurei Linux project
+pkgname=networkmanager
+_lockname=networkmanager
+pkgver=1.54.1
+pkgrel=3
+pkgdesc="networkmanager: independent Plasma desktop support"
+arch=(x86_64)
+url="https://github.com/Subuwu97/Yurei-OS"
+license=(LGPL-2.1-or-later GPL-2.0-or-later)
+depends=(glib dbus libndp systemd polkit gnutls readline curl iwd util-linux modemmanager mobile-broadband-provider-info)
+makedepends=(libxslt)
+install=networkmanager.install
+backup=(etc/NetworkManager/conf.d/10-yurei.conf)
+source=("NetworkManager-$pkgver.tar.gz::https://github.com/NetworkManager/NetworkManager/archive/$pkgver.tar.gz")
+sha256sums=('3bec7f01698e416c58fe823d042de87fdc0e5ddf54d1871a8b65216070eb9a93')
+
+build() {
+    meson setup NetworkManager-$pkgver build --prefix=/usr --libdir=lib --sysconfdir=/etc --localstatedir=/var \
+        --buildtype=release --wrap-mode=nofallback -Dcrypto=gnutls -Dnm_cloud_setup=false -Dnbft=false -Dintrospection=false -Dvapi=false -Ddocs=false -Dtests=no -Dselinux=false -Dlibaudit=no -Dppp=false -Dovs=false -Dnmtui=false -Diwd=true -Dmodem_manager=true -Dlibpsl=false -Dqt=false -Dconfig_wifi_backend_default=iwd -Dconfig_dns_rc_manager_default=symlink
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+    install -Dm644 /dev/stdin "$pkgdir/etc/NetworkManager/conf.d/10-yurei.conf" <<'CONF'
+[main]
+dhcp=internal
+dns=systemd-resolved
+rc-manager=symlink
+[device]
+wifi.backend=iwd
+CONF
+    install -Dm644 "$srcdir/NetworkManager-$pkgver/COPYING" "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}

@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+# Yūrei's own recipe (stage 5, KDE Plasma; docs/INDEPENDENT.md). The source
+# address and sum are the ones in independent/bootstrap/sources.lock
+# (as kf6-threadweaver); check-recipes.py keeps them the same.
+pkgname=threadweaver
+_lockname=kf6-threadweaver
+pkgver=6.18.0
+pkgrel=2
+pkgdesc="KDE Frameworks: work in threads"
+arch=(x86_64)
+url="https://kde.org/"
+license=(LGPL-2.0-or-later)
+depends=(qt6-base)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/frameworks/6.18/threadweaver-$pkgver.tar.xz")
+sha256sums=('a6e7f4c90b9b9304ef67a0fffadd77655757c65f7bee00c35b38aefc869e3278')
+
+build() {
+    cmake -S threadweaver-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_USE_QT_SYS_PATHS=ON -DKDE_INSTALL_LIBDIR=lib
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+}

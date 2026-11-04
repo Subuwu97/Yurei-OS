@@ -18,6 +18,10 @@ srv=$yurei/srv/yurei
 name=${ISO_NAME:-yurei-independent-$(date +%Y.%m.%d)-x86_64.iso}
 work=$out/work
 [[ -d $srv/live && -d $srv/initramfs && -d $srv/esp ]] || { echo "run iso-inside.sh first" >&2; exit 1; }
+[[ -u $srv/live/usr/bin/sudo && $(stat -c %u "$srv/live/usr/bin/sudo") == 0 ]] || {
+    echo "The staged sudo must be root-owned and setuid before packing the ISO" >&2
+    exit 1
+}
 
 rm -rf "$work" && mkdir -p "$work/iso/yurei" "$out"
 

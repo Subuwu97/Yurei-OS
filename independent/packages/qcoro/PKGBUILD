@@ -1,0 +1,24 @@
+# Maintainer: Yurei Linux project
+pkgname=qcoro
+pkgver=0.12.0
+pkgrel=1
+pkgdesc="qcoro support library for Plasma"
+arch=(x86_64)
+url="https://github.com/Subuwu97/Yurei-OS"
+license=(MIT)
+depends=(qt6-base qt6-declarative)
+source=("qcoro-$pkgver.tar.gz::https://github.com/qcoro/qcoro/archive/v$pkgver.tar.gz")
+sha256sums=('809afafab61593f994c005ca6e242300e1e3e7f4db8b5d41f8c642aab9450fbc')
+
+build() {
+    cmake -S qcoro-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+        -DUSE_QT_VERSION=6 -DQCORO_BUILD_EXAMPLES=OFF -DQCORO_BUILD_TESTING=OFF \
+        -DBUILD_TESTING=OFF -DQCORO_WITH_QTWEBSOCKETS=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 qcoro-$pkgver/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

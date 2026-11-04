@@ -1,0 +1,23 @@
+# Maintainer: Yurei Linux project
+pkgname=icu
+pkgver=77.1
+pkgrel=1
+pkgdesc="Unicode collation and time-zone libraries for Plasma"
+arch=(x86_64)
+url="https://icu.unicode.org/"
+license=(Unicode-3.0)
+depends=(glibc gcc-libs)
+source=("https://github.com/unicode-org/icu/releases/download/release-77-1/icu4c-77_1-src.tgz")
+sha256sums=('588e431f77327c39031ffbb8843c0e3bc122c211374485fa87dc5f3faff24061')
+
+build() {
+    cd icu/source
+    ./configure --prefix=/usr --libdir=/usr/lib --disable-static --disable-tests --disable-samples
+    make
+}
+
+package() {
+    cd icu/source
+    make DESTDIR="$pkgdir" install
+    install -Dm644 "$srcdir/icu/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

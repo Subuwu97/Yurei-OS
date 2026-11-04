@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=prison
+_lockname=kf6-prison
+pkgver=6.18.0
+pkgrel=1
+pkgdesc="QR code rendering library"
+arch=(x86_64)
+url="https://kde.org/"
+license=(BSD-3-Clause CC0-1.0 MIT)
+depends=(qt6-base qt6-declarative qt6-multimedia libqrencode)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/frameworks/6.18/prison-$pkgver.tar.xz")
+sha256sums=('38a4f154b39b4d2e4b86d16f84846039d27bd70cb26ecd488b591f612dd4141e')
+
+build() {
+    cmake -S prison-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a prison-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

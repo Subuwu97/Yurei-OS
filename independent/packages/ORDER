@@ -1,4 +1,4 @@
-# The order Yūrei's packages are built in: each after what it needs to build.
+# The order YÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â«rei's packages are built in: each after what it needs to build.
 # First batch: enough for a system installed by pacman to run a shell.
 yurei-filesystem
 linux-api-headers
@@ -17,6 +17,7 @@ gmp
 mpfr
 mpc
 libxcrypt
+linux-pam bootstrap-install
 gcc
 # Third batch: the core tools, Perl, Python and OpenSSL.
 m4
@@ -51,6 +52,7 @@ gawk
 findutils
 gzip
 make
+tzdata
 patch
 tar
 texinfo
@@ -96,6 +98,7 @@ mtdev
 libevdev
 xkeyboard-config
 libxml2
+libxslt
 # Thirteenth batch (stage 3): the X11 client libraries (for Xwayland and Mesa's X11 drivers).
 util-macros
 xorgproto
@@ -141,6 +144,7 @@ hwdata
 libdisplay-info
 freetype
 fontconfig
+libxft
 ttf-dejavu
 tllist
 fcft
@@ -218,6 +222,7 @@ xcb-util
 xcb-util-image
 xcb-util-renderutil
 xcb-util-cursor
+libcups
 qt6-base
 qt6-shadertools
 qt6-svg
@@ -226,3 +231,201 @@ qt6-wayland
 qt6-5compat
 qt6-imageformats
 qt6-tools
+qt6-sensors
+qt6-positioning
+qt6-location
+
+# Native graphical installer; Qt is built above.
+yurei-install-gui
+# Twenty-third batch (stage 5, KDE Plasma): KDE's CMake modules, Plasma's
+# Wayland protocols, and KDE Frameworks 6.18's first tier.
+extra-cmake-modules
+plasma-wayland-protocols
+karchive
+kcodecs
+kconfig
+kcoreaddons
+kdbusaddons
+kguiaddons
+ki18n
+kidletime
+kitemmodels
+kitemviews
+kwidgetsaddons
+kwindowsystem
+solid
+hunspell
+sonnet
+threadweaver
+syntax-highlighting
+kirigami
+breeze-icons
+attica
+kplotting
+
+# Next KDE Frameworks tier, in upstream dependency order.
+kcrash
+kcompletion
+kcolorscheme
+kconfigwidgets
+kservice
+kglobalaccel
+kpackage
+kpty
+kstatusnotifieritem
+kholidays
+kiconthemes
+ksvg
+kquickcharts
+kunitconversion
+kuserfeedback
+kimageformats
+kdesu
+kdeclarative
+kxmlgui
+
+# Desktop sound, authorization and the next Frameworks tier
+libogg
+libvorbis
+flac
+opus
+libsndfile
+libpulse
+libcanberra
+polkit-qt6
+kauth
+knotifications
+kjobwidgets
+kbookmarks
+kded
+
+# File operations, settings modules, desktop search and controls
+qca-qt6
+libsecret
+kwallet
+kio
+kparts
+kcmutils
+krunner
+knewstuff
+qqc2-desktop-style
+purpose
+
+# Media, speech, text editing and barcode support
+nasm
+ffmpeg
+qt6-multimedia
+flite
+qt6-speech
+ktextwidgets
+ktexteditor
+knotifyconfig
+libqrencode
+prison
+
+# Plasma platform libraries and desktop authorization agent
+boost-headers
+plasma-activities
+plasma-activities-stats
+kdecoration
+libkscreen
+layer-shell-qt
+kwayland
+kglobalacceld
+polkit-kde-agent-1
+
+# Plasma shell libraries, appearance, settings and screen locking
+lcms2
+qcoro
+libplasma
+# Network, power and applet support before shell configuration.
+libgudev
+libwacom
+libndp
+modemmanager
+mobile-broadband-provider-info
+networkmanager
+upower
+networkmanager-qt
+modemmanager-qt
+pulseaudio-qt
+kirigami-addons
+plasma5support
+kactivitymanagerd
+frameworkintegration
+noto-sans
+breeze
+plasma-integration
+systemsettings
+kde-cli-tools
+kscreenlocker
+
+# Complete Plasma shell, compositor and graphical login
+phonon-qt6
+vlc-libs
+phonon-vlc-qt6
+libnl
+lm-sensors
+libksysguard
+kwin
+icu
+plasma-workspace
+plasma-desktop
+sddm
+
+# KDE default applications and browser
+kfilemetadata
+konsole
+dolphin
+libxt
+firefox
+
+# Reuse the shared Yurei visual assets without CachyOS dependencies.
+yurei-appearance
+
+# User-facing network, volume and laptop controls
+powerdevil
+plasma-nm
+plasma-pa
+
+# Branded on-demand terminal system information
+fastfetch
+
+# Application store and sandboxed desktop support
+libyaml
+json-glib
+libxmlb
+libseccomp
+fuse3
+bubblewrap
+xdg-dbus-proxy
+python-pyparsing
+itstool build-only
+appstream
+ostree
+flatpak
+gstreamer
+gst-plugins-base
+xdg-desktop-portal
+xdg-desktop-portal-kde
+discover
+yurei-flathub
+
+# Explicit installer multimedia/gaming selections
+yurei-software
+
+# Hyper-V enhanced sessions, enabled explicitly after setting a password.
+libxmu
+xauth
+libpciaccess
+xorg-server
+xrdp
+xorgxrdp
+pipewire-module-xrdp
+kwin-x11
+yurei-hyperv
+
+# Original default game, retaining its complete upstream payload and license.
+libglu
+yurei-game-launcher
+katawa-shoujo

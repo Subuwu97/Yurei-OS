@@ -4,7 +4,7 @@
 # keeps them the same.
 pkgname=pacman
 pkgver=7.0.0
-pkgrel=1
+pkgrel=2
 pkgdesc="A library-based package manager with dependency support"
 arch=(x86_64)
 url="https://pacman.archlinux.page/"
@@ -48,7 +48,7 @@ Include = /etc/pacman.d/mirrorlist
 CONF
     install -Dm644 /dev/stdin "$pkgdir/etc/pacman.d/mirrorlist" <<'LIST'
 # Where pacman downloads Yūrei's packages from.
-Server = https://github.com/Subuwu97/Yurei-OS/releases/download/repo
+Server = https://github.com/Subuwu97/Yurei-OS/releases/latest/download
 LIST
     install -d "$pkgdir/var/lib/pacman" "$pkgdir/var/cache/pacman/pkg"
 }

@@ -1,0 +1,44 @@
+# Maintainer: Yurei Linux project
+pkgname=linux-pam
+pkgver=1.7.1
+pkgrel=1
+pkgdesc="Pluggable authentication and login sessions"
+arch=(x86_64)
+url="https://github.com/linux-pam/linux-pam"
+license=(BSD-3-Clause GPL-2.0-or-later)
+depends=(glibc libxcrypt)
+backup=(etc/pam.d/system-auth etc/pam.d/system-login etc/pam.d/other)
+source=("https://github.com/linux-pam/linux-pam/releases/download/v$pkgver/Linux-PAM-$pkgver.tar.xz")
+sha256sums=('21dbcec6e01dd578f14789eac9024a18941e6f2702a05cf91b28c232eeb26ab0')
+
+build() {
+    meson setup Linux-PAM-$pkgver build --prefix=/usr --libdir=lib --sysconfdir=/etc \
+        --buildtype=release --wrap-mode=nofallback --auto-features=disabled \
+        -Dsecuredir=/usr/lib/security -Dpam_unix=enabled -Ddocs=disabled -Dexamples=false
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+    install -Dm644 /dev/stdin "$pkgdir/etc/pam.d/system-auth" <<'PAM'
+auth       required   pam_unix.so try_first_pass
+account    required   pam_unix.so
+password   required   pam_unix.so yescrypt shadow try_first_pass
+session    required   pam_unix.so
+session    optional   pam_umask.so
+PAM
+    install -Dm644 /dev/stdin "$pkgdir/etc/pam.d/system-login" <<'PAM'
+auth       include    system-auth
+account    include    system-auth
+password   include    system-auth
+session    include    system-auth
+session    optional   pam_loginuid.so
+session    optional   pam_systemd.so
+PAM
+    install -Dm644 /dev/stdin "$pkgdir/etc/pam.d/other" <<'PAM'
+auth       required   pam_deny.so
+account    required   pam_deny.so
+password   required   pam_deny.so
+session    required   pam_deny.so
+PAM
+}

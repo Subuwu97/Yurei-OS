@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=kactivitymanagerd
+_lockname=plasma-kactivitymanagerd
+pkgver=6.4.5
+pkgrel=1
+pkgdesc="Activity session service"
+arch=(x86_64)
+url="https://kde.org/"
+license=(CC0-1.0 GPL-2.0-only GPL-2.0-or-later GPL-3.0-only LGPL-2.1-only LGPL-3.0-only)
+depends=(qt6-base kdbusaddons ki18n kcrash kio boost-headers)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/plasma/6.4.5/kactivitymanagerd-$pkgver.tar.xz")
+sha256sums=('de52518b901beeb58a6327316fcda345b3552305556c85a1c4b1133f9ab7a424')
+
+build() {
+    cmake -S kactivitymanagerd-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a kactivitymanagerd-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

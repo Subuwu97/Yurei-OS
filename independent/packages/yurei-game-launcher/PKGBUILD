@@ -1,0 +1,11 @@
+pkgname=yurei-game-launcher
+pkgver=0.1
+pkgrel=1
+pkgdesc="Launch bundled games from private writable per-user copies"
+arch=(any)
+url="https://github.com/Subuwu97/Yurei-OS"
+license=(GPL-3.0-or-later)
+depends=(python)
+package() {
+    install -Dm755 "$startdir/yurei-game.py" "$pkgdir/usr/bin/yurei-game"
+}

@@ -1,0 +1,20 @@
+# Maintainer: Yurei Linux project
+pkgname=libpciaccess
+pkgver=0.18.1
+pkgrel=1
+pkgdesc="PCI access library and headers for the Xorg server and its modules"
+arch=(x86_64)
+url="https://www.x.org/"
+license=(MIT)
+depends=(glibc zlib hwdata)
+source=("https://www.x.org/releases/individual/lib/libpciaccess-$pkgver.tar.xz")
+sha256sums=('4af43444b38adb5545d0ed1c2ce46d9608cc47b31c2387fc5181656765a6fa76')
+build() {
+    meson setup libpciaccess-$pkgver build --prefix=/usr --libdir=lib \
+        --buildtype=release --wrap-mode=nofallback -Dzlib=enabled
+    meson compile -C build
+}
+package() {
+    DESTDIR="$pkgdir" meson install -C build
+    test -s "$pkgdir/usr/include/pciaccess.h"
+}

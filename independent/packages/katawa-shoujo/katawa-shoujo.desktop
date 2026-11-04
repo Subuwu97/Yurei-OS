@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Katawa Shoujo
+Comment=Original visual novel by Four Leaf Studios
+Exec=yurei-game katawa-shoujo
+Icon=applications-games
+Terminal=false
+Categories=Game;AdventureGame;

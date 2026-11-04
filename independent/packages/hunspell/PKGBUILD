@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+pkgname=hunspell
+pkgver=1.7.2
+pkgrel=1
+pkgdesc="Spell-checking library and tools used by KDE Sonnet"
+arch=(x86_64)
+url="https://hunspell.github.io/"
+license=(GPL-2.0-or-later OR LGPL-2.1-or-later OR MPL-1.1)
+depends=(glibc gcc-libs)
+source=("https://github.com/hunspell/hunspell/releases/download/v$pkgver/hunspell-$pkgver.tar.gz")
+sha256sums=('11ddfa39afe28c28539fe65fc4f1592d410c1e9b6dd7d8a91ca25d85e9ec65b8')
+
+build() {
+    cd hunspell-$pkgver
+    ./configure --prefix=/usr --libdir=/usr/lib --disable-static \
+        --disable-nls --with-ui=no --without-readline
+    make
+}
+
+package() {
+    cd hunspell-$pkgver
+    make DESTDIR="$pkgdir" install
+    install -Dm644 COPYING "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+    install -Dm644 COPYING.LESSER "$pkgdir/usr/share/licenses/$pkgname/COPYING.LESSER"
+    install -Dm644 COPYING.MPL "$pkgdir/usr/share/licenses/$pkgname/COPYING.MPL"
+}

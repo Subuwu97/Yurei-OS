@@ -1,14 +1,14 @@
-# Maintainer: Yūrei Linux project
-# Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md): the installer, which
+# Maintainer: YÅ«rei Linux project
+# YÅ«rei's own recipe (stage 2c, docs/INDEPENDENT.md): the installer, which
 # puts the live system onto a disk.
 pkgname=yurei-install
 pkgver=0.1
-pkgrel=2
-pkgdesc="Installs Yūrei from the live system onto a disk"
+pkgrel=10
+pkgdesc="Installs YÅ«rei from the live system onto a disk"
 arch=(any)
 url="https://github.com/Subuwu97/Yurei-OS"
 license=(GPL-3.0-or-later)
-depends=(bash util-linux e2fsprogs dosfstools systemd shadow)
+depends=(bash coreutils grep sed gawk util-linux e2fsprogs dosfstools systemd shadow)
 
 package() {
     install -Dm755 "$startdir/yurei-install" "$pkgdir/usr/bin/yurei-install"

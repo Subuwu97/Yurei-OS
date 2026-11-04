@@ -1,0 +1,23 @@
+# Maintainer: Yurei Linux project
+# User-approved exception: package Mozilla's official Linux ESR distribution.
+# SHA-512 checked against Mozilla's published SHA512SUMS before pinning SHA-256.
+pkgname=firefox
+pkgver=153.6.0esr
+pkgrel=1
+pkgdesc="Firefox ESR web browser (official Mozilla Linux build)"
+arch=(x86_64)
+url="https://www.mozilla.org/firefox/"
+license=(MPL-2.0)
+depends=(glibc gcc-libs gtk3 dbus libxt libx11 libxcb libxcomposite libxdamage libxext libxfixes libxrandr libxrender fontconfig freetype alsa-lib libpulse)
+options=(!strip !debug)
+source=("firefox-$pkgver-linux-x86_64.tar.xz::https://archive.mozilla.org/pub/firefox/releases/$pkgver/linux-x86_64/en-US/firefox-$pkgver.tar.xz")
+sha256sums=('31321cd9e2cef73df678417e810cdd1b5760aa5cc8063c8465669e5869cb8498')
+sha512sums=('b2ed0f8d5dd1f363aae0e5d09554eee00c6beb980d5ea40db2a5dd7cc478b01b4f7059f0c981d97aec8af2ef64629de4349aedf075be8ebdd39cc3d814a6a17f')
+package() {
+    install -d "$pkgdir/usr/lib" "$pkgdir/usr/bin"
+    cp -a "$srcdir/firefox" "$pkgdir/usr/lib/firefox"
+    ln -s ../lib/firefox/firefox "$pkgdir/usr/bin/firefox"
+    install -Dm644 "$startdir/firefox.desktop" "$pkgdir/usr/share/applications/firefox.desktop"
+    install -Dm644 "$srcdir/firefox/browser/chrome/icons/default/default128.png" "$pkgdir/usr/share/icons/hicolor/128x128/apps/firefox.png"
+    install -Dm644 "$startdir/PROVENANCE" "$pkgdir/usr/share/doc/firefox/YUREI-PROVENANCE"
+}

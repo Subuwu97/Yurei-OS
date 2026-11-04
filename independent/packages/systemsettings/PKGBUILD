@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=systemsettings
+_lockname=plasma-systemsettings
+pkgver=6.4.5
+pkgrel=1
+pkgdesc="Plasma System Settings"
+arch=(x86_64)
+url="https://kde.org/"
+license=(BSD-2-Clause CC0-1.0 GPL-2.0-only GPL-2.0-or-later GPL-3.0-only LGPL-2.0-only LGPL-2.1-or-later)
+depends=(qt6-base qt6-declarative kauth kcrash kitemviews kitemmodels kcmutils ki18n kio kservice kiconthemes kwidgetsaddons kwindowsystem kxmlgui kdbusaddons kconfig kguiaddons kirigami kjobwidgets krunner kcolorscheme plasma-activities)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/plasma/6.4.5/systemsettings-$pkgver.tar.xz")
+sha256sums=('90d7f097f1a77a400076224cdba45b94c71d0fec43efd2ed737047f2ff2aba8f')
+
+build() {
+    cmake -S systemsettings-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DCMAKE_DISABLE_FIND_PACKAGE_KF6DocTools=ON -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a systemsettings-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

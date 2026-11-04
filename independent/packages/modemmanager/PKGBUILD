@@ -1,0 +1,25 @@
+# Maintainer: Yurei Linux project
+pkgname=modemmanager
+_lockname=modemmanager
+pkgver=1.24.2
+pkgrel=3
+pkgdesc="modemmanager: independent Plasma desktop support"
+arch=(x86_64)
+url="https://github.com/Subuwu97/Yurei-OS"
+license=(LGPL-2.1-or-later GPL-2.0-or-later)
+depends=(glib dbus libgudev systemd polkit)
+makedepends=(libxslt)
+source=("ModemManager-$pkgver.tar.gz::https://github.com/linux-mobile-broadband/ModemManager/archive/refs/tags/$pkgver.tar.gz")
+sha256sums=('fbc75adcc0d7b0565f256e7ff4e8872b0a37c4413ff576665f7470932d9c1b68')
+
+build() {
+    meson setup ModemManager-$pkgver build --prefix=/usr --libdir=lib --sysconfdir=/etc --localstatedir=/var \
+        --buildtype=release --wrap-mode=nofallback -Dintrospection=false -Dman=false -Dgtk_doc=false -Dvapi=false -Dtests=false -Dexamples=false -Dbash_completion=false -Dmbim=false -Dqmi=false -Dqrtr=false
+    ninja -C build
+}
+
+package() {
+    DESTDIR="$pkgdir" ninja -C build install
+    install -Dm644 "$srcdir/ModemManager-$pkgver/COPYING.LIB" "$pkgdir/usr/share/licenses/$pkgname/COPYING.LIB"
+    install -Dm644 "$srcdir/ModemManager-$pkgver/COPYING" "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}

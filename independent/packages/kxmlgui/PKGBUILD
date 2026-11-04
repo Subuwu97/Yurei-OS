@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=kxmlgui
+_lockname=kf6-kxmlgui
+pkgver=6.18.0
+pkgrel=1
+pkgdesc="KDE Frameworks: kxmlgui"
+arch=(x86_64)
+url="https://kde.org/"
+license=(BSD-2-Clause CC0-1.0 LGPL-2.0-only LGPL-2.0-or-later LGPL-2.1-only LGPL-2.1-or-later LGPL-3.0-only)
+depends=(qt6-base kglobalaccel kcoreaddons kitemviews kconfig kconfigwidgets kguiaddons ki18n kiconthemes kwidgetsaddons)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/frameworks/6.18/kxmlgui-$pkgver.tar.xz")
+sha256sums=('6d5e240c835668419ac036666fa4c99e3479795c6988100763f810ca8835c401')
+
+build() {
+    cmake -S kxmlgui-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a kxmlgui-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

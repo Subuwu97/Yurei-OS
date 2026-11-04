@@ -1,0 +1,13 @@
+Run fastfetch to show system information beside Yurei's girl-and-ghost mascot.
+The colored Unicode text artwork is sampled from the shared Plasma splash.
+It works without an image-capable terminal or a Nerd Font.
+
+System defaults: /etc/xdg/fastfetch/config.jsonc
+Personal overrides: ~/.config/fastfetch/config.jsonc
+Artwork: /usr/share/fastfetch/yurei-logo.txt
+For a plain report: fastfetch --logo-type none
+User configuration is never overwritten by the distribution defaults.
+
+Artwork source: themes/plasma/yurei/contents/splash/images/wave-00.png
+Maintainer regeneration: python3 branding/generate_fastfetch_logo.py (Pillow)
+Original visual asset licensing: ARTWORK.md in the Yurei source.

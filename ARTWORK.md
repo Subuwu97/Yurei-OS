@@ -33,6 +33,11 @@ added, and it keeps track of which version is current.
 |---|---|---|---|---|
 | 2026-10 | (initial set above) | ChatGPT | *(add prompts if you still have them)* | Selection; mock-up UI and captions removed in `build-assets.py` |
 
+The colored Unicode girl-and-ghost artwork in `independent/packages/fastfetch/yurei-logo.txt`
+is sampled from the existing Plasma splash by `branding/generate_fastfetch_logo.py`
+(2026-11-02; Python/Pillow). No new raster artwork was generated for Fastfetch.
+It credits Yūrei Linux and carries the same CC BY-SA 4.0 terms.
+
 ## Licence
 
 To the extent that copyright or similar rights exist in this artwork, it is
@@ -59,3 +64,7 @@ The aim is to commission a human artist for an official character reference
 sheet and clean, high-resolution login art built from these designs. That
 would make the mascot's details consistent across pictures, and give the
 project artwork it clearly owns.
+
+## Additional wallpaper choices (2026-11-03)
+
+Five mascot wallpapers were supplied by the Yurei project owner for preinstallation: Winter Wish at the Snowy Shrine, Neon Rainy Night, Riverside Summer Festival, Sunlit Summer Countryside, and Golden Beach Day. The original PNGs are preserved byte-for-byte in the corresponding `pkg/yurei-settings/files/usr/share/wallpapers/Yurei*` directories. No images were generated or retouched during this addition. Each includes Plasma wallpaper metadata and Yurei Linux attribution. The existing initial desktop wallpaper remains selected.

@@ -1,0 +1,26 @@
+# Maintainer: Yūrei Linux project
+pkgname=flac
+pkgver=1.4.3
+pkgrel=1
+pkgdesc="FLAC lossless audio libraries and tools"
+arch=(x86_64)
+url="https://downloads.xiph.org"
+license=(BSD-3-Clause GPL-2.0-or-later LGPL-2.1-or-later GFDL-1.2-or-later)
+depends=(glibc gcc-libs libogg)
+source=("https://downloads.xiph.org/releases/flac/flac-$pkgver.tar.xz")
+sha256sums=('6c58e69cd22348f441b861092b825e591d0b822e106de6eb0ee4d05d27205b70')
+
+build() {
+    cd flac-$pkgver
+    ./configure --prefix=/usr --libdir=/usr/lib --disable-static --disable-doxygen-docs --disable-examples
+    make
+}
+
+package() {
+    cd flac-$pkgver
+    make DESTDIR="$pkgdir" install
+    install -Dm644 COPYING.Xiph "$pkgdir/usr/share/licenses/$pkgname/COPYING.Xiph"
+    install -Dm644 COPYING.GPL "$pkgdir/usr/share/licenses/$pkgname/COPYING.GPL"
+    install -Dm644 COPYING.LGPL "$pkgdir/usr/share/licenses/$pkgname/COPYING.LGPL"
+    install -Dm644 COPYING.FDL "$pkgdir/usr/share/licenses/$pkgname/COPYING.FDL"
+}

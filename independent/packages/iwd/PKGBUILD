@@ -4,7 +4,7 @@
 # keeps them the same.
 pkgname=iwd
 pkgver=3.9
-pkgrel=1
+pkgrel=3
 pkgdesc="Wi-Fi daemon (connect with iwctl)"
 arch=(x86_64)
 url="https://iwd.wiki.kernel.org/"
@@ -12,6 +12,7 @@ license=(LGPL-2.1-or-later)
 depends=(glibc readline dbus systemd)
 backup=(etc/iwd/main.conf)
 install=iwd.install
+backup=(etc/iwd/main.conf)
 source=("https://www.kernel.org/pub/linux/network/wireless/iwd-$pkgver.tar.xz")
 sha256sums=('0cd7dc9b32b9d6809a4a5e5d063b5c5fd279f5ad3a0bf03d7799da66df5cad45')
 
@@ -27,11 +28,10 @@ build() {
 package() {
     cd iwd-$pkgver
     make DESTDIR="$pkgdir" install
-    # iwd gets the address itself (DHCP) and hands names to resolved, so a
-    # Wi-Fi network works as soon as iwctl connects to it
+    # NetworkManager owns address configuration; iwd supplies the Wi-Fi link.
     install -Dm644 /dev/stdin "$pkgdir/etc/iwd/main.conf" <<'CONF'
 [General]
-EnableNetworkConfiguration=true
+EnableNetworkConfiguration=false
 
 [Network]
 NameResolvingService=systemd

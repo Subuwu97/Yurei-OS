@@ -1,24 +1,40 @@
 #!/bin/sh
-# Starts Yūrei's graphical session from a console login: the labwc window
-# manager with a terminal (foot) open. Right-click the desktop for the menu
-# (Terminal, Files, Exit); Super+Enter opens another terminal. "yurei-desktop
-# --kiosk" starts one full-screen terminal in cage instead.
+# Plasma is the default once installed; labwc remains an explicit fallback.
 if [ -n "$WAYLAND_DISPLAY" ]; then
     echo "yurei-desktop: already running in a graphical session" >&2
     exit 1
 fi
+session=auto
+case "${1:-}" in
+    --plasma) session=plasma; shift ;;
+    --labwc) session=labwc; shift ;;
+    --kiosk) session=kiosk; shift ;;
+    "") ;;
+    *) echo "Usage: yurei-desktop [--plasma|--labwc|--kiosk]" >&2; exit 2 ;;
+esac
+if [ "$session" = auto ]; then
+    if command -v startplasma-wayland >/dev/null; then session=plasma; else session=labwc; fi
+fi
+if [ "$session" = plasma ] && ! command -v startplasma-wayland >/dev/null; then
+    echo "yurei-desktop: Plasma is not installed; use --labwc" >&2
+    exit 1
+fi
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
-# without a logind session (a console login), nobody made it: a private one
 if [ ! -d "$XDG_RUNTIME_DIR" ] || [ ! -w "$XDG_RUNTIME_DIR" ]; then
     XDG_RUNTIME_DIR=/tmp/runtime-$(id -u)
     mkdir -p -m 0700 "$XDG_RUNTIME_DIR"
 fi
-if [ "$1" = --kiosk ] || ! command -v labwc > /dev/null; then
-    [ "$1" = --kiosk ] && shift
+export XDG_SESSION_TYPE=wayland
+if [ "$session" = plasma ]; then
+    export XDG_CURRENT_DESKTOP=KDE XDG_SESSION_DESKTOP=KDE
+    export KDE_FULL_SESSION=true KDE_SESSION_VERSION=6
+    if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then exec dbus-run-session -- startplasma-wayland "$@"; fi
+    exec startplasma-wayland "$@"
+fi
+unset KDE_FULL_SESSION KDE_SESSION_VERSION
+export XDG_CURRENT_DESKTOP=labwc XDG_SESSION_DESKTOP=labwc
+if [ "$session" = kiosk ] || ! command -v labwc >/dev/null; then
     exec cage -- foot "$@"
 fi
-# a D-Bus session bus for the programs in it (Thunar, PipeWire, polkit)
-if [ -z "$DBUS_SESSION_BUS_ADDRESS" ] && command -v dbus-run-session > /dev/null; then
-    exec dbus-run-session -- labwc -s foot
-fi
-exec labwc -s foot
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then exec dbus-run-session -- labwc -s yurei-terminal "$@"; fi
+exec labwc -s yurei-terminal "$@"

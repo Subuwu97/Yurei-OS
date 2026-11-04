@@ -1,0 +1,21 @@
+# Maintainer: Yurei Linux project
+pkgname=xorgxrdp
+pkgver=0.10.5
+pkgrel=1
+pkgdesc="Hyper-V enhanced session support: xorgxrdp"
+arch=(x86_64)
+url="https://github.com/neutrinolabs/xorgxrdp/releases/download/v0.10.5"
+license=(MIT)
+depends=(xorg-server xrdp libdrm mesa libepoxy)
+source=("xorgxrdp-0.10.5.tar.gz::https://github.com/neutrinolabs/xorgxrdp/releases/download/v0.10.5/xorgxrdp-0.10.5.tar.gz")
+sha256sums=('a5d03435f0ef48bf3d5010e63d9264f2334e7063cba3ecd8d4c0a15616a4f712')
+
+build() {
+    cd xorgxrdp-$pkgver
+    ./configure --prefix=/usr --libdir=/usr/lib --sysconfdir=/etc --enable-strict-locations --disable-glamor
+    make
+}
+package() {
+    cd xorgxrdp-$pkgver
+    make DESTDIR="$pkgdir" install
+}

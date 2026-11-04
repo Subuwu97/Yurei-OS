@@ -51,13 +51,57 @@ CONF
 live_settings() {
     msg "Live settings"
     echo yurei-live > "$live/etc/hostname"
-    # root without a password, logged in on the first screen
+    # Root serial recovery is confined to the live image; the desktop uses live.
     sed -i 's/^root:[^:]*:/root::/' "$live/etc/shadow"
+    # The passwordless root console is confined to the live image. Installed
+    # systems have the normal non-null login policy restored by yurei-install.
+    if [[ -d $live/etc/pam.d ]]; then
+        cat > "$live/etc/pam.d/login" <<'PAM'
+auth required pam_unix.so nullok
+account include system-login
+password include system-login
+session include system-login
+PAM
+    fi
+    # Run the graphical session as a normal user: Steam and Chromium-based
+    # applications must retain their normal unprivileged sandbox.
+    chroot "$live" useradd -m -u 1000 -G wheel -s /bin/bash live
+    chroot "$live" passwd -d live
+    install -Dm440 /dev/stdin "$live/etc/sudoers.d/90-yurei-live" <<'SUDO'
+# Yurei live-only administrative access
+live ALL=(ALL:ALL) NOPASSWD: ALL
+SUDO
+    install -Dm644 /dev/stdin "$live/etc/polkit-1/rules.d/49-yurei-live.rules" <<'POLKIT'
+// Yurei live-only local session authorization; removed during installation.
+polkit.addRule(function(action, subject) {
+    if (subject.user !== "live" || !subject.local || !subject.active)
+        return polkit.Result.NOT_HANDLED;
+    if ((action.id === "org.freedesktop.policykit.exec" &&
+         action.lookup("program") === "/usr/bin/yurei-install") ||
+        action.id.indexOf("org.freedesktop.NetworkManager.") === 0 ||
+        action.id.indexOf("org.freedesktop.timedate1.") === 0 ||
+        ["org.freedesktop.Flatpak.app-install", "org.freedesktop.Flatpak.app-uninstall",
+         "org.freedesktop.Flatpak.runtime-install", "org.freedesktop.Flatpak.runtime-uninstall",
+         "org.freedesktop.Flatpak.app-update", "org.freedesktop.Flatpak.runtime-update",
+         "org.freedesktop.Flatpak.update-remote", "org.freedesktop.Flatpak.appstream-update",
+         "org.freedesktop.Flatpak.metadata-update"].indexOf(action.id) !== -1)
+        return polkit.Result.YES;
+    return polkit.Result.NOT_HANDLED;
+});
+POLKIT
+    # Match the working CachyOS live profile: a disposable passwordless
+    # session must not block Wi-Fi secrets on creating/unlocking a wallet.
+    # Installed systems remove this live-only configuration.
+    install -Dm644 /dev/stdin "$live/etc/xdg/kwalletrc" <<'WALLET'
+# Yurei live-only wallet policy
+[Wallet]
+Enabled=false
+WALLET
     install -d "$live/etc/systemd/system/getty@tty1.service.d"
     cat > "$live/etc/systemd/system/getty@tty1.service.d/autologin.conf" <<'UNIT'
 [Service]
 ExecStart=
-ExecStart=-/usr/sbin/agetty --autologin root --noclear %I $TERM
+ExecStart=-/usr/sbin/agetty --autologin live --noclear %I $TERM
 UNIT
     cat > "$live/etc/issue" <<'ISSUE'
 

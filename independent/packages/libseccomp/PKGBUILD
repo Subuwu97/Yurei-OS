@@ -1,0 +1,21 @@
+# Maintainer: Yurei Linux project
+pkgname=libseccomp
+pkgver=2.6.0
+pkgrel=1
+pkgdesc="libseccomp: application store and sandboxed desktop support"
+arch=(x86_64)
+url="https://github.com/seccomp/libseccomp/releases/download/v2.6.0"
+license=(LGPL-2.1-only)
+depends=(glibc)
+source=("https://github.com/seccomp/libseccomp/releases/download/v2.6.0/libseccomp-2.6.0.tar.gz")
+sha256sums=('83b6085232d1588c379dc9b9cae47bb37407cf262e6e74993c61ba72d2a784dc')
+
+build() {
+    cd libseccomp-2.6.0
+    ./configure --prefix=/usr --libdir=/usr/lib --sysconfdir=/etc --localstatedir=/var --disable-static --disable-python
+    make
+}
+package() {
+    cd libseccomp-2.6.0
+    make DESTDIR="$pkgdir" install
+}

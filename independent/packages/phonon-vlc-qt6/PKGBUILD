@@ -1,0 +1,28 @@
+# Maintainer: Yurei Linux project
+pkgname=phonon-vlc-qt6
+_lockname=phonon-vlc-qt6
+pkgver=0.12.0
+pkgrel=1
+pkgdesc="Working VLC audio backend for Qt 6 Phonon"
+arch=(x86_64)
+url="https://kde.org/"
+license=(LGPL-2.1-or-later)
+depends=(phonon-qt6 vlc-libs)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/phonon/phonon-backend-vlc/0.12.0/phonon-backend-vlc-$pkgver.tar.xz")
+sha256sums=('338479dc451e4b94b3ca5b578def741dcf82f5c626a2807d36235be2dce7c9a5')
+
+build() {
+    cmake -S phonon-backend-vlc-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DPHONON_BUILD_QT5=OFF -DPHONON_BUILD_QT6=ON
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    install -Dm644 phonon-backend-vlc-$pkgver/COPYING.LIB "$pkgdir/usr/share/licenses/$pkgname/COPYING.LIB"
+}

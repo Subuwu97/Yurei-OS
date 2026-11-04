@@ -1,0 +1,21 @@
+# Maintainer: Yurei Linux project
+pkgname=ostree
+pkgver=2026.6
+pkgrel=1
+pkgdesc="ostree: application store and sandboxed desktop support"
+arch=(x86_64)
+url="https://github.com/ostreedev/ostree/releases/download/v2026.6"
+license=(LGPL-2.1-or-later)
+depends=(glib xz zlib e2fsprogs curl gpgme libgpg-error libarchive openssl util-linux systemd fuse3)
+source=("https://github.com/ostreedev/ostree/releases/download/v2026.6/libostree-2026.6.tar.xz")
+sha256sums=('164b8226aea6a0e6601036de02a5e3b62307bae25890ed557fb4e19020bd5974')
+
+build() {
+    cd libostree-2026.6
+    ./configure --prefix=/usr --libdir=/usr/lib --sysconfdir=/etc --localstatedir=/var --disable-static --with-curl --disable-http2 --without-soup --without-soup3 --without-composefs --without-selinux --without-avahi --with-crypto=openssl --disable-introspection --disable-gtk-doc --disable-man --disable-installed-tests --disable-rofiles-fuse --without-dracut --without-mkinitcpio
+    make
+}
+package() {
+    cd libostree-2026.6
+    make DESTDIR="$pkgdir" install
+}

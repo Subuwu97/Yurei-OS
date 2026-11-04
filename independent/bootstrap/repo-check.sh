@@ -3,6 +3,7 @@
 # and library must find the libraries it needs, which shows that each
 # recipe's dependencies are complete.
 # shellcheck shell=bash
+trap 'printf "Repository verification failed at line %s\n" "$LINENO" >&2' ERR
 . /etc/os-release
 echo "Bash $BASH_VERSION running in $PRETTY_NAME, installed by pacman"
 cd /tmp || exit 1
@@ -173,6 +174,41 @@ if pacman -Q qt6-declarative qt6-5compat qt6-svg > /dev/null 2>&1; then
     [[ $qmlout == *QML-OK* ]]
     rm -f "$qmltest"
 fi
+if pacman -Q plasma-workspace > /dev/null 2>&1; then
+    command -v startplasma-wayland kwin_wayland plasmashell systemsettings sddm
+    cat > /tmp/yurei-plasma-imports.qml <<'QML'
+import QtQuick
+import org.kde.plasma.core as PlasmaCore
+import org.kde.plasma.components as PlasmaComponents
+import org.kde.kirigami as Kirigami
+Item {
+    Component.onCompleted: { console.log("PLASMA-QML-OK"); Qt.quit() }
+}
+QML
+    qmlout=$(QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software timeout 60 \
+        /usr/lib/qt6/bin/qml /tmp/yurei-plasma-imports.qml 2>&1) || true
+    printf '%s\n' "$qmlout"
+    [[ $qmlout == *PLASMA-QML-OK* ]]
+    rm -f /tmp/yurei-plasma-imports.qml
+fi
+if pacman -Q yurei-install-gui > /dev/null 2>&1; then
+    mkdir -p /tmp/yurei-gui-previews
+    for page in 0 1 2 3 4 5; do
+        QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen timeout 30 \
+            yurei-install-gui --preview --page "$page" \
+            --screenshot "/tmp/yurei-gui-previews/installer-$page.png"
+    done
+    python3 - <<'PY'
+from pathlib import Path
+import struct
+for page in range(6):
+    image = Path(f'/tmp/yurei-gui-previews/installer-{page}.png').read_bytes()
+    assert image[:8] == b'\x89PNG\r\n\x1a\n'
+    width, height = struct.unpack('>II', image[16:24])
+    assert width >= 800 and height >= 600, (page, width, height)
+print('All six native installer screens render with Yurei Qt')
+PY
+fi
 echo "firmware $(du -sh /usr/lib/firmware | cut -f1), iwd works"
 
 # every program and library finds what it links to
@@ -186,4 +222,115 @@ if [[ -n $missing ]]; then
     printf '%s' "$missing"
     exit 1
 fi
+if pacman -Q linux-pam > /dev/null 2>&1; then
+    test -s /usr/lib/security/pam_systemd.so
+    useradd -m -s /bin/bash yurei-pam-test
+    printf 'yurei-pam-test:local-build-check-4872\n' | chpasswd
+    cat > /tmp/yurei-pam-check.c <<'C'
+#include <security/pam_appl.h>
+#include <stdlib.h>
+#include <string.h>
+static int converse(int n, const struct pam_message **messages,
+                    struct pam_response **out, void *data) {
+    struct pam_response *r = calloc((size_t)n, sizeof(*r));
+    if (!r) return PAM_BUF_ERR;
+    for (int i = 0; i < n; ++i) {
+        if (messages[i]->msg_style == PAM_PROMPT_ECHO_OFF)
+            r[i].resp = strdup((const char *)data);
+        else if (messages[i]->msg_style == PAM_PROMPT_ECHO_ON)
+            r[i].resp = strdup("yurei-pam-test");
+    }
+    *out = r;
+    return PAM_SUCCESS;
+}
+int main(int argc, char **argv) {
+    if (argc != 2) return 2;
+    struct pam_conv conv = {converse, argv[1]};
+    pam_handle_t *p = NULL;
+    int status = pam_start("sudo", "yurei-pam-test", &conv, &p);
+    if (status == PAM_SUCCESS) status = pam_authenticate(p, 0);
+    if (status == PAM_SUCCESS) status = pam_acct_mgmt(p, 0);
+    if (p) pam_end(p, status);
+    return status == PAM_SUCCESS ? 0 : 1;
+}
+C
+    cc /tmp/yurei-pam-check.c -lpam -o /tmp/yurei-pam-check
+    /tmp/yurei-pam-check local-build-check-4872
+    if /tmp/yurei-pam-check deliberately-wrong; then
+        echo "PAM accepted an incorrect password" >&2
+        exit 1
+    fi
+    userdel -r yurei-pam-test
+    rm -f /tmp/yurei-pam-check.c /tmp/yurei-pam-check
+    echo "PAM accepts the correct password and rejects the wrong password"
+fi
+
+# Check real timezone offsets, including seasonal and fractional offsets.
+if pacman -Q tzdata >/dev/null 2>&1; then
+    test "$(TZ=America/New_York date -d '2026-01-15 12:00:00 UTC' +%z)" = -0500
+    test "$(TZ=America/New_York date -d '2026-07-15 12:00:00 UTC' +%z)" = -0400
+    test "$(TZ=Asia/Kathmandu date -d '2026-01-15 12:00:00 UTC' +%z)" = +0545
+    test -s /usr/share/zoneinfo/Etc/UTC
+    echo "Timezone database handles winter, summer and fractional offsets"
+fi
+
+if pacman -Q fastfetch >/dev/null 2>&1; then
+    timeout 30 fastfetch --config /etc/xdg/fastfetch/config.jsonc --pipe false > /tmp/yurei-fastfetch.txt
+    grep -q 'Y U R E I' /tmp/yurei-fastfetch.txt
+    grep -q 'Yūrei' /tmp/yurei-fastfetch.txt
+    test -s /usr/share/fastfetch/yurei-logo.txt
+    rm -f /tmp/yurei-fastfetch.txt
+    echo "Fastfetch renders the Yurei mascot and detects the distro"
+fi
+
+if pacman -Q konsole >/dev/null 2>&1; then
+    QT_QPA_PLATFORM=offscreen timeout 20 konsole --version
+    QT_QPA_PLATFORM=offscreen timeout 20 dolphin --version
+    timeout 20 firefox --version
+    test -s /usr/share/applications/org.kde.konsole.desktop
+    test -s /usr/share/applications/org.kde.dolphin.desktop
+    test -s /usr/share/applications/firefox.desktop
+    grep -qx 'inode/directory=org.kde.dolphin.desktop' /etc/xdg/mimeapps.list
+    grep -qx 'x-scheme-handler/https=firefox.desktop' /etc/xdg/mimeapps.list
+    echo "Konsole, Dolphin and Firefox start and their default applications are configured"
+fi
+
+if pacman -Q flatpak >/dev/null 2>&1; then
+    timeout 20 flatpak --version
+    timeout 20 bwrap --version
+    timeout 20 xdg-dbus-proxy --version
+    QT_QPA_PLATFORM=offscreen timeout 20 plasma-discover --version
+    test -s /usr/share/flatpak/remotes.d/flathub.flatpakrepo
+    test -s /usr/share/xdg-desktop-portal/portals/kde.portal
+    echo "Discover, Flatpak, sandbox helpers and KDE portals are installed"
+fi
+
+if pacman -Q yurei-hyperv >/dev/null 2>&1; then
+    test -x /usr/bin/Xorg
+    test -x /usr/bin/kwin_x11
+    test -x /usr/bin/startplasma-x11
+    test -x /usr/bin/xauth
+    test -s /usr/lib/xorg/modules/drivers/xrdpdev_drv.so
+    test -s /usr/lib/pipewire-0.3/libpipewire-module-xrdp-pipewire.so
+    grep -qx 'port=vsock://-1:3389' /etc/xrdp/xrdp.ini
+    grep -qx 'AllowRootLogin=false' /etc/xrdp/sesman.ini
+    grep -qx 'AlwaysGroupCheck=true' /etc/xrdp/sesman.ini
+    test ! -e /etc/systemd/system/multi-user.target.wants/xrdp.service
+    for identity in key.pem cert.pem rsakeys.ini; do
+        if test -e "/etc/xrdp/$identity"; then
+            echo "XRDP must create $identity on the target, not ship a shared identity" >&2
+            exit 1
+        fi
+    done
+    echo "Hyper-V enhanced-session components are installed; access starts disabled"
+fi
+
+if pacman -Q katawa-shoujo >/dev/null 2>&1; then
+    test -x /usr/bin/yurei-game
+    test -s /usr/share/applications/katawa-shoujo.desktop
+    test -x "/usr/share/yurei/games/katawa-shoujo/payload/lib/linux-x86_64/Katawa Shoujo"
+    test -s "/usr/share/licenses/katawa-shoujo/Game Manual.pdf"
+    echo "The original 64-bit Katawa Shoujo payload and its complete license are installed"
+fi
+
 echo "all libraries found"

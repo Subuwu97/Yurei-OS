@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=ktexteditor
+_lockname=kf6-ktexteditor
+pkgver=6.18.0
+pkgrel=1
+pkgdesc="KDE text editor component"
+arch=(x86_64)
+url="https://kde.org/"
+license=(BSD-2-Clause CC0-1.0 LGPL-2.0-only LGPL-2.0-or-later MIT)
+depends=(qt6-base qt6-declarative qt6-speech karchive kconfig kguiaddons ki18n kio kparts sonnet syntax-highlighting kcolorscheme kauth)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/frameworks/6.18/ktexteditor-$pkgver.tar.xz")
+sha256sums=('4f8abb0436a0c6ca501f7be391975756cb07f8e403d3afe7ec2f02d12bf7b516')
+
+build() {
+    cmake -S ktexteditor-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a ktexteditor-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

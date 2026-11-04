@@ -1,11 +1,11 @@
 # Maintainer: Yūrei Linux project
 # Yūrei's own recipe (stage 2c, docs/INDEPENDENT.md): the public key that
-# signs the [yurei] repository, for pacman to trust. Until Yūrei's own key
-# is set up, each build signs with a throwaway key, which repo-inside.sh
-# hands to this recipe as $YUREI_SIGNING_PUBKEY (and rebuilds it every run).
+# signs the independent [yurei] repository, for pacman to trust. The
+# integration workflow preserves its signing identity between builds.
+# repo-inside.sh hands its public key to $YUREI_SIGNING_PUBKEY.
 pkgname=yurei-keyring
 pkgver=2026.10
-pkgrel=1
+pkgrel=2
 pkgdesc="The key that signs Yūrei's packages"
 arch=(any)
 url="https://github.com/Subuwu97/Yurei-OS"

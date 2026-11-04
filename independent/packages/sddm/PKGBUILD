@@ -1,0 +1,65 @@
+# Maintainer: Yurei Linux project
+pkgname=sddm
+_lockname=sddm
+pkgver=0.21.0
+pkgrel=1
+pkgdesc="Wayland login manager with PAM and logind"
+arch=(x86_64)
+url="https://kde.org/"
+license=(GPL-2.0-or-later)
+depends=(qt6-base qt6-declarative qt6-svg linux-pam systemd libxcb libxkbcommon kwin)
+makedepends=(extra-cmake-modules qt6-tools)
+backup=(etc/sddm.conf.d/10-yurei.conf etc/pam.d/sddm etc/pam.d/sddm-autologin etc/pam.d/sddm-greeter var/lib/sddm/state.conf)
+source=("sddm-$pkgver.tar.gz::https://github.com/sddm/sddm/archive/v0.21.0.tar.gz")
+sha256sums=('f895de2683627e969e4849dbfbbb2b500787481ca5ba0de6d6dfdae5f1549abf')
+
+build() {
+    cmake -S sddm-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_WITH_QT6=ON -DCMAKE_INSTALL_SYSCONFDIR=/etc -DCMAKE_INSTALL_LOCALSTATEDIR=/var -DCMAKE_INSTALL_LIBEXECDIR=lib/sddm -DINSTALL_PAM_CONFIGURATION=OFF -DBUILD_MAN_PAGES=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 /dev/stdin "$pkgdir/etc/sddm.conf.d/10-yurei.conf" <<'CONF'
+[General]
+DisplayServer=wayland
+GreeterEnvironment=QT_WAYLAND_SHELL_INTEGRATION=layer-shell
+[Theme]
+Current=yurei
+CursorTheme=breeze_cursors
+[Wayland]
+CompositorCommand=kwin_wayland --drm --no-lockscreen --no-global-shortcuts --locale1
+SessionDir=/usr/share/wayland-sessions
+CONF
+    install -Dm644 /dev/stdin "$pkgdir/etc/pam.d/sddm" <<'PAM'
+auth requisite pam_nologin.so
+auth include system-login
+account include system-login
+password include system-login
+session include system-login
+PAM
+    install -Dm644 /dev/stdin "$pkgdir/etc/pam.d/sddm-autologin" <<'PAM'
+auth requisite pam_nologin.so
+auth required pam_permit.so
+account include system-login
+password include system-login
+session include system-login
+PAM
+    install -Dm644 /dev/stdin "$pkgdir/etc/pam.d/sddm-greeter" <<'PAM'
+auth required pam_permit.so
+account required pam_permit.so
+password required pam_deny.so
+session required pam_unix.so
+session optional pam_systemd.so
+PAM
+    install -Dm644 /dev/stdin "$pkgdir/var/lib/sddm/state.conf" <<'STATE'
+[Last]
+Session=/usr/share/wayland-sessions/plasma.desktop
+STATE
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    install -Dm644 sddm-$pkgver/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

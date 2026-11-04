@@ -1,0 +1,21 @@
+pkgname=katawa-shoujo
+pkgver=1.3.2
+pkgrel=1
+pkgdesc="Katawa Shoujo, the unmodified original Linux release by Four Leaf Studios"
+arch=(x86_64)
+url="https://4leafstudios.itch.io/katawa-shoujo"
+license=(custom:Katawa-Shoujo MIT LGPL-2.1-or-later)
+depends=(yurei-game-launcher glibc libglvnd libglu libx11 libxext libxi libxmu libpulse)
+# Retain the upstream binaries and payload byte-for-byte.
+options=(!strip !debug staticlibs libtool !purge)
+source=("katawa-shoujo-1.3.2-linux.tar.zst::https://4leafstudios.itch.io/katawa-shoujo/file/16033228")
+sha256sums=('c76b644b9d7582b20c50d0a984e426b6a85d8c564325e73ad29637210e31e0af')
+package() {
+    install -d "$pkgdir/usr/share/yurei/games/katawa-shoujo/payload"
+    cp -a "$srcdir/Katawa Shoujo-1.3.2-linux/." "$pkgdir/usr/share/yurei/games/katawa-shoujo/payload/"
+    install -Dm644 "$startdir/katawa-shoujo.json" "$pkgdir/usr/share/yurei/games/katawa-shoujo.json"
+    install -Dm644 "$startdir/katawa-shoujo.desktop" "$pkgdir/usr/share/applications/katawa-shoujo.desktop"
+    install -Dm644 "$startdir/ATTRIBUTION.txt" "$pkgdir/usr/share/licenses/$pkgname/ATTRIBUTION.txt"
+    install -Dm644 "$srcdir/Katawa Shoujo-1.3.2-linux/Game Manual.pdf" "$pkgdir/usr/share/licenses/$pkgname/Game Manual.pdf"
+    install -Dm644 "$srcdir/Katawa Shoujo-1.3.2-linux/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/RENPY-LICENSE.txt"
+}

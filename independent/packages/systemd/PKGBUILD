@@ -4,12 +4,12 @@
 # keeps them the same.
 pkgname=systemd
 pkgver=257.8
-pkgrel=1
+pkgrel=2
 pkgdesc="System and service manager, with udev"
 arch=(x86_64)
 url="https://systemd.io/"
 license=(LGPL-2.1-or-later GPL-2.0-or-later)
-depends=(glibc gcc-libs acl libcap libxcrypt kmod util-linux xz zstd lz4 openssl bash)
+depends=(glibc gcc-libs acl libcap libxcrypt kmod util-linux xz zstd lz4 openssl bash linux-pam)
 install=systemd.install
 backup=(etc/systemd/network/20-wired.network)
 source=("https://github.com/systemd/systemd/archive/v$pkgver/systemd-$pkgver.tar.gz")
@@ -25,7 +25,7 @@ build() {
     meson setup .. --prefix=/usr --buildtype=release -D mode=release \
         -D default-dnssec=no -D firstboot=false -D install-tests=false -D tests=false \
         -D ldconfig=false -D rpmmacrosdir=no -D homed=disabled -D userdb=false \
-        -D man=disabled -D pamconfdir=no -D dev-kvm-mode=0660 -D nobody-group=nobody \
+        -D man=disabled -D pam=enabled -D pamconfdir=/etc/pam.d -D pamlibdir=/usr/lib/security -D dev-kvm-mode=0660 -D nobody-group=nobody \
         -D sysupdate=disabled -D ukify=disabled -D bootloader=enabled \
         -D docdir=/usr/share/doc/systemd \
         -D sbat-distro=yurei -D sbat-distro-summary="Yurei Linux" \

@@ -1,0 +1,12 @@
+{
+    "KPlugin": {
+        "Id": "YureiGoldenBeach",
+        "Name": "Yurei’s Golden Beach Day",
+        "Authors": [
+            {
+                "Name": "Yūrei Linux"
+            }
+        ],
+        "License": "CC-BY-SA-4.0"
+    }
+}

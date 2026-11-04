@@ -1,0 +1,19 @@
+# Maintainer: Yurei Linux project
+pkgname=xdg-desktop-portal
+pkgver=1.22.1
+pkgrel=1
+pkgdesc="xdg-desktop-portal: application store and sandboxed desktop support"
+arch=(x86_64)
+url="https://github.com/flatpak/xdg-desktop-portal/releases/download/1.22.1"
+license=(LGPL-2.1-or-later)
+depends=(glib json-glib fuse3 gdk-pixbuf gst-plugins-base pipewire systemd libgudev bubblewrap flatpak)
+source=("https://github.com/flatpak/xdg-desktop-portal/releases/download/1.22.1/xdg-desktop-portal-1.22.1.tar.xz")
+sha256sums=('d4879ddb3d65ff1a8f19187497e6f13dc5d267bcac404a5d501218be355753d3')
+
+build() {
+    meson setup xdg-desktop-portal-1.22.1 build --prefix=/usr --libdir=lib --libexecdir=lib --sysconfdir=/etc --localstatedir=/var --buildtype=release --wrap-mode=nofallback -Dtests=disabled -Ddocumentation=disabled -Dman-pages=disabled -Dgeoclue=disabled -Dsandboxed-image-validation=enabled -Dsandboxed-sound-validation=enabled
+    meson compile -C build
+}
+package() {
+    DESTDIR="$pkgdir" meson install -C build
+}

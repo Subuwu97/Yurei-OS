@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=plasma5support
+_lockname=plasma-plasma5support
+pkgver=6.4.5
+pkgrel=2
+pkgdesc="Compatibility data engines for Plasma applets"
+arch=(x86_64)
+url="https://kde.org/"
+license=(CC0-1.0 GPL-2.0-or-later LGPL-2.0-or-later)
+depends=(qt6-base qt6-declarative kconfig kcoreaddons kguiaddons ki18n knotifications solid kservice kidletime kio plasma-activities libx11 networkmanager-qt)
+makedepends=(extra-cmake-modules qt6-tools)
+source=("https://download.kde.org/stable/plasma/6.4.5/plasma5support-$pkgver.tar.xz")
+sha256sums=('acfdfbc82f8e3af7bd35d514b1e3cbb5daba8da7ba790cecb68f925a0f4df942')
+
+build() {
+    cmake -S plasma5support-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a plasma5support-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

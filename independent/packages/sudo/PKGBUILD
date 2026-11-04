@@ -4,20 +4,19 @@
 # keeps them the same.
 pkgname=sudo
 pkgver=1.9.17p1
-pkgrel=1
+pkgrel=3
 pkgdesc="Lets the administrators (the wheel group) run commands as root"
 arch=(x86_64)
 url="https://www.sudo.ws/"
 license=(ISC)
-depends=(glibc libxcrypt zlib openssl)
-backup=(etc/sudoers)
+depends=(glibc libxcrypt zlib openssl linux-pam)
+backup=(etc/sudoers etc/pam.d/sudo)
 source=("https://www.sudo.ws/dist/sudo-$pkgver.tar.gz")
 sha256sums=('ff607ea717072197738a78f778692cd6df9a7e3e404565f51de063ca27455d32')
 
 build() {
     cd sudo-$pkgver
-    # no PAM yet: sudo checks the password against /etc/shadow itself
-    ./configure --prefix=/usr --sysconfdir=/etc --libexecdir=/usr/lib --without-pam \
+    ./configure --prefix=/usr --sysconfdir=/etc --libexecdir=/usr/lib --with-pam \
         --with-secure-path --with-env-editor --with-passprompt="[sudo] password for %p: " \
         --with-rundir=/run/sudo --with-vardir=/var/db/sudo --with-logfac=auth \
         --enable-tmpfiles.d=/usr/lib/tmpfiles.d --with-all-insults=no
@@ -27,6 +26,11 @@ build() {
 package() {
     cd sudo-$pkgver
     make DESTDIR="$pkgdir" install
+    install -Dm644 /dev/stdin "$pkgdir/etc/pam.d/sudo" <<'PAM'
+auth include system-auth
+account include system-auth
+session include system-auth
+PAM
     # the members of wheel are the administrators (yurei-install puts the
     # first user there)
     install -dm750 "$pkgdir/etc/sudoers.d"

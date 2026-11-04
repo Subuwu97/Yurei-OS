@@ -1,0 +1,29 @@
+# Maintainer: Yurei Linux project
+# Dependencies checked against the pinned upstream 6.18 CMake configuration.
+pkgname=kholidays
+_lockname=kf6-kholidays
+pkgver=6.18.0
+pkgrel=1
+pkgdesc="KDE Frameworks: kholidays"
+arch=(x86_64)
+url="https://kde.org/"
+license=(BSD-2-Clause CC0-1.0 GPL-3.0-or-later LGPL-2.0-or-later)
+depends=(qt6-base qt6-declarative)
+makedepends=(extra-cmake-modules qt6-tools bison flex)
+source=("https://download.kde.org/stable/frameworks/6.18/kholidays-$pkgver.tar.xz")
+sha256sums=('49dc892d98ee493a696dd730f5a0e1624b46ca7d746a2877f057007abe9f2151')
+
+build() {
+    cmake -S kholidays-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF \
+        -DBUILD_DESIGNERPLUGIN=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a kholidays-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}

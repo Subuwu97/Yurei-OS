@@ -1,0 +1,26 @@
+# Maintainer: Yurei Linux project
+pkgname=pulseaudio-qt
+_lockname=pulseaudio-qt
+pkgver=1.7.0
+pkgrel=1
+pkgdesc="pulseaudio-qt: independent Plasma desktop support"
+arch=(x86_64)
+url="https://github.com/Subuwu97/Yurei-OS"
+license=(CC0-1.0 LGPL-2.1-only LGPL-3.0-only)
+depends=(qt6-base qt6-declarative libpulse)
+source=("https://download.kde.org/stable/pulseaudio-qt/pulseaudio-qt-$pkgver.tar.xz")
+sha256sums=('6a18db76dd2bcc3df7d9a9379c025295817264baa1f2ed8caaac7da44e04e931')
+
+build() {
+    cmake -S pulseaudio-qt-$pkgver -B build -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+        -DKDE_INSTALL_LIBDIR=lib -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+        -DBUILD_TESTING=OFF -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF 
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d "$pkgdir/usr/share/licenses/$pkgname"
+    cp -a pulseaudio-qt-$pkgver/LICENSES/. "$pkgdir/usr/share/licenses/$pkgname/"
+}
