@@ -70,8 +70,8 @@ jobs:
         run: |
           set -euo pipefail
           available=$(df -B1 --output=avail /mnt/c | tail -n1 | tr -d ' ')
-          if (( available < 60 * 1024 * 1024 * 1024 )); then
-            echo "At least 60 GiB free on C: is required for app runtimes and ISO staging." >&2
+          if (( available < 48 * 1024 * 1024 * 1024 )); then
+            echo "At least 48 GiB free on C: is required after live-system staging for app runtimes and ISO tests." >&2
             exit 1
           fi
           sudo mkdir -p /home/runner/yurei-flatpak
