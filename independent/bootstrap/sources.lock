@@ -414,3 +414,5 @@ kwin-x11  6.4.5  https://download.kde.org/stable/plasma/6.4.5/kwin-x11-6.4.5.tar
 
 libglu  9.0.3  https://archive.mesa3d.org/glu/glu-9.0.3.tar.xz  bd43fe12f374b1192eb15fe20e45ff456b9bc26ab57f0eee919f96ca0f8a330f  repo
 katawa-shoujo  1.3.2  katawa-shoujo-1.3.2-linux.tar.zst::https://4leafstudios.itch.io/katawa-shoujo/file/16033228  c76b644b9d7582b20c50d0a984e426b6a85d8c564325e73ad29637210e31e0af  repo
+
+libpciaccess  0.18.1  https://www.x.org/releases/individual/lib/libpciaccess-0.18.1.tar.xz  4af43444b38adb5545d0ed1c2ce46d9608cc47b31c2387fc5181656765a6fa76  repo

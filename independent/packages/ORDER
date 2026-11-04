@@ -417,6 +417,7 @@ yurei-software
 # Hyper-V enhanced sessions, enabled explicitly after setting a password.
 libxmu
 xauth
+libpciaccess
 xorg-server
 xrdp
 xorgxrdp
