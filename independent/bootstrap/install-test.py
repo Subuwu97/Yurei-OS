@@ -358,6 +358,9 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
                 live.send("journalctl -b --no-pager -n 120; journalctl --user -b --no-pager -n 120; echo DESKTOP-DIAG-''DONE")
                 live.wait("DESKTOP-DIAG-DONE", 60)
         if ready and args.desktop_check:
+            live.send_user("if [ \"$(sudo -n id -u)\" = 0 ]; then echo LIVE-SUDO-''OK; else echo LIVE-SUDO-''BAD; fi")
+            ready = check("the unprivileged live user can run administrator commands",
+                          live.wait("LIVE-SUDO-OK", 30, fail="LIVE-SUDO-BAD")) and ready
             live.send("if grep -qx 'Enabled=false' /etc/xdg/kwalletrc; then echo LIVE-WALLET-''OK; else echo LIVE-WALLET-''BAD; fi")
             ready = check("live Wi-Fi does not require an encrypted wallet", live.wait("LIVE-WALLET-OK", 30, fail="LIVE-WALLET-BAD"))
             live.send("pid=$(pgrep -xu 1000 plasmashell | head -n1); "

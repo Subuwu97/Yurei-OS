@@ -20,12 +20,22 @@ SOURCES=${SOURCES:?set SOURCES to the directory fetch.sh downloaded into}
 [[ $EUID -eq 0 ]] || { echo "chroot.sh needs root (sudo)" >&2; exit 1; }
 [[ -x $YUREI/usr/bin/bash && -x $YUREI/usr/bin/gcc ]] || { echo "run temptools.sh first" >&2; exit 1; }
 
-# everything in the new system belongs to root from now on (/tools is gone
-# once the chroot step has cleaned up)
-for dir in usr var etc tools lib64; do
-    [[ -e $YUREI/$dir ]] && chown -R root:root "$YUREI/$dir"
-done
-chown -h root:root "$YUREI"/{bin,lib,sbin}
+inside=chroot-inside.sh
+if [[ ${1:-} == *.sh ]]; then
+    inside=$1
+    shift
+fi
+[[ -f $here/$inside ]] || { echo "no such script: $inside" >&2; exit 1; }
+
+# Only the initial toolchain handoff changes ownership. Repeating chown on
+# a packaged system clears setuid/setgid bits (even root -> root), breaking
+# sudo and other privileged helpers in the staged live image.
+if [[ $inside == chroot-inside.sh ]]; then
+    for dir in usr var etc tools lib64; do
+        [[ -e $YUREI/$dir ]] && chown -R root:root "$YUREI/$dir"
+    done
+    chown -h root:root "$YUREI"/{bin,lib,sbin}
+fi
 
 mounted=()
 mnt() {  # mnt TARGET MOUNT-ARGS...: mount once, remember it for unmounting
@@ -66,13 +76,6 @@ fi
 # the sources and the build scripts, read-only, so the build can't change them
 mnt /sources --bind -o ro "$SOURCES"
 mnt /bootstrap --bind -o ro "$here"
-
-inside=chroot-inside.sh
-if [[ ${1:-} == *.sh ]]; then
-    inside=$1
-    shift
-fi
-[[ -f $here/$inside ]] || { echo "no such script: $inside" >&2; exit 1; }
 
 chroot "$YUREI" /usr/bin/env -i \
     HOME=/root TERM="${TERM:-dumb}" PATH=/usr/bin:/usr/sbin \
