@@ -133,7 +133,7 @@ class Machine:
 
     def send_user(self, line):
         if getattr(self, "session_user", None):
-            self.send("runuser -u live -- env XDG_RUNTIME_DIR=/run/user/1000 "
+            self.send("sudo -n -u live -- env XDG_RUNTIME_DIR=/run/user/1000 "
                       "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus "
                       "systemd-run --user --wait --pipe --collect bash -c " + shlex.quote(line))
         else:

@@ -1,6 +1,7 @@
 """Shutdown must drain the VM console so QEMU can finalize audio output."""
 import ast
 import os
+import shlex
 from pathlib import Path
 import subprocess
 import sys
@@ -15,7 +16,7 @@ def machine_class():
     # Load only the class; the script's top level starts destructive test VMs.
     parsed = ast.parse(SOURCE.read_text(encoding="utf-8"))
     definition = next(node for node in parsed.body if isinstance(node, ast.ClassDef) and node.name == "Machine")
-    namespace = {"os": os, "subprocess": subprocess, "time": time, "Path": Path}
+    namespace = {"os": os, "subprocess": subprocess, "time": time, "Path": Path, "shlex": shlex}
     exec(compile(ast.Module(body=[definition], type_ignores=[]), str(SOURCE), "exec"), namespace)
     return namespace["Machine"]
 
@@ -58,3 +59,28 @@ def test_shutdown_keeps_serial_input_open_until_guest_exits(tmp_path):
     machine.qemu.stdin.write(b'poweroff\n')
     machine.qemu.stdin.flush()
     assert machine.stop(timeout=10)
+
+
+def test_live_checks_use_installed_sudo_and_the_live_users_session():
+    cls = machine_class()
+    machine = cls.__new__(cls)
+    machine.session_user = "live"
+    commands = []
+    machine.send = commands.append
+    probe = "printf '%s\\n' \"value with spaces\"; wpctl status"
+    machine.send_user(probe)
+    args = shlex.split(commands[0])
+    assert args[:6] == ["sudo", "-n", "-u", "live", "--", "env"]
+    assert "XDG_RUNTIME_DIR=/run/user/1000" in args
+    assert "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus" in args
+    assert args[-1] == probe
+    assert args[args.index("systemd-run") + 1] == "--user"
+
+
+def test_installed_session_checks_keep_the_logged_in_user():
+    cls = machine_class()
+    machine = cls.__new__(cls)
+    commands = []
+    machine.send = commands.append
+    machine.send_user("wpctl status")
+    assert commands == ["wpctl status"]
