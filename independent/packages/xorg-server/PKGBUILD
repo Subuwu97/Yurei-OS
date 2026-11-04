@@ -1,7 +1,7 @@
 # Maintainer: Yurei Linux project
 pkgname=xorg-server
 pkgver=21.1.25
-pkgrel=3
+pkgrel=4
 pkgdesc="Hyper-V enhanced session support: xorg-server"
 arch=(x86_64)
 url="https://www.x.org/releases/individual/xserver"
@@ -26,4 +26,9 @@ build() {
 }
 package() {
     DESTDIR="$pkgdir" meson install -C build
+    # Xwayland already owns these shared X server documents in Yurei.
+    # Keep one owner so installing both servers is a valid transaction.
+    rm -f "$pkgdir/usr/lib/xorg/protocol.txt" \
+        "$pkgdir/usr/share/man/man1/Xserver.1" \
+        "$pkgdir/usr/share/man/man1/Xserver.1.gz"
 }

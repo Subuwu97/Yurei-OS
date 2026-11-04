@@ -79,7 +79,12 @@ polkit.addRule(function(action, subject) {
     if ((action.id === "org.freedesktop.policykit.exec" &&
          action.lookup("program") === "/usr/bin/yurei-install") ||
         action.id.indexOf("org.freedesktop.NetworkManager.") === 0 ||
-        action.id.indexOf("org.freedesktop.timedate1.") === 0)
+        action.id.indexOf("org.freedesktop.timedate1.") === 0 ||
+        ["org.freedesktop.Flatpak.app-install", "org.freedesktop.Flatpak.app-uninstall",
+         "org.freedesktop.Flatpak.runtime-install", "org.freedesktop.Flatpak.runtime-uninstall",
+         "org.freedesktop.Flatpak.app-update", "org.freedesktop.Flatpak.runtime-update",
+         "org.freedesktop.Flatpak.update-remote", "org.freedesktop.Flatpak.appstream-update",
+         "org.freedesktop.Flatpak.metadata-update"].indexOf(action.id) !== -1)
         return polkit.Result.YES;
     return polkit.Result.NOT_HANDLED;
 });

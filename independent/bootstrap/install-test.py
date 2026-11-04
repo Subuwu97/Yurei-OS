@@ -360,6 +360,12 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
         if ready and args.desktop_check:
             live.send("if grep -qx 'Enabled=false' /etc/xdg/kwalletrc; then echo LIVE-WALLET-''OK; else echo LIVE-WALLET-''BAD; fi")
             ready = check("live Wi-Fi does not require an encrypted wallet", live.wait("LIVE-WALLET-OK", 30, fail="LIVE-WALLET-BAD"))
+            live.send("pid=$(pgrep -xu 1000 plasmashell | head -n1); "
+                      "if [ -n \"$pid\" ] && pkcheck --action-id org.freedesktop.Flatpak.app-install --process \"$pid\" && "
+                      "pkcheck --action-id org.freedesktop.NetworkManager.network-control --process \"$pid\"; "
+                      "then echo LIVE-AUTHORIZATION-''OK; else echo LIVE-AUTHORIZATION-''BAD; fi")
+            ready = check("the active live desktop can install apps and manage networking without a blank-password prompt",
+                          live.wait("LIVE-AUTHORIZATION-OK", 30, fail="LIVE-AUTHORIZATION-BAD")) and ready
             ready = check_network_agent(live, "live session") and ready
         if ready and args.desktop_check:
             ready = check_audio(live, "live session")
