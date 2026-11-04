@@ -88,3 +88,20 @@ def test_vlc_defaults_preserve_browser_and_file_manager(tmp_path):
     assert text.count("video/mp4=") == 1
     assert "x-scheme-handler/https=firefox.desktop" in text
     assert "inode/directory=org.kde.dolphin.desktop" in text
+
+
+@pytest.mark.parametrize("release,accepted", [("ID=yurei\n", True), ("ID=ubuntu\n", False), (None, False)])
+def test_main_validates_the_actual_destination_identity(tmp_path, monkeypatch, release, accepted):
+    if release is not None:
+        path = tmp_path / "usr/lib/os-release"
+        path.parent.mkdir(parents=True)
+        path.write_text(release)
+    monkeypatch.setattr(software.os, "geteuid", lambda: 0, raising=False)
+    monkeypatch.setattr(software.subprocess, "run", lambda *a, **kw: subprocess.CompletedProcess(a[0], 0))
+    monkeypatch.setattr(software.sys, "argv", ["yurei-software", "--groups", "", "--target-root", str(tmp_path)])
+    if accepted:
+        assert software.main() == 0
+    else:
+        with pytest.raises(SystemExit) as error:
+            software.main()
+        assert error.value.code == 2
