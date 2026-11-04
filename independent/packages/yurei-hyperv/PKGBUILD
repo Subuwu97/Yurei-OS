@@ -1,0 +1,12 @@
+pkgname=yurei-hyperv
+pkgver=0.1
+pkgrel=1
+pkgdesc="Enable password-protected Hyper-V enhanced sessions with audio"
+arch=(any)
+url="https://github.com/Subuwu97/Yurei-OS"
+license=(GPL-3.0-or-later)
+depends=(python xrdp xorgxrdp pipewire-module-xrdp kwin-x11 plasma-workspace shadow openssl kmod systemd)
+package() {
+    install -Dm755 "$startdir/yurei-hyperv.py" "$pkgdir/usr/bin/yurei-hyperv"
+    install -Dm644 "$startdir/yurei-hyperv.desktop" "$pkgdir/usr/share/applications/yurei-hyperv.desktop"
+}

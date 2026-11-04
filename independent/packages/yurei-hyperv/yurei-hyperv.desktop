@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Hyper-V Enhanced Session Setup
+Comment=Set up a separate remote desktop account with sound redirection
+Exec=sudo /usr/bin/yurei-hyperv enable
+Icon=preferences-desktop-remote-desktop
+Terminal=true
+Categories=Settings;System;

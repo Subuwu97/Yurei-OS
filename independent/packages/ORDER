@@ -413,3 +413,18 @@ yurei-flathub
 
 # Explicit installer multimedia/gaming selections
 yurei-software
+
+# Hyper-V enhanced sessions, enabled explicitly after setting a password.
+libxmu
+xauth
+xorg-server
+xrdp
+xorgxrdp
+pipewire-module-xrdp
+kwin-x11
+yurei-hyperv
+
+# Original default game, retaining its complete upstream payload and license.
+libglu
+yurei-game-launcher
+katawa-shoujo

@@ -1,0 +1,14 @@
+Katawa Shoujo 1.3.2
+Copyright Four Leaf Studios and the respective contributors.
+Official release: https://4leafstudios.itch.io/katawa-shoujo
+
+The original Linux distribution is included in its entirety, unmodified.
+The game license is in Game Manual.pdf, in the Game License section.
+It permits noncommercial distribution of unmodified copies in collections.
+Keep the complete license and attribution with this game. The collection's
+other software has its own licenses; these terms apply to the game itself.
+
+Ren'Py and its bundled dependencies have separate licenses, retained in the
+original payload and RENPY-LICENSE.txt. Their source availability information
+is included there. Yurei is unaffiliated with and not endorsed by Four Leaf
+Studios. The launcher outside the payload is Yurei's integration code.

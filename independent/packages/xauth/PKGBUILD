@@ -1,0 +1,20 @@
+# Maintainer: Yurei Linux project
+pkgname=xauth
+pkgver=1.1.5
+pkgrel=1
+pkgdesc="X11 remote session support: xauth"
+arch=(x86_64)
+url="https://www.x.org/"
+license=(MIT)
+depends=(libx11 libxau libxext libxmu)
+source=("https://www.x.org/releases/individual/app/xauth-1.1.5.tar.xz")
+sha256sums=('a4000e2f441facebf569026bedecc23ba262cc6927be52070abe0002625cfbe0')
+build() {
+    cd xauth-$pkgver
+    ./configure --prefix=/usr --disable-static --disable-docs --disable-devel-docs
+    make
+}
+package() {
+    cd xauth-$pkgver
+    make DESTDIR="$pkgdir" install
+}

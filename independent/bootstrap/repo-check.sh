@@ -304,4 +304,27 @@ if pacman -Q flatpak >/dev/null 2>&1; then
     echo "Discover, Flatpak, sandbox helpers and KDE portals are installed"
 fi
 
+if pacman -Q yurei-hyperv >/dev/null 2>&1; then
+    test -x /usr/bin/Xorg
+    test -x /usr/bin/kwin_x11
+    test -x /usr/bin/startplasma-x11
+    test -x /usr/bin/xauth
+    test -s /usr/lib/xorg/modules/drivers/xrdpdev_drv.so
+    test -s /usr/lib/pipewire-0.3/libpipewire-module-xrdp-pipewire.so
+    grep -qx 'port=vsock://-1:3389' /etc/xrdp/xrdp.ini
+    grep -qx 'AllowRootLogin=false' /etc/xrdp/sesman.ini
+    grep -qx 'AlwaysGroupCheck=true' /etc/xrdp/sesman.ini
+    test ! -e /etc/systemd/system/multi-user.target.wants/xrdp.service
+    test ! -e /etc/xrdp/key.pem
+    echo "Hyper-V enhanced-session components are installed; access starts disabled"
+fi
+
+if pacman -Q katawa-shoujo >/dev/null 2>&1; then
+    test -x /usr/bin/yurei-game
+    test -s /usr/share/applications/katawa-shoujo.desktop
+    test -x "/usr/share/yurei/games/katawa-shoujo/payload/lib/linux-x86_64/Katawa Shoujo"
+    test -s "/usr/share/licenses/katawa-shoujo/Game Manual.pdf"
+    echo "The original 64-bit Katawa Shoujo payload and its complete license are installed"
+fi
+
 echo "all libraries found"

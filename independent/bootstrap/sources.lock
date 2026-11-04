@@ -397,3 +397,20 @@ yurei-flathub  1  https://flathub.org/repo/flathub.flatpakrepo  3371dd250e61d9e1
 itstool  2.0.7  https://files.itstool.org/itstool/itstool-2.0.7.tar.bz2  6b9a7cd29a12bb95598f5750e8763cee78836a1a207f85b74d8b3275b27e87ca  repo
 
 libcups  2.4.12  https://github.com/OpenPrinting/cups/releases/download/v2.4.12/cups-2.4.12-source.tar.gz  b1dde191a4ae2760c47220c82ca6155a28c382701e6c1a0159d1054990231d59  repo
+
+libxmu  1.3.1  https://www.x.org/releases/individual/lib/libXmu-1.3.1.tar.xz  81a99e94c4501e81c427cbaa4a11748b584933e94b7a156830c3621256857bc4  repo
+
+xauth  1.1.5  https://www.x.org/releases/individual/app/xauth-1.1.5.tar.xz  a4000e2f441facebf569026bedecc23ba262cc6927be52070abe0002625cfbe0  repo
+
+xorg-server  21.1.25  xorg-server-21.1.25.tar.xz::https://www.x.org/releases/individual/xserver/xorg-server-21.1.25.tar.xz  6ad4e3c7b59a309b32c92e5c15ce1267110f9e13f1ac78da62361a628da1a0eb  repo
+
+xrdp  0.10.6.1  xrdp-0.10.6.1.tar.gz::https://github.com/neutrinolabs/xrdp/releases/download/v0.10.6.1/xrdp-0.10.6.1.tar.gz  2f7beb5a3b2529c8d72dc0df9b8cdca31ab0e0c14d1e3421210f5e6ec0ab3b75  repo
+
+xorgxrdp  0.10.5  xorgxrdp-0.10.5.tar.gz::https://github.com/neutrinolabs/xorgxrdp/releases/download/v0.10.5/xorgxrdp-0.10.5.tar.gz  a5d03435f0ef48bf3d5010e63d9264f2334e7063cba3ecd8d4c0a15616a4f712  repo
+
+pipewire-module-xrdp  0.1  pipewire-module-xrdp-0.1.tar.gz::https://github.com/neutrinolabs/pipewire-module-xrdp/archive/refs/tags/v0.1.tar.gz  a85b6b17643452790af3e53966a885650feeeef9c59c24e5c82924a62eeacf8f  repo
+
+kwin-x11  6.4.5  https://download.kde.org/stable/plasma/6.4.5/kwin-x11-6.4.5.tar.xz  cea91879467afdfa2caf0ec6dd7256eae78defa970cdc9a947fefd85d417acb1  repo
+
+libglu  9.0.3  https://archive.mesa3d.org/glu/glu-9.0.3.tar.xz  bd43fe12f374b1192eb15fe20e45ff456b9bc26ab57f0eee919f96ca0f8a330f  repo
+katawa-shoujo  1.3.2  katawa-shoujo-1.3.2-linux.tar.zst::https://4leafstudios.itch.io/katawa-shoujo/file/16033228  c76b644b9d7582b20c50d0a984e426b6a85d8c564325e73ad29637210e31e0af  repo

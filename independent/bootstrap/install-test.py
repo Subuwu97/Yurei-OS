@@ -71,7 +71,7 @@ class Machine:
             "-device", "intel-hda,id=yureihda", "-device", "hda-duplex,bus=yureihda.0,audiodev=yureiaudio",
         ] if audio_enabled else []
         self.qemu = subprocess.Popen(
-            ["qemu-system-x86_64", *accel, "-m", "4096", "-smp", "2", "-bios", firmware,
+            ["qemu-system-x86_64", *accel, "-m", "6144", "-smp", "2", "-bios", firmware,
              "-display", "none", "-vga", "virtio", "-serial", "stdio", "-monitor", "none", "-no-reboot",
              "-qmp", f"unix:{self.qmp_path},server=on,wait=off",
              "-nic", "user,model=virtio-net-pci", *audio_devices, *args],
@@ -135,7 +135,7 @@ class Machine:
         if getattr(self, "session_user", None):
             self.send("runuser -u live -- env XDG_RUNTIME_DIR=/run/user/1000 "
                       "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus "
-                      "bash -c " + shlex.quote(line))
+                      "systemd-run --user --wait --pipe --collect bash -c " + shlex.quote(line))
         else:
             self.send(line)
 
@@ -236,6 +236,21 @@ def check_live_apps(machine):
                           "&& echo VLC-PLAYBACK-''OK || echo VLC-PLAYBACK-''BAD")
         ok = check("preinstalled VLC plays audio through the live session",
                    machine.wait("VLC-PLAYBACK-OK", 45, fail="VLC-PLAYBACK-BAD"))
+    return ok
+
+
+def check_default_game(machine):
+    # Start the real bundled 64-bit game, with the user's imported display
+    # environment. Keep the original seed read-only and play from a copy.
+    command = "timeout 120 yurei-game katawa-shoujo >/tmp/yurei-katawa.log 2>&1 & job=$!; "
+    command += "game_pid=; for n in $(seq 1 90); do game_pid=$(pgrep -u 1000 -f '[/]payload/lib/linux-x86_64/Katawa Shoujo' | head -n1); "
+    command += "[ -n \"$game_pid\" ] && break; kill -0 \"$job\" 2>/dev/null || break; sleep 1; done; sleep 5; "
+    command += "if [ -n \"$game_pid\" ] && kill -0 \"$game_pid\" 2>/dev/null; then echo KATAWA-STARTUP-''OK; "
+    command += "else cat /tmp/yurei-katawa.log; echo KATAWA-STARTUP-''BAD; fi; "
+    command += "kill \"$job\" 2>/dev/null || true; wait \"$job\" 2>/dev/null || true"
+    machine.send_user(command)
+    ok = check("the original 64-bit Katawa Shoujo starts from a writable user copy",
+               machine.wait("KATAWA-STARTUP-OK", 115, fail="KATAWA-STARTUP-BAD"))
     return ok
 
 
@@ -352,6 +367,8 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
                 ready = check_browser(live, "live session")
         if ready and args.desktop_check:
             ready = check_live_apps(live)
+            if ready:
+                ready = check_default_game(live)
         if ready and args.gui_preview_check:
             # Execute Yurei's own binary and Qt libraries, not the host's Qt.
             # Offscreen preview does not inventory disks or launch the backend.

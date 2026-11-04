@@ -1,0 +1,55 @@
+# Maintainer: Yurei Linux project
+pkgname=xrdp
+pkgver=0.10.6.1
+pkgrel=1
+pkgdesc="Hyper-V enhanced session support: xrdp"
+arch=(x86_64)
+url="https://github.com/neutrinolabs/xrdp/releases/download/v0.10.6.1"
+license=(Apache-2.0)
+depends=(xauth openssl linux-pam libjpeg-turbo fuse3 opus freetype systemd)
+source=("xrdp-0.10.6.1.tar.gz::https://github.com/neutrinolabs/xrdp/releases/download/v0.10.6.1/xrdp-0.10.6.1.tar.gz")
+sha256sums=('2f7beb5a3b2529c8d72dc0df9b8cdca31ab0e0c14d1e3421210f5e6ec0ab3b75')
+
+install=xrdp.install
+backup=(etc/xrdp/xrdp.ini etc/xrdp/sesman.ini etc/xrdp/startwm.sh etc/pam.d/xrdp-sesman)
+build() {
+    cd xrdp-$pkgver
+    ./configure --prefix=/usr --sbindir=/usr/bin --libdir=/usr/lib \
+        --libexecdir=/usr/lib --sysconfdir=/etc --localstatedir=/var \
+        --with-systemdsystemunitdir=/usr/lib/systemd/system \
+        --enable-strict-locations --enable-pam --enable-pam-config=arch --enable-vsock --enable-opus --enable-fuse \
+        --with-imlib2=no --with-freetype2=yes --disable-tests --disable-painter --disable-rfxcodec
+    make
+}
+package() {
+    cd xrdp-$pkgver
+    make DESTDIR="$pkgdir" install
+    install -Dm644 /dev/stdin "$pkgdir/usr/lib/sysusers.d/xrdp.conf" <<'USERS'
+u xrdp - "Remote desktop service" /var/lib/xrdp
+m xrdp video
+g yurei-rdp -
+USERS
+    install -Dm644 /dev/stdin "$pkgdir/usr/lib/tmpfiles.d/xrdp.conf" <<'DIRS'
+d /run/xrdp 0755 xrdp xrdp -
+d /var/lib/xrdp 0750 xrdp xrdp -
+DIRS
+    install -Dm644 /dev/stdin "$pkgdir/etc/pam.d/xrdp-sesman" <<'PAM'
+auth include system-login
+account include system-login
+password include system-login
+session include system-login
+PAM
+    # Hyper-V sockets only: never listen on the LAN or enable blank passwords.
+    sed -i -e 's/^port=3389$/port=vsock:\/\/-1:3389/' \
+        -e 's/^certificate=$/certificate=\/etc\/xrdp\/cert.pem/' \
+        -e 's/^key_file=$/key_file=\/etc\/xrdp\/key.pem/' \
+        -e 's/^security_layer=negotiate/security_layer=tls/' \
+        -e 's/^#runtime_user=xrdp/runtime_user=xrdp/' \
+        -e 's/^#runtime_group=xrdp/runtime_group=xrdp/' "$pkgdir/etc/xrdp/xrdp.ini"
+    sed -i -e 's/^AllowRootLogin=true/AllowRootLogin=false/' \
+        -e 's/^AlwaysGroupCheck=false/AlwaysGroupCheck=true/' \
+        -e 's/^TerminalServerUsers=tsusers/TerminalServerUsers=yurei-rdp/' \
+        -e 's/^EnableUserWindowManager=true/EnableUserWindowManager=false/' \
+        -e 's|^param=Xorg$|param=/usr/bin/Xorg|' "$pkgdir/etc/xrdp/sesman.ini"
+    install -Dm755 "$startdir/startwm.sh" "$pkgdir/etc/xrdp/startwm.sh"
+}

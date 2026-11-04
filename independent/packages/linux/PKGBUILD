@@ -4,7 +4,7 @@
 # keeps them the same.
 pkgname=linux
 pkgver=6.18
-pkgrel=10
+pkgrel=11
 # NVIDIA's open kernel modules (MIT/GPL), built here against this kernel so
 # their versions always match; nvidia-utils brings the matching driver
 _nvidia=595.112.07
@@ -66,7 +66,7 @@ build() {
         -m SND_HDA_INTEL -m SND_HDA_CODEC_REALTEK -m SND_HDA_CODEC_HDMI \
         -e VIRTIO_BLK -e VIRTIO_NET -e SERIAL_8250_CONSOLE \
         -e HYPERVISOR_GUEST -e HYPERV -e HYPERV_VMBUS -e SCSI -e HYPERV_STORAGE \
-        -e HYPERV_NET -e CONNECTOR -e PTP_1588_CLOCK -e HYPERV_UTILS -e HYPERV_BALLOON \
+        -e HYPERV_NET -m VSOCKETS -m HYPERV_VSOCKETS -e CONNECTOR -e PTP_1588_CLOCK -e HYPERV_UTILS -e HYPERV_BALLOON \
         -e HYPERV_KEYBOARD -e HID_HYPERV_MOUSE -e DRM_HYPERV -d FB_HYPERV \
         -m I2C_HID_ACPI -m I2C_DESIGNWARE_PLATFORM -m I2C_DESIGNWARE_PCI -m MFD_INTEL_LPSS_ACPI \
         -m MFD_INTEL_LPSS_PCI -e PINCTRL_INTEL -m PINCTRL_CANNONLAKE -m PINCTRL_TIGERLAKE \
@@ -105,6 +105,9 @@ build() {
     # Without their side-codec/controller chain only part of the speakers work.
     for option in SPI_PXA2XX SPI_PXA2XX_PCI SERIAL_MULTI_INSTANTIATE SND_HDA_SCODEC_CS35L41 SND_HDA_SCODEC_CS35L41_SPI SND_HDA_SCODEC_CS35L41_I2C; do
         grep -Eq "^CONFIG_${option}=[ym]$" .config || { echo "Missing XPS speaker amplifier support $option" >&2; return 1; }
+    done
+    for option in VSOCKETS HYPERV_VSOCKETS; do
+        grep -Eq "^CONFIG_${option}=[ym]$" .config || { echo "Missing Hyper-V socket driver: $option" >&2; return 1; }
     done
     make
     make -C "$srcdir/open-gpu-kernel-modules-$_nvidia" modules SYSSRC="$PWD" SYSOUT="$PWD"
