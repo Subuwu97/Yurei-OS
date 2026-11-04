@@ -1,11 +1,11 @@
 pkgname=libglu
 pkgver=9.0.3
-pkgrel=1
+pkgrel=2
 pkgdesc="Mesa OpenGL utility library for legacy Linux applications"
 arch=(x86_64)
 url="https://mesa3d.org/"
 license=(MIT)
-depends=(libglvnd)
+depends=(libglvnd gcc-libs)
 source=("https://archive.mesa3d.org/glu/glu-$pkgver.tar.xz")
 sha256sums=('bd43fe12f374b1192eb15fe20e45ff456b9bc26ab57f0eee919f96ca0f8a330f')
 build() {

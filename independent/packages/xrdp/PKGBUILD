@@ -1,12 +1,12 @@
 # Maintainer: Yurei Linux project
 pkgname=xrdp
 pkgver=0.10.6.1
-pkgrel=1
+pkgrel=2
 pkgdesc="Hyper-V enhanced session support: xrdp"
 arch=(x86_64)
 url="https://github.com/neutrinolabs/xrdp/releases/download/v0.10.6.1"
 license=(Apache-2.0)
-depends=(xauth openssl linux-pam libjpeg-turbo fuse3 opus freetype systemd)
+depends=(libx11 libxfixes libxrandr libice xauth openssl linux-pam libjpeg-turbo fuse3 opus freetype systemd)
 source=("xrdp-0.10.6.1.tar.gz::https://github.com/neutrinolabs/xrdp/releases/download/v0.10.6.1/xrdp-0.10.6.1.tar.gz")
 sha256sums=('2f7beb5a3b2529c8d72dc0df9b8cdca31ab0e0c14d1e3421210f5e6ec0ab3b75')
 
@@ -14,11 +14,13 @@ install=xrdp.install
 backup=(etc/xrdp/xrdp.ini etc/xrdp/sesman.ini etc/xrdp/startwm.sh etc/pam.d/xrdp-sesman)
 build() {
     cd xrdp-$pkgver
+    # Upstream interprets any --enable/disable-tests argument as requiring
+    # test dependencies. Omit it so unavailable test frameworks stay optional.
     ./configure --prefix=/usr --sbindir=/usr/bin --libdir=/usr/lib \
         --libexecdir=/usr/lib --sysconfdir=/etc --localstatedir=/var \
         --with-systemdsystemunitdir=/usr/lib/systemd/system \
         --enable-strict-locations --enable-pam --enable-pam-config=arch --enable-vsock --enable-opus --enable-fuse \
-        --with-imlib2=no --with-freetype2=yes --disable-tests --disable-painter --disable-rfxcodec
+        --with-imlib2=no --with-freetype2=yes --disable-painter --disable-rfxcodec
     make
 }
 package() {
