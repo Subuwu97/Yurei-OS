@@ -1,7 +1,7 @@
 # Maintainer: Yurei Linux project
 pkgname=xrdp
 pkgver=0.10.6.1
-pkgrel=2
+pkgrel=3
 pkgdesc="Hyper-V enhanced session support: xrdp"
 arch=(x86_64)
 url="https://github.com/neutrinolabs/xrdp/releases/download/v0.10.6.1"
@@ -26,6 +26,11 @@ build() {
 package() {
     cd xrdp-$pkgver
     make DESTDIR="$pkgdir" install
+    # Upstream's install hook generates host-specific TLS and legacy RSA
+    # keys. Never distribute those shared keys; yurei-hyperv creates the
+    # TLS identity locally when the user enables the TLS-only service.
+    rm -f "$pkgdir/etc/xrdp/key.pem" "$pkgdir/etc/xrdp/cert.pem" \
+        "$pkgdir/etc/xrdp/rsakeys.ini"
     install -Dm644 /dev/stdin "$pkgdir/usr/lib/sysusers.d/xrdp.conf" <<'USERS'
 u xrdp - "Remote desktop service" /var/lib/xrdp
 m xrdp video

@@ -3,6 +3,7 @@
 # and library must find the libraries it needs, which shows that each
 # recipe's dependencies are complete.
 # shellcheck shell=bash
+trap 'printf "Repository verification failed at line %s\n" "$LINENO" >&2' ERR
 . /etc/os-release
 echo "Bash $BASH_VERSION running in $PRETTY_NAME, installed by pacman"
 cd /tmp || exit 1
@@ -315,7 +316,12 @@ if pacman -Q yurei-hyperv >/dev/null 2>&1; then
     grep -qx 'AllowRootLogin=false' /etc/xrdp/sesman.ini
     grep -qx 'AlwaysGroupCheck=true' /etc/xrdp/sesman.ini
     test ! -e /etc/systemd/system/multi-user.target.wants/xrdp.service
-    test ! -e /etc/xrdp/key.pem
+    for identity in key.pem cert.pem rsakeys.ini; do
+        if test -e "/etc/xrdp/$identity"; then
+            echo "XRDP must create $identity on the target, not ship a shared identity" >&2
+            exit 1
+        fi
+    done
     echo "Hyper-V enhanced-session components are installed; access starts disabled"
 fi
 
