@@ -22,7 +22,7 @@ jobs:
     name: Build and test Plasma ISO
     if: github.actor == 'Subuwu97'
     runs-on: yurei-pc
-    timeout-minutes: 150
+    timeout-minutes: 240
     env:
       YUREI: /home/runner/yurei-root
       SOURCES: /home/runner/yurei-sources
@@ -63,10 +63,25 @@ jobs:
             sudo --preserve-env=YUREI,SOURCES,YUREI_SIGNING_HOME independent/bootstrap/chroot.sh repo-inside.sh cleanup
           fi
           sudo --preserve-env=YUREI,SOURCES,YUREI_SIGNING_HOME independent/bootstrap/chroot.sh repo-inside.sh
+      - name: Cache multimedia and gaming apps for the live image
+        run: |
+          set -euo pipefail
+          available=$(df -B1 --output=avail /mnt/c | tail -n1 | tr -d ' ')
+          if (( available < 60 * 1024 * 1024 * 1024 )); then
+            echo "At least 60 GiB free on C: is required for app runtimes and ISO staging." >&2
+            exit 1
+          fi
+          sudo mkdir -p /home/runner/yurei-flatpak
+          sudo --preserve-env=YUREI,SOURCES YUREI_APP_STORE=/home/runner/yurei-flatpak \
+            independent/bootstrap/chroot.sh apps-inside.sh
       - name: Create the test ISO
         if: env.BUILD_DESKTOP_ISO == 'true'
         run: |
           sudo --preserve-env=YUREI,SOURCES,YUREI_SIGNING_HOME independent/bootstrap/chroot.sh iso-inside.sh
+          # Hardlinks avoid duplicating multi-gigabyte runtimes on the build SSD.
+          sudo mkdir -p "$YUREI/srv/yurei/live/var/lib/flatpak"
+          sudo cp -al /home/runner/yurei-flatpak/. "$YUREI/srv/yurei/live/var/lib/flatpak/"
+          sudo python3 -c 'import runpy,sys,pathlib; runpy.run_path("independent/packages/yurei-software/yurei-software.py", run_name="software")["set_media_defaults"](pathlib.Path(sys.argv[1]))' "$YUREI/srv/yurei/live"
           sudo YUREI="$YUREI" OUT=/home/runner/yurei-iso \
             ISO_NAME="yurei-independent-desktop-${GITHUB_RUN_ID}-x86_64.iso" independent/bootstrap/iso.sh
           sudo chown -R "$(id -u):$(id -g)" /home/runner/yurei-iso

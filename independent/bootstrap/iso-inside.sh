@@ -51,7 +51,7 @@ CONF
 live_settings() {
     msg "Live settings"
     echo yurei-live > "$live/etc/hostname"
-    # root without a password, logged in on the first screen
+    # Root serial recovery is confined to the live image; the desktop uses live.
     sed -i 's/^root:[^:]*:/root::/' "$live/etc/shadow"
     # The passwordless root console is confined to the live image. Installed
     # systems have the normal non-null login policy restored by yurei-install.
@@ -63,15 +63,27 @@ password include system-login
 session include system-login
 PAM
     fi
-    # Upstream refuses root for desktop PipeWire units. This image's live
-    # session is root; allow only that live session, keeping all other unit
-    # sandboxing intact. The installed system removes these exact overrides.
-    for unit in pipewire.service pipewire.socket pipewire-pulse.service pipewire-pulse.socket; do
-        install -Dm644 /dev/stdin "$live/etc/systemd/user/$unit.d/90-yurei-live-root.conf" <<'AUDIO'
-[Unit]
-ConditionUser=
-AUDIO
-    done
+    # Run the graphical session as a normal user: Steam and Chromium-based
+    # applications must retain their normal unprivileged sandbox.
+    chroot "$live" useradd -m -u 1000 -G wheel -s /bin/bash live
+    chroot "$live" passwd -d live
+    install -Dm440 /dev/stdin "$live/etc/sudoers.d/90-yurei-live" <<'SUDO'
+# Yurei live-only administrative access
+live ALL=(ALL:ALL) NOPASSWD: ALL
+SUDO
+    install -Dm644 /dev/stdin "$live/etc/polkit-1/rules.d/49-yurei-live.rules" <<'POLKIT'
+// Yurei live-only local session authorization; removed during installation.
+polkit.addRule(function(action, subject) {
+    if (subject.user !== "live" || !subject.local || !subject.active)
+        return polkit.Result.NOT_HANDLED;
+    if ((action.id === "org.freedesktop.policykit.exec" &&
+         action.lookup("program") === "/usr/bin/yurei-install") ||
+        action.id.indexOf("org.freedesktop.NetworkManager.") === 0 ||
+        action.id.indexOf("org.freedesktop.timedate1.") === 0)
+        return polkit.Result.YES;
+    return polkit.Result.NOT_HANDLED;
+});
+POLKIT
     # Match the working CachyOS live profile: a disposable passwordless
     # session must not block Wi-Fi secrets on creating/unlocking a wallet.
     # Installed systems remove this live-only configuration.
@@ -84,7 +96,7 @@ WALLET
     cat > "$live/etc/systemd/system/getty@tty1.service.d/autologin.conf" <<'UNIT'
 [Service]
 ExecStart=
-ExecStart=-/usr/sbin/agetty --autologin root --noclear %I $TERM
+ExecStart=-/usr/sbin/agetty --autologin live --noclear %I $TERM
 UNIT
     cat > "$live/etc/issue" <<'ISSUE'
 

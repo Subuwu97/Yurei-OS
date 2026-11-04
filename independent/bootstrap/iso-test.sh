@@ -82,7 +82,7 @@ else
 fi
 
 # install onto a blank disk with yurei-install, then start from that disk
-install_args=(--disk-size-gib 32 --expected-session "${EXPECTED_SESSION:-greeter}")
+install_args=(--disk-size-gib 64 --expected-session "${EXPECTED_SESSION:-greeter}")
 if [[ ${EXPECTED_SESSION:-greeter} == sddm ]]; then
     install_args+=(--gui-protocol --gui-preview-check --desktop-check)
 fi

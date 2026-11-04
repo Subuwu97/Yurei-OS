@@ -1,7 +1,7 @@
 # Maintainer: Yurei Linux project
 pkgname=yurei-install-gui
 pkgver=0.1
-pkgrel=2
+pkgrel=3
 pkgdesc="Graphical installer for the independent Yurei live system"
 arch=(x86_64)
 url="https://github.com/Subuwu97/Yurei-OS"

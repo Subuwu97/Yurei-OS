@@ -1,6 +1,6 @@
 pkgname=yurei-software
 pkgver=0.1
-pkgrel=1
+pkgrel=2
 pkgdesc="Install selected Yurei multimedia and gaming apps"
 arch=(any)
 url="https://github.com/Subuwu97/Yurei-OS"

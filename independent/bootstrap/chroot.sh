@@ -53,6 +53,11 @@ if [[ -n ${YUREI_SIGNING_HOME:-} ]]; then
     [[ $YUREI_SIGNING_HOME == /* && -d $YUREI_SIGNING_HOME ]] || { echo "invalid signing home" >&2; exit 1; }
     mnt /signing-gnupg --bind "$YUREI_SIGNING_HOME"
 fi
+# Reusable app deployments are outside the disposable ISO staging tree.
+if [[ -n ${YUREI_APP_STORE:-} ]]; then
+    [[ $YUREI_APP_STORE == /* && -d $YUREI_APP_STORE ]] || { echo "invalid app store" >&2; exit 1; }
+    mnt /var/lib/flatpak --bind "$YUREI_APP_STORE"
+fi
 # the sources and the build scripts, read-only, so the build can't change them
 mnt /sources --bind -o ro "$SOURCES"
 mnt /bootstrap --bind -o ro "$here"

@@ -194,6 +194,7 @@ install -m644 "$kernel" "$target/boot/vmlinuz-yurei"
 say "Settings"
 # the live settings out, the installed system's in
 rm -rf "$target/etc/systemd/system/getty@tty1.service.d"
+rm -f "$target/etc/sudoers.d/90-yurei-live" "$target/etc/polkit-1/rules.d/49-yurei-live.rules"
 for unit in pipewire.service pipewire.socket pipewire-pulse.service pipewire-pulse.socket; do
     rm -f "$target/etc/systemd/user/$unit.d/90-yurei-live-root.conf"
 done
@@ -234,6 +235,9 @@ in_target() { chroot "$target" "$@"; }
 # an administrator (wheel), with the screen and input devices (seat) and
 # sound, video and game controllers
 in_target systemd-sysusers
+if in_target getent passwd live >/dev/null; then
+    in_target userdel -r live
+fi
 groups=wheel
 for group in seat video input audio render; do
     if in_target getent group "$group" >/dev/null; then groups+=,$group; fi
@@ -276,8 +280,12 @@ options root=PARTUUID=$partuuid rw${kernel_options:+ $kernel_options}
 ENTRY
 
 software_failed=0
+# Keep only the app groups selected for the installed system.
+if command -v yurei-software >/dev/null; then
+    yurei-software --target-root "$target" --prune-unselected --groups "$software" || software_failed=1
+fi
 if [[ -n $software ]]; then
-    say "Installing selected optional software (internet required)"
+    say "Installing selected optional software (using included apps when available)"
     # Run in the live environment so DNS works without binding the live /run
     # tree into the target. Flatpak writes its downloads to the target disk.
     yurei-software --target-root "$target" --groups "$software" || software_failed=1

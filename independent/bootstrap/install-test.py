@@ -131,6 +131,14 @@ class Machine:
         self.qemu.stdin.write(line.encode() + b"\n")
         self.qemu.stdin.flush()
 
+    def send_user(self, line):
+        if getattr(self, "session_user", None):
+            self.send("runuser -u live -- env XDG_RUNTIME_DIR=/run/user/1000 "
+                      "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus "
+                      "bash -c " + shlex.quote(line))
+        else:
+            self.send(line)
+
     def stop(self, timeout=180):
         # Keep stdin open until the guest exits: EOF on the stdio chardev can
         # race the last serial command. Drain output throughout shutdown.
@@ -185,24 +193,49 @@ def request_shutdown(machine, label, password=None):
 def check_network_agent(machine, label):
     # No radio is attached to this VM; verify the actual Plasma secret agent
     # loads, without claiming that this exercises a wireless association.
-    machine.send("for n in $(seq 1 30); do if busctl --user call org.kde.kded6 /kded org.kde.kded6 loadedModules 2>/dev/null | grep -q '\"networkmanagement\"'; then echo NETWORK-AGENT-''READY; break; fi; sleep 1; done")
+    machine.send_user("for n in $(seq 1 30); do if busctl --user call org.kde.kded6 /kded org.kde.kded6 loadedModules 2>/dev/null | grep -q '\"networkmanagement\"'; then echo NETWORK-AGENT-''READY; break; fi; sleep 1; done")
     ok = check(label + " loads the Plasma Wi-Fi secret agent", machine.wait("NETWORK-AGENT-READY", 45))
     if not ok:
-        machine.send("systemctl --user status plasma-kded6 --no-pager; journalctl --user -b -n 80 --no-pager; echo NETWORK-DIAG-''DONE")
+        machine.send_user("systemctl --user status plasma-kded6 --no-pager; journalctl --user -b -n 80 --no-pager; echo NETWORK-DIAG-''DONE")
         machine.wait("NETWORK-DIAG-DONE", 30)
     return ok
 
 
 def check_audio(machine, label):
-    machine.send("for n in $(seq 1 60); do if pactl info >/dev/null 2>&1 && wpctl inspect @DEFAULT_AUDIO_SINK@ 2>/dev/null | grep -q alsa_output; then echo AUDIO-SINK-''READY; break; fi; sleep 1; done")
+    machine.send_user("for n in $(seq 1 60); do if pactl info >/dev/null 2>&1 && wpctl inspect @DEFAULT_AUDIO_SINK@ 2>/dev/null | grep -q alsa_output; then echo AUDIO-SINK-''READY; break; fi; sleep 1; done")
     ok = check(label + " detects an ALSA output through PipeWire", machine.wait("AUDIO-SINK-READY", 90))
     if ok:
         program = "import math,struct,wave;w=wave.open('/tmp/yurei-tone.wav','wb');w.setparams((1,2,48000,0,'NONE','not compressed'));w.writeframes(b''.join(struct.pack('<h',int(12000*math.sin(2*math.pi*440*n/48000))) for n in range(48000)));w.close()"
-        machine.send("python3 -c " + shlex.quote(program) + " && wpctl set-mute @DEFAULT_AUDIO_SINK@ 0 && wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.5 && timeout 15 paplay /tmp/yurei-tone.wav && echo AUDIO-PLAY-''OK || echo AUDIO-PLAY-''BAD")
+        machine.send_user("python3 -c " + shlex.quote(program) + " && wpctl set-mute @DEFAULT_AUDIO_SINK@ 0 && wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.5 && timeout 15 paplay /tmp/yurei-tone.wav && echo AUDIO-PLAY-''OK || echo AUDIO-PLAY-''BAD")
         ok = check(label + " plays a tone through PulseAudio compatibility", machine.wait("AUDIO-PLAY-OK", 45, fail="AUDIO-PLAY-BAD"))
     if not ok:
-        machine.send("cat /proc/asound/cards; wpctl status; systemctl --user status pipewire pipewire-pulse wireplumber --no-pager; journalctl --user -u pipewire -u pipewire-pulse -u wireplumber -n 60 --no-pager; echo AUDIO-DIAG-''DONE")
+        machine.send_user("cat /proc/asound/cards; wpctl status; systemctl --user status pipewire pipewire-pulse wireplumber --no-pager; journalctl --user -u pipewire -u pipewire-pulse -u wireplumber -n 60 --no-pager; echo AUDIO-DIAG-''DONE")
         machine.wait("AUDIO-DIAG-DONE", 45)
+    return ok
+
+
+def check_live_apps(machine):
+    refs = ("org.videolan.VLC", "com.valvesoftware.Steam", "com.discordapp.Discord",
+            "net.lutris.Lutris", "net.davidotek.pupgui2",
+            "com.valvesoftware.Steam.CompatibilityTool.Proton-GE")
+    command = " && ".join("flatpak --system info " + ref + " >/dev/null" for ref in refs)
+    machine.send(command + " && echo APP-DEPLOYMENTS-''OK || echo APP-DEPLOYMENTS-''BAD")
+    ok = check("live apps and GE-Proton are deployed, not download links",
+               machine.wait("APP-DEPLOYMENTS-OK", 60, fail="APP-DEPLOYMENTS-BAD"))
+    if not ok:
+        return False
+    # Enter the real app sandboxes as the actual desktop user, without
+    # disabling sandbox checks or downloading Steam client updates in CI.
+    for ref in refs[:-1]:
+        machine.send_user("timeout 60 flatpak run --command=sh " + ref +
+                          " -c 'test \"$(id -u)\" -ne 0' && echo APP-SANDBOX-''OK || echo APP-SANDBOX-''BAD")
+        ok = check(ref + " starts its sandbox as an unprivileged live user",
+                   machine.wait("APP-SANDBOX-OK", 75, fail="APP-SANDBOX-BAD")) and ok
+    if ok:
+        machine.send_user("timeout 30 flatpak run --filesystem=/tmp/yurei-tone.wav:ro org.videolan.VLC -I dummy --play-and-exit /tmp/yurei-tone.wav "
+                          "&& echo VLC-PLAYBACK-''OK || echo VLC-PLAYBACK-''BAD")
+        ok = check("preinstalled VLC plays audio through the live session",
+                   machine.wait("VLC-PLAYBACK-OK", 45, fail="VLC-PLAYBACK-BAD"))
     return ok
 
 
@@ -246,10 +279,10 @@ with tempfile.TemporaryDirectory(prefix='yurei-browser-') as temporary:
 """
     encoded = base64.b64encode(program.encode()).decode()
     command = "python3 -c " + shlex.quote("import base64;exec(base64.b64decode(" + repr(encoded) + "))")
-    machine.send(command + " && echo BROWSER-''OK || echo BROWSER-''BAD")
+    machine.send_user(command + " && echo BROWSER-''OK || echo BROWSER-''BAD")
     ok = check(label + " Firefox renders a local HTTP page without sandbox overrides", machine.wait("BROWSER-OK", 120, fail="BROWSER-BAD"))
     if not ok:
-        machine.send("ldd /usr/lib/firefox/libxul.so | grep 'not found'; free -m; journalctl -k -n 30 --no-pager; echo BROWSER-DIAG-''DONE")
+        machine.send_user("ldd /usr/lib/firefox/libxul.so | grep 'not found'; free -m; journalctl -k -n 30 --no-pager; echo BROWSER-DIAG-''DONE")
         machine.wait("BROWSER-DIAG-DONE", 45)
     return ok
 
@@ -268,6 +301,7 @@ print(f"== install: the live ISO, with a blank {args.disk_size_gib} GiB disk", f
 live = Machine(os.path.join(out, "install-live.log"),
                "-drive", f"file={iso},media=cdrom,readonly=on", "-boot", "d",
                "-drive", f"file={disk},format=raw,if=virtio")
+live.session_user = "live"
 if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
     live.send("root")
     if check("logged in", live.wait("# ", 60)):
@@ -302,7 +336,7 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
                       f"echo '{digest}  {backend}' | sha256sum -c - && echo BACKEND-''READY || echo BACKEND-''BAD")
             ready = check("injected backend matches the reviewed source", ready and live.wait("BACKEND-READY", 60, fail="BACKEND-BAD"))
         if ready and args.desktop_check:
-            live.send("for n in $(seq 1 120); do if pgrep -xu 0 plasmashell >/dev/null && pgrep -xu 0 kwin_wayland >/dev/null; then echo LIVE-''DESKTOP-OK; break; fi; sleep 1; done")
+            live.send("for n in $(seq 1 120); do if pgrep -xu 1000 plasmashell >/dev/null && pgrep -xu 1000 kwin_wayland >/dev/null; then echo LIVE-''DESKTOP-OK; break; fi; sleep 1; done")
             ready = check("live KWin and Plasma desktop started", live.wait("LIVE-DESKTOP-OK", 150))
             live.screenshot("live-plasma.png")
             if not ready:
@@ -316,6 +350,8 @@ if check("the live system's login prompt", live.wait("yurei-live login:", 300)):
             ready = check_audio(live, "live session")
             if ready:
                 ready = check_browser(live, "live session")
+        if ready and args.desktop_check:
+            ready = check_live_apps(live)
         if ready and args.gui_preview_check:
             # Execute Yurei's own binary and Qt libraries, not the host's Qt.
             # Offscreen preview does not inventory disks or launch the backend.
@@ -369,6 +405,11 @@ if all(results):
                    "then echo SUDO-''OK; else echo SUDO-''BAD; fi")
     check("the user is an administrator (sudo)", installed.wait("SUDO-OK", 30, fail="SUDO-BAD"))
     if args.expected_session == "sddm":
+        installed.send("if ! getent passwd live >/dev/null && [ ! -e /etc/sudoers.d/90-yurei-live ] && "
+                   "[ ! -e /etc/polkit-1/rules.d/49-yurei-live.rules ]; then echo LIVE-ACCOUNT-''REMOVED; else echo LIVE-ACCOUNT-''BAD; fi")
+        check("installed system removes the live user and temporary authorization rules", installed.wait("LIVE-ACCOUNT-REMOVED", 30, fail="LIVE-ACCOUNT-BAD"))
+        installed.send("if [ -z \"$(flatpak --system list --app --columns=application)\" ]; then echo OPTIONAL-APPS-''REMOVED; else echo OPTIONAL-APPS-''BAD; fi")
+        check("an installation without optional selections omits preloaded apps", installed.wait("OPTIONAL-APPS-REMOVED", 30, fail="OPTIONAL-APPS-BAD"))
         installed.send("if ! grep -qw nullok /etc/pam.d/login && [ ! -e /etc/systemd/system/getty@tty1.service.d/autologin.conf ]; then echo LOGIN-POLICY-''OK; else echo LOGIN-POLICY-''BAD; fi")
         check("installed system has no live-only passwordless login policy", installed.wait("LOGIN-POLICY-OK", 30, fail="LOGIN-POLICY-BAD"))
     if args.expected_session == "greeter":

@@ -124,7 +124,7 @@ class Installer : public QWidget {
                 .arg(disk.path, disk.model).arg(disk.bytes / 1073741824.0, 0, 'f', 1).arg(user->text(), hostname->text()));
             QStringList software;
             if (multimedia->isChecked()) software << "VLC and multimedia codecs";
-            if (gaming->isChecked()) software << "Steam, Discord, Lutris and ProtonUp-Qt";
+            if (gaming->isChecked()) software << "Steam, Discord, Lutris, GE-Proton and ProtonUp-Qt";
             review->setText(review->text() + "\n\nOptional software: " + (software.isEmpty() ? "None selected" : software.join("; ")));
             confirmation->setPlaceholderText("ERASE " + disk.path);
         }
@@ -218,11 +218,11 @@ public:
         form->addRow(samePassword); form->addRow("Administrator password", rootPassword); form->addRow("Repeat administrator password", rootRepeat);
         rootPassword->setEnabled(false); rootRepeat->setEnabled(false); account->addLayout(form); account->addStretch();
         connect(samePassword, &QCheckBox::toggled, this, [this](bool same) { rootPassword->setEnabled(!same); rootRepeat->setEnabled(!same); updateButtons(); });
-        auto *software = newPage("Choose your software", "These selections apply to the installed system. An internet connection is required for apps and any missing runtimes; downloads can be several gigabytes.");
+        auto *software = newPage("Choose your software", "These selections apply to the installed system. Apps included on this live image install offline. An internet connection is needed only for missing apps or runtimes.");
         multimedia = new QCheckBox("Multimedia: VLC and additional media codecs");
-        gaming = new QCheckBox("Gaming: Steam, Discord, Lutris and ProtonUp-Qt");
+        gaming = new QCheckBox("Gaming: Steam, Discord, Lutris, GE-Proton and ProtonUp-Qt");
         software->addWidget(multimedia); software->addWidget(gaming);
-        software->addWidget(text("ProtonUp-Qt manages GE-Proton and other compatibility tools. Steam downloads its supported Proton versions as needed. Games and account sign-in are separate.", 13));
+        software->addWidget(text("GE-Proton is included as a Flathub compatibility extension. ProtonUp-Qt manages additional versions. Steam downloads its official Proton versions as needed. Games and account sign-in are separate.", 13));
         reduceMotion = new QCheckBox("Reduce motion"); software->addWidget(reduceMotion); software->addStretch();
         auto *summary = newPage("Review before installing", "Check the disk and account below. Nothing is changed until you explicitly start installation.");
         summary->setSpacing(10); review = text("", 13); summary->addWidget(review);
